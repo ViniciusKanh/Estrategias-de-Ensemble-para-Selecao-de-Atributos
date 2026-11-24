@@ -1,0 +1,134 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{\textit{Ensemble Feature Selection}}\label{ensambleFS}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+O \textit{Ensemble Feature Selection} (EFS) combina resultados de diferentes métodos de seleção de atributos para reduzir a dependência de um único critério de avaliação e explorar a complementaridade entre os seletores \citeonline{bolon2019ensembles}. Sua construção envolve decisões relacionadas à composição do \textit{ensemble}, à diversidade entre os métodos, à representação e agregação dos resultados e à definição do subconjunto final de atributos. Essas decisões podem influenciar tanto a seleção obtida quanto sua estabilidade e capacidade de generalização, conforme discutido por \citeonline{akhy2024comprehensive}.
+
+Esta seção apresenta e analisa 22 estudos primários sobre EFS, identificados por meio de buscas em bases bibliográficas (\textit{Scopus}, \textit{IEEE Xplore}, \textit{ACM Digital Library}, \textit{Web of Science} e \textit{Google Scholar}), utilizando combinações de termos relacionados a \textit{ensemble feature selection} e agregação de \textit{rankings}\footnote{A expressão de referência utilizada na Scopus foi \textit{TITLE((ensemble* W/2 ``feature selection'') OR (``rank aggregation'' W/2 ``feature selection''))}, com adaptações à sintaxe das demais bases consultadas.}. Trabalhos de revisão foram utilizados como apoio conceitual, mas não integram a comparação metodológica. A Tabela~\ref{tab:efs} sintetiza tais estudos, considerando a composição do \textit{ensemble}, a representação dos resultados, as estratégias de agregação, os critérios adicionais empregados, a definição do subconjunto final e as formas de avaliação. Com base nessa caracterização, as subseções seguintes discutem comparativamente as principais decisões metodológicas identificadas na literatura. Entre os estudos analisados, sete apresentam maior proximidade com as decisões investigadas nesta pesquisa: \citeonline{abasabadi2021automatic}, \citeonline{drotar2019ensemble}, \citeonline{fu2023reranking}, \citeonline{janani2023ensemble}, \citeonline{kaur2023mcdm}, \citeonline{seijopardo2019automatic} e \citeonline{zhang2019ensemble}. Esses trabalhos recebem maior aprofundamento ao longo da discussão, considerando aspectos relacionados à composição do \textit{ensemble}, à agregação dos resultados e à definição do subconjunto final de atributos.
+
+%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%
+\begin{sidewaystable}[p]
+\centering
+\caption{Síntese dos 22 estudos primários de \textit{Ensemble Feature Selection} analisados.}
+\label{tab:efs}
+\fontsize{8}{9.2}\selectfont
+\setlength{\tabcolsep}{2.5pt}
+\renewcommand{\arraystretch}{1.10}
+\begin{tabular}{|P{2.3cm}|P{2.6cm}|P{2.3cm}|P{2.8cm}|P{3.0cm}|P{3.0cm}|P{2.6cm}|}
+\hline
+\textbf{Trabalho} &
+\textbf{Composição do \textit{ensemble}} &
+\textbf{Representação} &
+\textbf{Agregação / consenso} &
+\textbf{Diversidade / pesos / critérios adicionais} &
+\textbf{Definição do subconjunto} &
+\textbf{Avaliação} \\ \hline
+\hline
+\citeonline{abasabadi2021automatic} & Múltiplos ranqueadores & \textit{Rankings} & \textit{Fast non-dominated sorting} & Múltiplos ranqueadores (geração de diversidade) & Limiar automático & Desempenho e número de atributos \\ \hline
+\citeonline{abellana2022ensemble} & Filtros heterogêneos & \textit{Scores}\slash \textit{rankings} & EDAS & Critérios heterogêneos & Retenção de 20\% dos atributos & AUC, redução dimensional e estabilidade \\ \hline
+\citeonline{drotar2019ensemble} & Filtros heterogêneos & \textit{Rankings} & Plurality, STV, Borda e Borda ponderada & \textit{Mean-shift clustering} e similaridade entre ranqueadores & Top-$k$/número requerido de atributos & Relevância, estabilidade e classificação \\ \hline
+\citeonline{fu2023reranking} & Filtros heterogêneos univariados e multivariados & \textit{Rankings} & TOPSIS e NSGA-III & Complementaridade uni\slash multivariada & Otimização multiobjetivo & Acurácia e F-measure \\ \hline
+\citeonline{geng2026stability} & U-test, RFECV, LASSO e informação mútua & Subconjuntos\slash indicadores & Combinação linear ponderada & Pesos otimizados por Bayes e estabilidade entre \textit{folds} & Consenso de seleção e interseção entre \textit{folds} & Desempenho interno/externo e estabilidade \\ \hline
+\citeonline{hashemi2021pareto} & Filtros heterogêneos & \textit{Rankings}\slash matriz de decisão & Pareto e ordenação não dominada & Relevância e redundância & Número de atributos definido experimentalmente & Acurácia, F-score e tempo \\ \hline
+\citeonline{he2023ensemble} & Filtros heterogêneos & \textit{Rankings}\slash subconjuntos & Combinação ponderada & Pesos adaptativos por \textit{softmax} & Top-$k$ & Desempenho e adequação dos seletores \\ \hline
+\citeonline{janani2023ensemble} & Filtros heterogêneos & \textit{Rankings} & IOWA, NWBM, BON-OWA e BON-IOWA & Ponderação por entropia & Top-$k$ & Acurácia, F-measure, precisão e revocação \\ \hline
+\citeonline{joseph2025hybrid} & Filtros heterogêneos & \textit{Rankings} & Borda, MC4 e Random Dictator com distância de Kendall & Diversidade entre métodos de agregação & Etapa \textit{wrapper}/RFE & Desempenho preditivo \\ \hline
+\citeonline{kaur2023mcdm} & $\chi^2$, correlação, InfoGain e ReliefF & \textit{Scores} & TOPSIS & Critérios heterogêneos & Seleção a partir do \textit{score} final & nMCC e G-measure \\ \hline
+\citeonline{kavitha2025decision} & Filtros heterogêneos & \textit{Rankings}\slash matriz de preferência & TOPSIS, VIKOR, CODAS e variantes & Representação qROPHF & \textit{Ranking} seguido de seleção & Desempenho e significância estatística \\ \hline
+\end{tabular}
+\end{sidewaystable}
+
+\begin{sidewaystable}[p]
+\ContinuedFloat
+\centering
+\caption{Síntese dos 22 estudos primários de \textit{Ensemble Feature Selection} analisados (continuação).}
+\fontsize{8}{9.2}\selectfont
+\setlength{\tabcolsep}{2.5pt}
+\renewcommand{\arraystretch}{1.10}
+\begin{tabular}{|P{2.3cm}|P{2.6cm}|P{2.3cm}|P{2.8cm}|P{3.0cm}|P{3.0cm}|P{2.6cm}|}
+\hline
+\textbf{Trabalho} &
+\textbf{Composição do \textit{ensemble}} &
+\textbf{Representação} &
+\textbf{Agregação / consenso} &
+\textbf{Diversidade / pesos / critérios adicionais} &
+\textbf{Definição do subconjunto} &
+\textbf{Avaliação} \\ \hline
+\hline
+\citeonline{lin2024ensemble} & SU, FDR e ReliefF com complementaridade discriminante & Subconjuntos & Estratégia de agregação aprimorada & Complementaridade entre critérios & Subconjunto orientado pela capacidade classificatória & Desempenho e redução dimensional \\ \hline
+\citeonline{loggenberg2026cross} & 18 métodos de FS baseados em PLS & \textit{Rankings}\slash frequência & \textit{Weighted Borda Count} & Pesos por SRD e desempenho no treinamento & Cotovelo adaptativo e refinamento top-15\% & Transferibilidade, desempenho e redução \\ \hline
+\citeonline{ma2024ensemble} & Múltiplos critérios baseados em \textit{neighbourhood rough sets} & \textit{Scores} & Fusão multicritério & Critérios heterogêneos & Busca sequencial & Desempenho preditivo \\ \hline
+\citeonline{mera2021framework} & Múltiplos métodos de FS & \textit{Rankings}\slash subconjuntos & Consenso por frequência & Configuração flexível & Limiar de consenso configurável & Desempenho e estabilidade \\ \hline
+\citeonline{olabisi2025heterogeneous} & Filtros estatísticos heterogêneos & \textit{Rankings} & Borda & Complementaridade entre filtros & Limiar seguido de consolidação & Desempenho em detecção de \textit{phishing} \\ \hline
+\citeonline{seijopardo2019automatic} & Ranqueadores em diferentes configurações & \textit{Rankings} & Desenhos CT e TC com diferentes combinações & Perturbação\slash configuração do \textit{ensemble} & Percentuais fixos ou limiar automático por complexidade & Erro de classificação e número de atributos \\ \hline
+\citeonline{chinglensana2026ef} & mRMR, PCFS, JoMIC e MIFS-ND & \textit{Rankings}\slash subconjuntos & Consenso por frequência & Particionamento, refinamento iterativo e controle de redundância & Consenso entre ranqueadores e poda por correlação & Desempenho, redução e robustez \\ \hline
+\citeonline{tang2023ensemble} & Filtros heterogêneos & \textit{Scores} & TOPSIS & Ponderação por entropia & \textit{Ranking} seguido de seleção & Desempenho preditivo \\ \hline
+\citeonline{wu2023ecm} & Múltiplos seletores & Subconjuntos\slash votos & Coassociação e \textit{Feature Kernel} & Relações entre atributos & Núcleo inicial por coassociação; seleção até atingir $k$ atributos & Desempenho, robustez e estabilidade \\ \hline
+\citeonline{zhang2019ensemble} & SAM, InfoGain, GeoDE e ReliefF sob \textit{bootstrap} & \textit{Rankings} & \textit{Rank Products} & Ponderação pela estabilidade & Percentual de atributos & AUC e estabilidade \\ \hline
+\citeonline{zheng2019feature} & Tsallis e \textit{Markov blanket} sob múltiplas evidências & Subconjuntos\slash evidências & Dempster--Shafer & Ponderação por evidência & Resultado da fusão & Desempenho preditivo \\ \hline
+\end{tabular}
+\end{sidewaystable}
+%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%
+\subsection{Configuração do \textit{Ensemble} e Representação dos Resultados}
+\label{subsec:efs-configuracao}
+
+Uma das primeiras decisões na construção de um EFS refere-se à composição do \textit{ensemble} e à forma de introduzir diversidade entre os seletores. Em configurações heterogêneas, diferentes métodos de seleção de atributos são aplicados ao mesmo conjunto de treinamento, explorando critérios distintos de relevância, dependência ou redundância. Essa estratégia é adotada por \citeonline{drotar2019ensemble}, \citeonline{abellana2022ensemble}, \citeonline{kaur2023mcdm}, \citeonline{janani2023ensemble}, \citeonline{lin2024ensemble}, \citeonline{he2023ensemble} e \citeonline{joseph2025hybrid}, entre outros. A combinação de métodos com diferentes critérios busca explorar informações complementares e reduzir a dependência de um único seletor.
+
+Entre os trabalhos que exploram essa configuração, \citeonline{drotar2019ensemble} combinam oito métodos de filtro e investigam a diversidade entre os resultados produzidos. Os autores propõem o agrupamento dos ranqueadores por meio do algoritmo \textit{mean-shift}, representando cada grupo por um \textit{ranking} médio antes da agregação. Essa estratégia busca reduzir a influência de seletores que apresentam resultados semelhantes, evitando que métodos redundantes tenham participação excessiva na formação do consenso. De forma relacionada, \citeonline{abasabadi2021automatic} propõem o \textit{Automatic Thresholding Feature Selection} (ATFS), que combina métodos de filtro e considera a similaridade entre os \textit{rankings} por meio de medidas de correlação, incluindo Spearman e Kendall. Embora empreguem mecanismos distintos, ambos os trabalhos destacam a importância de considerar a relação entre os seletores, e não apenas a quantidade de métodos combinados.
+
+Outras configurações heterogêneas são investigadas por \citeonline{fu2023reranking} e \citeonline{janani2023ensemble}. Os primeiros combinam seis métodos de filtro, incluindo Chi-quadrado, Gini, Fisher Score, ReliefF, mRMR e CMIM, abrangendo diferentes critérios de avaliação dos atributos. Já \citeonline{janani2023ensemble} utilizam cinco métodos de seleção, incluindo abordagens baseadas em relevância e redundância, para investigar diferentes operadores de agregação. Em ambos os casos, a utilização de seletores heterogêneos permite reunir diferentes perspectivas sobre a importância dos atributos, embora o tratamento dessas informações na etapa de agregação seja distinto.
+
+A diversidade também pode ser introduzida por meio de perturbações nos dados de treinamento. Essa estratégia é explorada por \citeonline{zhang2019ensemble}, que propõem o \textit{Ensemble Feature Selection Integrating Stability} (EFSIS). O método combina diferentes funções de seleção com amostras geradas por \textit{bootstrap}, permitindo avaliar tanto a relevância dos atributos quanto a consistência dos resultados diante de variações nos dados. Diferentemente das abordagens que exploram apenas a heterogeneidade dos seletores, o EFSIS incorpora a estabilidade como um componente adicional na construção do \textit{ensemble}.
+
+Além da composição do \textit{ensemble}, a representação dos resultados produzidos pelos métodos de base influencia diretamente as possibilidades de combinação. Os seletores podem fornecer \textit{rankings}, \textit{scores} de relevância ou subconjuntos de atributos. A agregação de \textit{rankings} considera as posições relativas dos atributos, enquanto a combinação de \textit{scores} pode exigir procedimentos de normalização para tornar as avaliações comparáveis. Quando os resultados são subconjuntos, o consenso pode ser estabelecido a partir das decisões de inclusão ou exclusão dos atributos.
+
+Nos estudos analisados, \citeonline{drotar2019ensemble}, \citeonline{joseph2025hybrid} e \citeonline{olabisi2025heterogeneous} utilizam predominantemente \textit{rankings}. Por outro lado, \citeonline{abellana2022ensemble}, \citeonline{kaur2023mcdm} e \citeonline{tang2023ensemble} organizam avaliações de relevância dos atributos como critérios de decisão multicritério. Em particular, \citeonline{kaur2023mcdm} estruturam os resultados de diferentes seletores em uma matriz de decisão, na qual os atributos representam as alternativas e as avaliações dos métodos correspondem aos critérios utilizados na agregação. Outras abordagens, como as de \citeonline{wu2023ecm}, \citeonline{mera2021framework} e \citeonline{zheng2019feature}, exploram o consenso entre subconjuntos ou evidências de seleção.
+
+Essas diferentes configurações evidenciam que a composição do \textit{ensemble} e a representação de seus resultados são decisões relacionadas. A heterogeneidade dos métodos pode ampliar a complementaridade das avaliações, mas também introduzir redundância entre seletores. Da mesma forma, a utilização de posições, \textit{scores} ou decisões de seleção determina quais informações estarão disponíveis para a etapa de agregação e, consequentemente, quais mecanismos poderão ser empregados na obtenção do subconjunto final de atributos.
+
+%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%
+\subsection{Estratégias de Agregação, Ponderação e Consenso}
+\label{subsec:efs-agregacao}
+
+As estratégias de agregação identificadas nos estudos analisados abrangem métodos eleitorais, operadores de agregação, técnicas de decisão multicritério, abordagens de otimização e mecanismos de consenso estrutural. Essas estratégias diferem quanto à forma de combinar as avaliações produzidas pelos seletores, podendo utilizar posições em \textit{rankings}, \textit{scores} de relevância ou outras representações das informações sobre os atributos.
+
+Entre os métodos eleitorais, \citeonline{drotar2019ensemble} investigam diferentes mecanismos de decisão coletiva, incluindo voto plural, voto único transferível, contagem de Borda e Borda ponderada. A proposta também considera o agrupamento prévio de ranqueadores, permitindo relacionar o tratamento da redundância entre seletores à formação do consenso. Outras aplicações de métodos eleitorais são apresentadas por \citeonline{olabisi2025heterogeneous}, que utilizam Borda para combinar filtros estatísticos na detecção de \textit{phishing}, e por \citeonline{joseph2025hybrid}, que investigam mecanismos como Borda, MC4 e distância de Kendall.
+
+Além dos métodos eleitorais, diferentes operadores matemáticos têm sido empregados para combinar os resultados dos seletores. \citeonline{janani2023ensemble} investigam quatro operadores de agregação, incluindo IOWA e combinações baseadas em Bonferroni e OWA, utilizando os resultados de diferentes métodos de seleção de atributos. A proposta explora mecanismos de ponderação para produzir uma avaliação agregada, permitindo investigar o efeito da estratégia de combinação sobre os resultados do \textit{ensemble}. Embora os operadores utilizados sejam distintos de Borda, RRF e TOPSIS, o trabalho apresenta proximidade metodológica com o EFS4AC por tratar a escolha do mecanismo de agregação como uma decisão central.
+
+Outra linha de investigação formula a agregação como um problema de decisão multicritério, no qual os atributos representam alternativas e as avaliações dos métodos de FS constituem os critérios de decisão. \citeonline{abellana2022ensemble} empregam EDAS, enquanto \citeonline{kaur2023mcdm} propõem o MCDM-EFS, que utiliza TOPSIS para combinar avaliações produzidas por $\chi^2$, correlação, \textit{Information Gain} e ReliefF. Nesse último trabalho, os \textit{scores} de importância são organizados em uma matriz de decisão, e o procedimento gera uma avaliação agregada utilizada para ordenar os atributos. \citeonline{tang2023ensemble} também adotam TOPSIS, incorporando ponderação baseada em entropia, enquanto \citeonline{kavitha2025decision} exploram TOPSIS, VIKOR e CODAS em um ambiente \textit{q-rung orthopair hesitant fuzzy}, buscando representar incertezas no processo de decisão.
+
+A utilização de TOPSIS também é investigada por \citeonline{fu2023reranking}, que propõem o RTEFS, uma arquitetura de múltiplos estágios que combina informações provenientes de filtros univariados e multivariados. Além da agregação multicritério, a proposta incorpora procedimentos de reordenação dos atributos e otimização multiobjetivo por NSGA-III, considerando aspectos relacionados à relevância atributo-classe e à redundância atributo-atributo. Comparativamente ao MCDM-EFS, o RTEFS apresenta uma arquitetura mais complexa, na qual TOPSIS integra um processo mais amplo de refinamento das avaliações. Ambos os trabalhos são relevantes para o EFS4AC por investigarem a combinação de diferentes avaliações de atributos por meio de TOPSIS, embora não adotem necessariamente a mesma representação de entrada prevista nesta pesquisa.
+
+Abordagens baseadas em otimização e ordenação multiobjetivo também são identificadas na literatura. \citeonline{hashemi2021pareto} utilizam dominância de Pareto e distância de aglomeração para ordenar atributos segundo critérios de relevância e redundância. De forma relacionada, \citeonline{abasabadi2021automatic} empregam \textit{fast non-dominated sorting} para integrar avaliações produzidas por métodos de filtro, associando esse procedimento à definição automática dos atributos selecionados. Diferentemente das abordagens baseadas em votação ou em uma função agregadora única, esses métodos consideram conjuntamente diferentes critérios de avaliação por meio de relações de dominância.
+
+Outros estudos exploram mecanismos de consenso que não dependem exclusivamente da combinação de posições ou \textit{scores}. \citeonline{wu2023ecm} utilizam matrizes de coassociação para representar relações entre atributos; \citeonline{ma2024ensemble} combinam critérios derivados de \textit{neighbourhood rough sets}; e \citeonline{zheng2019feature} empregam a teoria de evidências de Dempster-Shafer para integrar subconjuntos. \citeonline{lin2024ensemble}, por sua vez, incorporam informações de complementaridade discriminante à combinação de diferentes filtros. O EF2RB, proposto por \citeonline{chinglensana2026ef}, utiliza mecanismos de consenso e refinamento iterativo, incluindo o controle da redundância entre os atributos selecionados.
+
+Além da escolha do mecanismo de agregação, alguns estudos investigam a atribuição de pesos distintos aos componentes do \textit{ensemble}. \citeonline{he2023ensemble} utilizam uma função \textit{softmax} para ajustar adaptativamente os pesos dos seletores conforme sua adequação aos dados. \citeonline{zhang2019ensemble}, por sua vez, empregam \textit{Rank Products} para agregar os \textit{rankings} obtidos a partir de amostras geradas por \textit{bootstrap} e incorporam estimativas de estabilidade na ponderação dos diferentes métodos de seleção. Outras abordagens investigam pesos associados à confiabilidade ou à estabilidade dos componentes, como em \citeonline{loggenberg2026cross} e \citeonline{geng2026stability}.
+
+Em conjunto, os estudos evidenciam que a agregação constitui uma decisão central na construção de um EFS, envolvendo a escolha do mecanismo de combinação e a possibilidade de ponderar diferentemente as contribuições dos seletores. Para o EFS4AC, essas alternativas são particularmente relevantes, pois permitem investigar como diferentes mecanismos de agregação influenciam o consenso produzido a partir dos \textit{rankings} individuais.
+
+%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%
+\subsection{Definição do Subconjunto Final e Estabilidade}
+\label{subsec:efs-estabilidade-corte}
+
+A definição do subconjunto final de atributos constitui uma etapa importante do EFS, podendo ocorrer após a agregação dos resultados dos seletores ou estar incorporada ao próprio mecanismo de consenso. Essa decisão influencia o resultado da seleção: um subconjunto excessivamente amplo pode manter atributos irrelevantes ou redundantes, enquanto uma seleção muito restritiva pode eliminar informações discriminativas.
+
+Uma estratégia recorrente consiste em selecionar uma quantidade ou um percentual predefinido de atributos a partir dos resultados agregados. Essa abordagem é adotada por \citeonline{drotar2019ensemble}, \citeonline{janani2023ensemble}, \citeonline{he2023ensemble} e \citeonline{zhang2019ensemble}, entre outros. Em particular, \citeonline{drotar2019ensemble} selecionam uma quantidade requerida de atributos a partir dos resultados dos mecanismos eleitorais, enquanto \citeonline{janani2023ensemble} utilizam quantidades predefinidas para avaliar diferentes operadores de agregação. De forma semelhante, \citeonline{kaur2023mcdm} selecionam os atributos mais bem posicionados na ordenação produzida pelo TOPSIS. Embora essas estratégias sejam relativamente simples, a escolha da quantidade de atributos pode influenciar tanto o desempenho preditivo quanto o grau de redução da dimensionalidade.
+
+Outros trabalhos investigam mecanismos que procuram determinar o subconjunto de maneira automática. \citeonline{seijopardo2019automatic} propõem a utilização de medidas de complexidade dos dados para estabelecer limiares de seleção em EFS, comparando essa estratégia com abordagens baseadas em quantidades ou percentuais predefinidos. Os autores também investigam duas configurações metodológicas: a combinação dos resultados dos seletores seguida da aplicação de limiares e a aplicação de limiares aos resultados individuais seguida da combinação. Essa distinção evidencia que a definição do subconjunto não depende apenas do valor de corte, mas também da ordem em que as operações de agregação e seleção são realizadas.
+
+A determinação automática do subconjunto também é investigada por \citeonline{abasabadi2021automatic}, que propõem um procedimento baseado em métodos de filtro e \textit{fast non-dominated sorting}. Em vez de estabelecer previamente a quantidade de atributos, a abordagem procura identificar o subconjunto a partir das avaliações produzidas pelos seletores. Outras estratégias são apresentadas por \citeonline{mera2021framework}, que utilizam um limiar configurável sobre a frequência de seleção, e por \citeonline{wu2023ecm}, que iniciam a seleção a partir de um núcleo de atributos obtido por coassociação.
+
+Em abordagens de múltiplos estágios, a definição do subconjunto pode estar associada a procedimentos adicionais de refinamento. \citeonline{fu2023reranking}, por exemplo, integram pré-seleção, reordenação e otimização na construção do subconjunto final. Essa organização difere das abordagens em que a agregação e a aplicação de uma regra de corte constituem etapas separadas, permitindo investigar individualmente seus efeitos sobre os atributos selecionados.
+
+Além dos critérios de corte, a estabilidade constitui outra dimensão relevante na avaliação e construção de métodos de EFS. Essa propriedade expressa a consistência dos atributos selecionados diante de variações nos dados de treinamento. \citeonline{mera2021framework} avaliam a estabilidade utilizando o índice de Jaccard, enquanto \citeonline{drotar2019ensemble} analisam essa propriedade em conjunto com a identificação de atributos relevantes e o desempenho classificatório. No EFSIS, \citeonline{zhang2019ensemble} incorporam a estabilidade diretamente ao processo de agregação, atribuindo maior influência aos resultados considerados mais consistentes entre diferentes amostras. Assim, a estabilidade pode ser utilizada tanto como critério de avaliação quanto como componente do próprio método de seleção.
+
+Em conjunto, os estudos mostram que a definição do subconjunto final pode envolver quantidades ou percentuais predefinidos, limiares automáticos e procedimentos de seleção integrados à agregação ou à otimização. Para o EFS4AC, essa distinção é relevante porque permite investigar separadamente os efeitos da agregação dos \textit{rankings} e dos critérios utilizados para selecionar os atributos que serão disponibilizados ao classificador associativo.

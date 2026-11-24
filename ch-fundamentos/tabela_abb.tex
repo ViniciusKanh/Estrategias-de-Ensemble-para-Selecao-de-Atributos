@@ -1,0 +1,121 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{table}[!htb]
+\centering
+\footnotesize
+\caption{Medidas objetivas utilizadas neste trabalho.}
+\label{tab:mos_abb}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Nome Completo}         & \textbf{Abreviação} \\ \hline
+Accuracy                       & ACCRC               \\ \hline
+Added Value                    & ADD\_V              \\ \hline
+Chi-Square                     & CHI\_SQ             \\ \hline
+Collective Strength            & CLL\_STR            \\ \hline
+Complement Class Support       & CP\_CL\_SP          \\ \hline
+Conditional Entropy            & CON\_ENT            \\ \hline
+Confidence                     & CNFD                \\ \hline
+Confidence Causal              & CN\_CA              \\ \hline
+Confirm Causal                 & CF\_CA              \\ \hline
+Confirm Descriptive            & CF\_DES             \\ \hline
+Confirmed Confidence Causal    & CF\_CN\_CA          \\ \hline
+Correlation Coefficient        & CORR\_COE           \\ \hline
+Cosine                         & COSI                \\ \hline
+Coverage                       & COVER               \\ \hline
+Dir                            & DIR                 \\ \hline
+F-Measure                      & FME                 \\ \hline
+Gini Index                     & GIN\_IN             \\ \hline
+Goodman Kruskal                & GOO\_KRU            \\ \hline
+Implication Index              & IMP\_IND            \\ \hline
+J-Measure                      & JME                 \\ \hline
+Kappa                          & KAPP                \\ \hline
+Klosgen                        & KLOS                \\ \hline
+K-Measure                      & KME                 \\ \hline
+Kulczynski 2                   & KUL2                \\ \hline
+Least Contradiction            & LST\_CNT            \\ \hline
+Leverage                       & LEVER               \\ \hline
+Lift                           & LIFT                \\ \hline
+Loevinger                      & LOEV                \\ \hline
+Logical Necessity              & LOG\_NEC            \\ \hline
+Mutual Information             & MU\_INF             \\ \hline
+Normalized Mutual Information  & NR\_MU\_IN          \\ \hline
+Odd Multiplier                 & ODD\_MUL            \\ \hline
+Odds Ratio                     & ODD\_RAT            \\ \hline
+One Way Support                & ONE\_SUP            \\ \hline
+Piatetsky Shapiro              & PIE\_SHA            \\ \hline
+Prevalence                     & PREVA               \\ \hline
+Putative Causal Dependency     & PT\_CA\_DP          \\ \hline
+Recall                         & RECA                \\ \hline
+Relative Risk                  & REL\_RIS            \\ \hline
+Specificity                    & SPECT               \\ \hline
+Support                        & SUPP                \\ \hline
+Theil Uncertainty Coefficiente & THE\_UNC            \\ \hline
+TIC                            & TIC                 \\ \hline
+Two Way Support                & TW\_SUP             \\ \hline
+\end{tabular}
+\end{table}
+
+
+
+% {\tiny
+% \renewcommand*{\arraystretch}{1.9}
+% \renewcommand*{\P}{\text{P}}
+% \newcommand*{\A}{\text{A}}
+% \newcommand*{\B}{\text{B}}
+% \newcommand*{\C}{\text{AB}}
+% \newcommand*{\N}{\text{N}}
+
+% \begin{longtblr}[!htb
+%   caption = {Medidas objetivas utilizadas neste trabalho.\label{tab:mos_abb}},
+% ]{
+%   hlines,
+%   vlines,
+%   hline{1} = {-}{solid,black},
+% }
+% \textbf{Nome Completo} & \textbf{Abreviação} & Equação\\
+% Accuracy & ACCRC & $ \P(\C) + \P(\overline {\C}) $\\
+% Added Value & ADD\_V & $ \P(\B|\A) - \P(\B) $\\
+% Chi-Square & CHI\_SQ & $ \frac{(\P(\C)-\P(\A) \P(\B))^{2} \N}{\P(\A) \P(\overline{\A}) \P(\B) \P(\overline{\B})} $\\
+% Collective Strength & CLL\_STR & $ \frac{\P(\C)+\P(\overline{\C})}{\P(\A) \P(\B)+\P(\overline{\A}) \P(\overline{\B})} \frac{1-\P(\A) \P(\B)-\P(\overline{\A}) \P(\overline{\B})}{1-\P(\C)-\P(\overline{\C})}$\\
+% Complement Class Support & CP\_CL\_SP & $ \frac{\P(\A \overline{\B})}{\P(\overline{\B})}$\\
+% Conditional Entropy & CON\_ENT & $ -\P(\B|\A) \log _2 \P(\B|\A)-\P(\overline{\B}|\A) \log _2 \P(\overline{\B}|\A) $\\
+% Confidence & CNFD & $ \P(\B|\A)$\\
+% Confidence Causal & CN\_CA & $ \frac{1}{2}(\P(\B|\A)+\P(\overline{\A}|\overline{\B})) $\\
+% Confirm Causal & CF\_CA & $ \P(\C)+\P(\overline{\C})-2 \P(\A \overline{\B}) $\\
+% Confirm Descriptive & CF\_DES & $ \P(\C)-\P(\A \overline{\B}) $\\
+% Confirmed Confidence Causal & CF\_CN\_CA & $ \frac{1}{2}(\P(\B|\A)+\P(\overline{\A}|\overline{\B}))-\P(\overline{\B}|\A)$\\
+% Correlation Coefficient & CORR\_COE & $ \frac{\P(\C)-\P(\A) \P(\B)}{\sqrt{\P(\A) \P(\B) \P(\overline{\A}) \P(\overline{\B})}}$\\
+% Cosine & COSI & $ \frac{\P(\C)}{\sqrt{\P(\A) \P(\B)}}$\\
+% Coverage & COVER & $ \P(\A) $\\
+% Dir & DIR & $ \begin{cases}-\infty & \text { if } \P(\B)=1 \\ \hline 0 & \text { if } \P(\B) \leq \frac{1}{2} \text { and } \P(\B|\A) \leq \frac{1}{2} \\ \hline 1+\P(\B|\A) \log_{2} \P(\B|\A)+\P(\overline{\B}|\A) \log_{2} \P(\overline{\B}|\A) & \text { if } \P(\B) \leq \frac{1}{2} \text { and } \P(\B|\A)>\frac{1}{2} \\ \hline 1+\frac{1}{\P(\B) \log_{2} \P(\B)+\P(\overline{\B}) \log_{2} \P(\overline{\B})} & \text { if } \P(\B)>\frac{1}{2} \text { and } \P(\B|\A) \leq \frac{1}{2} \\ 1-\frac{\P(\B|\A) \log_{2} \P(\B|\A)+\P(\overline{\B}|\A) \log_{2} \P(\overline{\B}|\A)}{\P(\B) \log_{2} \P(\B)+\P(\overline{\B}) \log_{2} \P(\overline{\B})} & \text { if } \P(\B)>\frac{1}{2} \text { and } \P(\B|\A)>\frac{1}{2}\end{cases} $\\
+% F-Measure & FME & $ \frac{2 \P(\A|\B) \P(\B|\A)}{\P(\A|\B)+\P(\B|\A)} $\\
+% Gini Index & GIN\_IN & $ \P(\A)\left(\P(\B|\A)^2+\P(\overline{\B}|\A)^2\right)+\P(\overline{\A})\left(\P(\B|\overline{\A})^2+\P(\overline{\B}|\overline{\A})^2\right)-\P(\B)^2-\P(\overline{\B})^2 $\\
+% Goodman Kruskal & GOO\_KRU & $ \frac{\max \left(P_{1}, P_{2}\right)+\max \left(P_{3}, P_{4}\right)+\max \left(P_{1}, P_{3}\right)+\max \left(P_{2}, P_{4}\right)-\max (\P(\A), \P(\overline{\A}))-\max (\P(\B), \P(\overline{\B}))}{2-\max (\P(\A), \P(\overline{\A}))-\max (\P(\B), \P(\overline{\B}))}$\\
+% Implication Index & IMP\_IND & $ \sqrt{\N} \frac{\P(\A \overline{\B})-\P(\A) \P(\overline{\B})}{\sqrt{\P(\A) \P(\overline{\B})}}$\\
+% J-Measure & JME & $ \P(\C) \log _2 \frac{\P(\B|\A)}{\P(\B)}+\P(\A \overline{\B}) \log _2 \frac{\P(\overline{\B}|\A)}{\P(\overline{\B})}$\\
+% Kappa & KAPP & $ \frac{\P(\B|\A) \P(\A)+\P(\overline{\B}|\overline{\A}) \P(\overline{\A})-\P(\A) \P(\B)-\P(\overline{\A}) \P(\overline{\B})}{1-\P(\A) \P(\B)-\P(\overline{\A}) \P(\overline{\B})}$\\
+% Klösgen & KLOS & $ \sqrt{\P(\A)}(\P(\B|\A)-\P(\B))$\\
+% K-Measure & KME & $ \begin{aligned} & \P(\B|\A) \log_{2} \frac{\P(\B|\A)}{\P(\B)}+\P(\overline{\B}|\overline{\A}) \log_{2} \frac{\P(\overline{\B}|\overline{\A})}{\P(\overline{\B})}-\P(\B|\A) \log_{2} \frac{\P(\B|\A)}{\P(\overline{\B})} \\ & \quad-\P(\overline{\B}|\overline{\A}) \log_{2} \frac{\P(\overline{\B}|\overline{\A})}{\P(\B)}\end{aligned} $\\
+% Kulczynski 2 & KUL2 & $ \frac{\P(\C)}{\P(\A \overline{\B})+\P(\overline{\A} \B)}$\\
+% Least Contradiction & LST\_CNT & $ \frac{\P(\C)-\P(\A \overline{\B})}{\P(\B)}$\\
+% Leverage & LEVER & $ \P(\B|\A)-\P(\A) \P(\B) $\\
+% Lift & LIFT & $ \frac{\P(\B|\A)}{\P(\B)} $\\
+% Loevinger & LOEV & $ 1-\frac{\P(\A \overline{\B})}{\P(\A) \P(\overline{\B})} $\\
+% Logical Necessity & LOG\_NEC & $ \frac{\P(\overline{\A}|\B)}{\P(\overline{\A}|\overline{\B})} $\\
+% Mutual Information & MU\_INF & $ \begin{aligned} & \P(\C) \log_{2} \frac{\P(\C)}{\P(\A) \P(\B)}+\P(\A \overline{\B}) \log_{2} \frac{\P(\A \overline{\B})}{\P(\A) \P(\overline{\B})}+\P(\overline{\A} \B) \log_{2} \frac{\P(\overline{\A} \B)}{\P(\overline{\A}) \P(\B)} \\ & \quad+\P(\overline{\C}) \log_{2} \frac{\P(\overline{\C})}{\P(\overline{\A}) \P(\overline{\B})}\end{aligned}$\\
+% Normalized Mutual Information & NR\_MU\_IN & $ \frac{\text { MU\_INF }}{-\P(\A) \log_{2} \P(\A)-\P(\overline{\A}) \log_{2} \P(\overline{\A})}$\\
+% Odd Multiplier & ODD\_MUL & $ \frac{\P(\C) \P(\overline{\B})}{\P(\B) \P(\A \overline{\B})}$\\
+% Odds Ratio & ODD\_RAT & $ \frac{\P(\C) \P(\overline{\C})}{\P(\A \overline{\B}) \P(\overline{\A} \B)} $\\
+% One Way Support & ONE\_SUP & $ \P(\B|\A) \log _2 \frac{\P(\B|\A)}{\P(\B)} $\\
+% Piatetsky Shapiro & PIE\_SHA & $ \N(\P(\C)-\P(\A) \P(\B)) $\\
+% Prevalence & PREVA & $ \P(\B) $\\
+% Putative Causal Dependency & PT\_CA\_DP & $ \frac{1}{2}(\P(\B|\A)-\P(\B))+(\P(\overline{\A}|\overline{\B})-\P(\overline{\A}))-(\P(\overline{\B}|\A)-\P(\overline{\B}))-(\P(\A|\overline{\B})-\P(\A)) $\\
+% Recall & RECA & $ \P(\A|\B) $\\
+% Relative Risk & REL\_RIS & $ \frac{\P(\B|\A)}{\P(\B|\overline{\A})} $\\
+% Specificity & SPECT & $ \P(\overline{\B}|\overline{\A}) $\\
+% Support & SUPP & $ \P(\C)$\\
+% Theil Uncertainty Coefficiente & THE\_UNC & $ \frac{\text { MU\_INF }}{-\P(\B) \log_{2} \P(\B)-\P(\overline{\B}) \log_{2} \P(\overline{\B})} $\\
+% TIC & TIC & $ \sqrt{\operatorname{DIR}(\A \Rightarrow \B) \operatorname{DIR}(\overline{\B} \Rightarrow \overline{\A})} $\\
+% Two Way Support & TW\_SUP & $ \P(\C) \log _2 \frac{\P(\B|\A)}{\P(\B)} $
+% \end{longtblr}
+
+% }

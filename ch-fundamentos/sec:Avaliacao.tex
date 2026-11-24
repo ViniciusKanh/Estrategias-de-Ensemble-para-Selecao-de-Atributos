@@ -1,0 +1,28 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Critérios de Avaliação}
+\label{met_avaliacao}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%teria mais o custo computacional
+
+A avaliação de uma estratégia de seleção de atributos aplicada à classificação não deve considerar apenas o desempenho preditivo do modelo resultante. No contexto deste trabalho, a análise envolve diferentes dimensões, incluindo a capacidade classificatória, a redução da dimensionalidade, a estabilidade do processo de seleção e a complexidade do classificador associativo obtido. Esses critérios permitem avaliar não apenas se a seleção preserva ou melhora a capacidade de predição, mas também seus efeitos sobre o subconjunto de atributos e a estrutura do modelo baseado em regras.
+
+O desempenho preditivo deve ser avaliado sobre dados não utilizados durante o treinamento, permitindo estimar a capacidade de generalização do classificador. Entre as medidas comumente utilizadas estão precisão, revocação e medida-F, que, em problemas multiclasse, podem ser agregadas por estratégias como micro, macro e macro ponderada. Neste trabalho, destaca-se a medida F1-macro, que atribui o mesmo peso a cada classe no cálculo da média dos valores de F1. Para obter estimativas mais confiáveis, podem ser empregados protocolos como \textit{holdout} e validação cruzada (\textit{cross-validation}), incluindo sua versão estratificada. Uma discussão detalhada dessas medidas e estratégias pode ser encontrada em \citeonline{Tan2020}.
+
+No contexto de seleção de atributos, outra dimensão relevante corresponde à redução da dimensionalidade. Seja $F$ o conjunto original de atributos e $S \subseteq F$ o subconjunto selecionado, o percentual de redução pode ser expresso conforme a Equação~\ref{eq:red-fs}. Essa medida permite verificar o quanto uma estratégia de FS reduz o espaço original de atributos. No caso da classificação associativa, essa redução pode produzir efeitos adicionais, uma vez que os atributos selecionados determinam os itens disponíveis para a mineração e, consequentemente, podem modificar o número de \textit{itemsets} e as regras produzidas.
+
+%%%%%%%
+\begin{equation}\label{eq:red-fs}
+    \text{Redu\c{c}\~{a}o(\%)} =
+    \left(
+    1 - \frac{|S|}{|F|}
+    \right) \times 100
+\end{equation}
+%%%%%%%
+
+Outro aspecto relevante para métodos de FS e EFS é a estabilidade da seleção. A estabilidade refere-se à capacidade de um método produzir subconjuntos semelhantes quando pequenas alterações são realizadas nos dados de treinamento. Uma estratégia de seleção pode apresentar desempenho preditivo semelhante entre diferentes execuções e, ainda assim, selecionar atributos substancialmente distintos. Em EFS, essa propriedade é particularmente relevante, uma vez que a combinação de múltiplos seletores pode contribuir para reduzir a variabilidade associada às decisões individuais de seleção. A estabilidade pode ser avaliada por meio de medidas que quantificam a similaridade entre os subconjuntos de atributos obtidos em diferentes execuções do processo de seleção.
+
+Em algoritmos baseados em regras, a avaliação pode considerar também propriedades relacionadas à complexidade e à interpretabilidade do modelo. Embora modelos baseados em regras sejam frequentemente considerados inerentemente interpretáveis, a utilização de regras não garante, por si só, uma representação simples \cite{Rudin2019,margot2021interpretability,molnar2022}. Um classificador pode conter um grande número de regras ou regras extensas, tornando sua inspeção difícil. Por esse motivo, propriedades estruturais do modelo são frequentemente utilizadas como aproximações da complexidade interpretativa.
+
+No contexto da classificação associativa, a quantidade de regras é uma dessas medidas e tem sido empregada em diferentes trabalhos \cite{Agnol:2024,math11183978,momac,app12189055,Building2020,DBLP:journals/access/Rajab19,DBLP:conf/kdd/LakkarajuBL16}. Entretanto, o número de regras não deve ser interpretado isoladamente como uma medida completa de interpretabilidade, pois outras propriedades, como o comprimento dos antecedentes e a redundância entre regras, também podem influenciar a complexidade do modelo.
+
+Dessa forma, a avaliação das estratégias investigadas neste trabalho considera diferentes perspectivas complementares. O desempenho preditivo indica a capacidade de generalização do classificador; a redução dimensional caracteriza a capacidade do método de FS em restringir o espaço de atributos; a estabilidade avalia a consistência da seleção diante de perturbações nos dados; e as propriedades estruturais do classificador associativo permitem analisar os efeitos da seleção sobre a complexidade do modelo baseado em regras.

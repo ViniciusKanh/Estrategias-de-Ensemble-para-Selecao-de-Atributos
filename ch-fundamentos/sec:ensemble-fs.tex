@@ -1,0 +1,284 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{\textit{Ensemble} de \textit{Feature Selection}}\label{ensambleFS}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+O \textit{ensemble} de \textit{feature selection} (EFS)\footnote{Os artigos descritos nesta seção foram identificados por meio de uma \textit{string} de busca sistematizada rodada na Scopus, a saber: \textit{TITLE( (ensemble* W/2 "feature selection") OR ("rank aggregation" W/2 "feature selection") )}. Vale mencionar que o objetivo foi realizar uma busca mais sistematizada, e não uma revisão sistemática da literatura.} constitui uma linha de pesquisa voltada à combinação de múltiplos métodos de seleção de atributos com o objetivo de reduzir a dependência de um único seletor, aumentar a robustez do subconjunto final e melhorar a estabilidade dos resultados. Diferentemente da seleção de atributos convencional, em que um único método produz um \textit{ranking}, um subconjunto ou um \textit{score} de relevância, o EFS utiliza diferentes fontes de evidência para construir uma decisão consensual sobre a importância dos atributos. Essa decisão pode ser obtida pela agregação de \textit{rankings}, pela fusão de subconjuntos, pela combinação de \textit{scores}, por métodos eleitorais, por estratégias de tomada de decisão multicritério, por otimização multiobjetivo ou por modelos de consenso estrutural entre atributos \cite{bolon2018scalability,mera2021framework,seijopardo2019automatic}.
+
+A motivação central do EFS decorre da própria natureza instável da seleção de atributos. Diferentes métodos de seleção podem produzir subconjuntos distintos para o mesmo conjunto de dados, pois cada seletor adota critérios próprios de relevância, redundância, dependência estatística, capacidade discriminativa ou interação com o classificador. Métodos de filtro, por exemplo, tendem a ser mais eficientes computacionalmente, mas podem ignorar interações entre atributos. Métodos \textit{wrapper} avaliam subconjuntos com base no desempenho de um classificador, mas apresentam maior custo computacional e maior risco de \textit{overfitting}. Métodos \textit{embedded}, por sua vez, incorporam a seleção ao treinamento do modelo, mas ficam vinculados à lógica interna do algoritmo de aprendizagem. Assim, a combinação de seletores busca explorar a complementaridade entre métodos, evitando que o resultado final seja determinado exclusivamente pelo viés de um único método.
+
+%OBS. INTERESSANTE - VINÍCIUS REVER REFERÊNCIA - TALVEZ TESTAR ALGO NESTA LINHA TAMBÉM
+Neste contexto, \citeonline{bolon2018scalability} apresentam uma revisão sobre ensembles aplicados à seleção de atributos, destacando que a combinação de seletores pode ser organizada de acordo com a fonte de diversidade utilizada. Em ensembles homogêneos, aplica-se o mesmo seletor sobre diferentes amostras ou perturbações dos dados. Em ensembles heterogêneos, diferentes métodos de seleção são aplicados ao mesmo conjunto de dados. Há ainda estratégias híbridas, nas quais são combinadas perturbações nos dados, nos seletores e, em alguns casos, nos classificadores. Essa distinção é importante porque a qualidade de um EFS depende não apenas do agregador utilizado, mas também da diversidade e complementaridade das saídas geradas pelos seletores de base.
+
+%Muito boa a motivação
+A contribuição de \citeonline{mera2021framework} situa o EFS como um problema estruturado de consenso. Os autores propõem um \textit{framework} conceitual e de implementação para combinar métodos de seleção de atributos, considerando que abordagens filtro, \textit{wrapper} e \textit{embedded} podem gerar saídas distintas, mas complementares. A proposta trata as diferentes abordagens de FS em uma lógica inspirada em consenso entre especialistas, buscando construir um subconjunto agregado de atributos relevantes. Essa formulação é relevante porque desloca o foco da escolha do ``melhor seletor'' para a construção de uma decisão coletiva. Além disso, o trabalho avalia estabilidade por meio do índice de Jaccard, reforçando que a seleção de atributos não deve ser analisada apenas pelo desempenho preditivo, mas também pela consistência dos subconjuntos obtidos.
+
+%Ok
+O estudo empírico de \citeonline{akhy2024comprehensive} reforça essa visão ao organizar os componentes recorrentes em estudos de EFS no contexto de classificação. Os autores destacam que a construção de um ensemble envolve, em geral, a escolha dos seletores individuais, a definição de um método agregador, a decisão sobre o ponto de corte para geração do subconjunto final e a avaliação por classificadores. O estudo também evidencia que abordagens filtro, \textit{wrapper} e \textit{embedded} aparecem de maneira recorrente nos trabalhos analisados, assim como agregadores baseados em média, mínimo, mediana, Borda, agregação linear ponderada e não ponderada e agregação de \textit{rankings}. Embora o trabalho tenha caráter mais descritivo do que propositivo, sua relevância está em explicitar que o desempenho do EFS depende da interação entre seletor, agregador, \textit{threshold} e domínio dos dados.
+
+%Ok
+%Usou clustering e Borda, parece interessante
+Entre as estratégias baseadas em agregação de \textit{rankings}, \citeonline{drotar2019ensemble} investigam métodos eleitorais para combinar seletores, incluindo voto plural (\textit{plurality vote}), voto único transferível (\textit{single transferable vote}), contagem de Borda e contagem de Borda ponderada. Os autores também introduzem o agrupamento prévio dos seletores por \textit{mean-shift}, com o objetivo de reduzir redundância entre ranqueadores semelhantes antes da votação. A principal contribuição do estudo está em aproximar o EFS de mecanismos formais de decisão coletiva, nos quais cada seletor atua como um votante e cada atributo como um candidato. Os resultados indicam que estratégias baseadas em Borda ponderada apresentam desempenho equilibrado em identificação de atributos relevantes, estabilidade e impacto na classificação.
+
+%Ok
+Seguindo essa mesma linha, \citeonline{joseph2025hybrid} propõem uma abordagem híbrida de seleção por agregação de \textit{rankings} aplicada ao contexto de risco de crédito. O método combina \textit{rankings} produzidos por técnicas de seleção de atributos e utiliza diferentes mecanismos de agregação, como MC4, distância de Kendall Tau e contagem de Borda. A proposta parte da constatação de que uma única técnica de agregação de \textit{rankings} nem sempre apresenta o melhor desempenho em todos os conjuntos de dados. Assim, o modelo híbrido busca selecionar atributos relevantes de forma consistente entre diferentes agregadores, aumentando a consistência do subconjunto final.
+
+%Ok
+Em termos de aplicação, \citeonline{olabisi2025heterogeneous} propõem um EFS heterogêneo via Borda para detecção de \textit{URL phishing}. O método utiliza seletores estatísticos de filtro, como razão de ganho, $\chi^2$ e coeficiente de correlação de Pearson, para gerar \textit{rankings} primários de atributos. Em seguida, a contagem de Borda é empregada para agregar as posições dos atributos e produzir o conjunto final de variáveis. A relevância desse estudo está em demonstrar a aplicação prática de um EFS heterogêneo em segurança cibernética, preservando baixo custo computacional e melhorando o desempenho de classificadores tradicionais.
+
+%Ok
+Outra vertente relevante é a formulação do EFS como um problema de tomada de decisão multicritério. Nessa perspectiva, os atributos são tratados como alternativas, enquanto os seletores ou métricas de avaliação funcionam como critérios de decisão. \citeonline{abellana2022ensemble} aplicam o método EDAS à agregação de filtros em problemas de classificação binária. O estudo mostra que o EDAS pode reduzir a dimensionalidade sem comprometer significativamente o desempenho do classificador, além de abrir espaço para a integração entre métodos de decisão multicritério e seleção de atributos.
+
+%Ok
+De maneira semelhante, \citeonline{kaur2023mcdm} propõem o MCDM-EFS para predição de defeitos de software. O método constrói uma matriz de decisão contendo os \textit{scores} de importância dos atributos segundo diferentes seletores e, em seguida, utiliza o método TOPSIS para produzir o ranking final. A contribuição do estudo está em demonstrar que a seleção de atributos em defeitos de software pode ser tratada como um problema multicritério, no qual diferentes medidas de importância são combinadas em uma ordenação única.
+
+%Ok
+\citeonline{tang2023ensemble} também utilizam TOPSIS, mas o combinam com ponderação por entropia. A proposta calcula inicialmente os \textit{scores} de importância de três métodos individuais de seleção de atributos, determina pesos objetivos por meio do método de entropia e utiliza TOPSIS para obter um \textit{ranking} final mais estável. A contribuição do estudo está na combinação entre ponderação objetiva e decisão multicritério, evitando que todos os seletores tenham a mesma influência no resultado final.
+
+%Ok
+A proposta de \citeonline{kavitha2025decision} amplia a formulação multicritério ao introduzir o \textit{q-rung orthopair hesitant fuzzy} (qROPHFS). O estudo desenvolve uma nova função de \textit{score} baseada em \textit{S-curve} e a integra a métodos de decisão multicritério, como VIKOR, TOPSIS e CODAS, no contexto de EFS. Sua principal contribuição está em incorporar incerteza e hesitação na avaliação dos atributos, o que é relevante quando diferentes seletores produzem avaliações divergentes ou ambíguas sobre a importância das variáveis.
+
+%Ok
+Além das abordagens tradicionais de agregação de \textit{rankings}, há estudos que exploram operadores formais de agregação. \citeonline{janani2023ensemble} propõem ensembles baseados em operadores como \textit{induced ordered weighted averaging} (IOWA), \textit{normalized weighted Bonferroni mean} (NWBM), \textit{Bonferroni-ordered weighted averaging} (BON-OWA) e \textit{Bonferroni-induced ordered weighted averaging} (BON-IOWA). A ponderação dos métodos é definida por uma estratégia baseada em entropia, enquanto os operadores são empregados para realizar a agregação dos \textit{rankings} de atributos produzidos por diferentes seletores. A principal contribuição da abordagem está na modelagem de diferentes formas de interação entre critérios, permitindo representar relações de compensação, dependência e inter-relacionamento entre os métodos de seleção utilizados.
+
+%Ok
+Na frente multiobjetivo, \citeonline{hashemi2021pareto} modelam o EFS como um problema biobjetivo considerando simultaneamente aspectos de relevância e redundância. O método PEFS utiliza dominância de Pareto para identificar atributos não dominados e ordena esses atributos por \textit{crowding distance}. A contribuição central está em abandonar uma visão unidimensional de importância, substituindo-a por uma lógica na qual um bom atributo deve ser simultaneamente relevante para a classe e pouco redundante em relação aos demais. Assim, o EFS passa a ser concebido como uma estratégia explícita de equilíbrio entre objetivos conflitantes.
+
+%Ok
+\citeonline{abasabadi2021automatic} também exploram a ordenação não dominada, mas com foco adicional na definição automática do subconjunto final. O método ATFS por eles proposto combina \textit{rankings} por meio de \textit{fast non-dominated sorting} e utiliza essa estrutura para induzir automaticamente o ponto de corte (\textit{threshold}). O estudo é relevante porque enfrenta dois problemas recorrentes do EFS: a combinação de múltiplos \textit{rankings} e a arbitrariedade na escolha do número de atributos selecionados. Com isso, a definição do \textit{threshold} deixa de ser uma decisão externa e passa a fazer parte do próprio método.
+
+%Ok
+Já \citeonline{fu2023reranking} propõem o RTEFS, um método de múltiplas etapas para categorização de texto. O método realiza pré-processamento textual, constrói um subconjunto união a partir de seis métodos de filtro, aplica re-ranqueamento (\textit{re-ranking}), realiza agregação de \textit{rankings} via TOPSIS e utiliza o algoritmo genético multiobjetivo NSGA-III para selecionar o subconjunto final. A relevância do estudo está em mostrar que o EFS pode ser concebido como um \textit{pipeline}, no qual re-ranqueamento, decisão multicritério e otimização multiobjetivo atuam de forma complementar. Essa proposta é particularmente importante para dados textuais, pois esses conjuntos costumam apresentar alta dimensionalidade e esparsidade.
+
+%Ok
+A estabilidade aparece como eixo metodológico em \citeonline{zhang2019ensemble}. Os autores propõem o EFSIS, o qual integra perturbação dos dados, perturbação funcional e ponderação baseada em estabilidade. O estudo parte da observação de que ensembles heterogêneos podem preservar ou melhorar a acurácia preditiva, embora ainda possam apresentar baixa estabilidade. A principal contribuição dos autores está em incorporar a estabilidade dos seletores ao processo de agregação, de modo que métodos mais consistentes ao longo de diferentes amostragens recebam maior peso no resultado final.
+
+%Ok
+Outra abordagem distinta é apresentada por \citeonline{wu2023ecm}, que propõem o ECM-EFS, baseado em matriz de coassociação aprimorada. Em vez de considerar apenas votos ou posições em \textit{rankings}, o método modela relações entre atributos por meio de matrizes de coassociação positiva, negativa e relativa. Além disso, introduz o conceito de \textit{feature kernel}, formado por atributos considerados centrais para iniciar o processo de seleção. A contribuição do estudo está em tratar o EFS como um problema de consenso estrutural entre atributos, considerando relações de coocorrência, repulsão e independência entre variáveis.
+
+%Ok
+\citeonline{ma2024ensemble} propõem uma fusão multicritério baseada em \textit{neighbourhood rough sets}. O método utiliza três critérios derivados dessa teoria: qualidade de aproximação por vizinhança, taxa de reconhecimento por vizinhança e índice de discriminação por vizinhança. Esses critérios geram múltiplos \textit{scores} de importância, posteriormente fundidos para orientar uma busca gulosa progressiva. A contribuição está em avaliar a qualidade dos atributos a partir de diferentes perspectivas de incerteza e granularidade local dos dados.
+
+%Ok
+Na linha de fusão de evidências, \citeonline{zheng2019feature} propõem um algoritmo baseado em entropia de Tsallis e teoria de Dempster-Shafer. Inicialmente, um critério de correlação baseado em entropia de Tsallis avalia a relevância dos atributos. Em seguida, um \textit{approximate Markov blanket} é empregado para remover redundâncias. Por fim, a teoria de evidência de Dempster-Shafer é utilizada para combinar os subconjuntos gerados e produzir a seleção final. A principal contribuição do estudo está em integrar análise de relevância, eliminação de redundância e fusão de evidências em uma mesma estrutura de EFS.
+
+%Ok
+\citeonline{he2023ensemble} abordam uma limitação frequente dos ensembles: a atribuição uniforme de pesos aos seletores de base. O método EFS-BSF utiliza função \textit{softmax} para ajustar dinamicamente os pesos dos seletores de acordo com seu desempenho no conjunto de dados ao longo de múltiplas rodadas de treinamento. Assim, seletores mais adequados ao conjunto de dados recebem maior influência na composição do subconjunto final. A contribuição do estudo está em substituir a agregação estática por uma ponderação adaptativa orientada ao desempenho dos seletores.
+
+%Ok
+Por fim, \citeonline{lin2024ensemble} propõem o EFSMMIAS, baseado em múltiplas métricas e estratégias aprimoradas de agregação. O método combina \textit{Symmetric Uncertainty}, \textit{Fisher Discriminant Ratio} e ReliefF com complementaridade de vetores de estrutura discriminante, permitindo identificar atributos com capacidades discriminativas complementares em diferentes subproblemas. Em seguida, utiliza uma estratégia aprimorada de agregação para eliminar atributos redundantes e refinar o subconjunto final. A principal contribuição do estudo está em combinar métricas globais e informações discriminativas associadas a subproblemas, buscando melhorar simultaneamente a redução de dimensionalidade e o desempenho de classificação.
+
+%%%%%%%%%%%
+De maneira geral, os estudos analisados indicam que EFS não constitui uma técnica única, mas uma família de abordagens que compartilham a premissa de combinar múltiplas evidências de relevância. A Tabela~\ref{tab:efs_quadro_resumo} sumariza os trabalhos acima descritos. A literatura pode ser compreendida a partir de seis estratégias principais: agregação de \textit{rankings}, métodos eleitorais, tomada de decisão multicritério, otimização multiobjetivo, integração de estabilidade e mecanismos de consenso estrutural ou evidencial. Apesar das diferenças metodológicas, os trabalhos convergem em três problemas recorrentes: como gerar diversidade entre seletores, como agregar suas saídas e como definir o subconjunto final de atributos. Este último aspecto, relacionado à definição de um \textit{threshold}, merece uma discussão específica, pois influencia diretamente o tamanho do subconjunto selecionado, a estabilidade da seleção e o desempenho do classificador.
+
+
+%%%%%%%%%%%%%%%%%%
+\footnotesize
+\setlength{\LTleft}{0pt}
+\setlength{\LTright}{0pt}
+\setlength{\tabcolsep}{3.5pt}
+\renewcommand{\arraystretch}{1.15}
+
+\begin{longtable}{P{2.8cm}P{4.8cm}P{5.9cm}}
+\caption{Síntese dos estudos selecionados sobre EFS.}\label{tab:efs_quadro_resumo}\\
+\toprule
+\textbf{Referência} & \textbf{Estratégia Geral} & \textbf{Contribuição} \\
+\midrule
+\endfirsthead
+
+\caption[]{Síntese dos estudos selecionados sobre EFS (continuação).}\\
+\toprule
+\textbf{Referência} & \textbf{Estratégia Geral} & \textbf{Contribuição} \\
+\midrule
+\endhead
+
+\midrule
+\multicolumn{3}{r}{\textit{Continua na próxima página...}} \\
+\endfoot
+
+\bottomrule
+\endlastfoot
+
+\citeonline{bolon2018scalability} &
+Revisão de \textit{ensembles} para seleção de atributos &
+Sistematiza conceitos de EFS, diversidade, estabilidade, ensembles homogêneos e heterogêneos \\ \hline
+
+\citeonline{mera2021framework} &
+\textit{Framework} conceitual e de implementação &
+Trata a combinação de seletores como problema de consenso entre métodos de seleção de atributos \\ \hline
+
+\citeonline{akhy2024comprehensive} &
+Estudo empírico e revisão de componentes de EFS &
+Discute seletores individuais, agregadores, limiares, características dos dados e desempenho classificativo \\ \hline
+
+\citeonline{seijopardo2019automatic} &
+\textit{Ensemble} de \textit{rankings} com limiar automático &
+Compara métodos em que combinação e \textit{threshold} ocorrem em ordens distintas \\ \hline
+
+\citeonline{drotar2019ensemble} &
+Métodos eleitorais e agrupamento de ranqueadores &
+Aplica voto plural, voto único transferível, Borda e Borda ponderada, com agrupamento por \textit{mean-shift} \\ \hline
+
+\citeonline{joseph2025hybrid} &
+Agregação híbrida de \textit{rankings} &
+Combina diferentes técnicas de agregação, como MC4, Kendall Tau e Borda, para seleção mais robusta \\ \hline
+
+\citeonline{olabisi2025heterogeneous} &
+Agregação heterogênea via Borda em \textit{URL phishing} & Agrega \textit{rankings} de filtros estatísticos para compor os atributos finais \\ \hline
+
+\citeonline{abellana2022ensemble} &
+EDAS aplicado a EFS &
+Formula a agregação de filtros como um problema de decisão multicritério em classificação binária \\ \hline
+
+\citeonline{kaur2023mcdm} &
+TOPSIS para predição de defeitos de software &
+Usa matriz de decisão com \textit{scores} de seletores e TOPSIS para ranquear atributos \\ \hline
+
+\citeonline{tang2023ensemble} &
+Entropia e TOPSIS &
+Define pesos objetivos por entropia e aplica TOPSIS para obter o \textit{ranking} final de atributos \\ \hline
+
+\citeonline{kavitha2025decision} &
+MCDM em domínio fuzzy &
+Integra funções de \textit{score} em domínio \textit{q-rung orthopair hesitant fuzzy} com métodos multicritério \\ \hline
+
+\citeonline{janani2023ensemble} &
+Operadores Bonferroni, OWA e IOWA &
+Explora operadores formais de agregação com pesos por entropia para fusão de \textit{rankings} \\ \hline
+
+\citeonline{hashemi2021pareto} &
+Otimização biobjetivo por Pareto &
+Modela EFS como equilíbrio entre relevância e redundância usando dominância de Pareto \\ \hline
+
+\citeonline{abasabadi2021automatic} &
+\textit{Fast non-dominated sorting} &
+Combina \textit{rankings} e define automaticamente o limiar do subconjunto final \\ \hline
+
+\citeonline{fu2023reranking} &
+Re-ranqueamento, TOPSIS e NSGA-III &
+Propõe \textit{pipeline} em múltiplos estágios para EFS em categorização de texto \\ \hline
+
+\citeonline{zhang2019ensemble} &
+Integração explícita de estabilidade &
+Combina perturbação de dados, perturbação funcional e ponderação por estabilidade \\ \hline
+
+\citeonline{wu2023ecm} &
+Matriz de coassociação aprimorada &
+Modela relações positivas, negativas e relativas entre atributos por meio de matrizes de coassociação \\ \hline
+
+\citeonline{ma2024ensemble} &
+Fusão multicritério com \textit{neighbourhood rough sets} &
+Combina múltiplos critérios de incerteza local para orientar a seleção progressiva de atributos \\ \hline
+
+\citeonline{zheng2019feature} &
+Fusão de evidências por Dempster-Shafer &
+Integra entropia de Tsallis, \textit{approximate Markov blanket} e teoria de evidência \\ \hline
+
+\citeonline{he2023ensemble} &
+Ponderação adaptativa por \textit{softmax} &
+Ajusta dinamicamente o peso dos seletores conforme sua aderência ao conjunto de dados \\ \hline
+
+\citeonline{lin2024ensemble} &
+Múltiplas métricas e agregação aprimorada &
+Combina SU, FDR e ReliefF com complementaridade discriminativa entre atributos \\
+
+\end{longtable}
+\normalsize
+%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{\textit{Thresholds} em EFS}\label{subsec:thresholds-efs}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+A definição do \textit{threshold} constitui uma etapa relevante em EFS baseados em \textit{rankings} ou \textit{scores} de importância. Enquanto alguns seletores retornam diretamente um subconjunto de atributos, os métodos baseados em ordenação produzem uma lista ranqueada de variáveis, exigindo uma regra adicional para determinar quantos atributos serão efetivamente mantidos. Assim, o \textit{threshold} atua como mecanismo de conversão entre a saída intermediária do \textit{ensemble} e o subconjunto final utilizado pelo classificador.
+
+A escolha de um limiar muito permissivo pode manter atributos irrelevantes, ruidosos ou redundantes, reduzindo a capacidade de generalização do modelo. Por outro lado, um limiar excessivamente restritivo pode eliminar atributos relevantes, comprometendo o desempenho preditivo e a estabilidade da seleção. Portanto, o \textit{threshold} não deve ser interpretado apenas como um parâmetro operacional, mas como uma decisão metodológica que afeta diretamente a dimensionalidade, a interpretabilidade, a estabilidade e a acurácia do modelo final \cite{bolon2018scalability,seijopardo2019automatic,abasabadi2021automatic}.
+
+Na literatura analisada, a forma mais simples de definição de um \textit{threshold} consiste na retenção de uma quantidade fixa de atributos ou de um percentual fixo do \textit{ranking} final. Essa estratégia aparece em diferentes variações, como seleção dos melhores $k$ atributos, retenção dos melhores 10\%, 25\% ou 50\% das variáveis, ou avaliação experimental de diferentes tamanhos de subconjunto. Embora seja simples e de fácil reprodução, essa abordagem apresenta uma limitação: o mesmo percentual pode ser adequado para um conjunto de dados e inadequado para outro, especialmente quando há diferenças relevantes em dimensionalidade, número de instâncias, número de classes ou grau de redundância entre atributos.
+
+\citeonline{bolon2018scalability} observam que, em \textit{ensembles} baseados em ranqueadores, a escolha do limiar costuma ocorrer por percentuais fixos de atributos retidos ou por número fixo de melhores atributos. Essa prática é recorrente porque permite comparar diferentes seletores sob uma condição controlada. Contudo, ela não resolve o problema: a quantidade ideal de atributos depende da estrutura do conjunto de dados. Assim, a seleção dos melhores $k$ atributos pode ser vista como uma solução pragmática, mas não necessariamente adaptativa.
+
+O estudo de \citeonline{akhy2024comprehensive} reforça essa leitura ao destacar que os componentes de um EFS incluem os seletores individuais, os métodos agregadores e os \textit{thresholds} responsáveis por produzir o subconjunto final. Os autores mencionam diferentes estratégias, incluindo geradores automáticos baseados em $\log_2(n)$, razão discriminante de Fisher e busca por percentuais fixos. Essa discussão mostra que a etapa de aplicação de limiar é recorrente, mas ainda heterogênea, variando conforme o desenho experimental adotado por cada estudo.
+
+Uma contribuição central para esse tema é apresentada por \citeonline{seijopardo2019automatic}. Os autores comparam duas estratégias de EFS baseadas em \textit{rankings} de atributos: Design CT (\textit{Combination followed by Thresholding}) e Design TC (\textit{Thresholding followed by Combination}). No Design CT, os \textit{rankings} individuais são inicialmente combinados em um \textit{ranking} agregado, e o \textit{threshold} é aplicado posteriormente sobre esse resultado. No Design TC, o \textit{threshold} é aplicado inicialmente a cada \textit{ranking} individual, gerando subconjuntos parciais posteriormente combinados. Essa distinção é metodologicamente importante porque altera o momento em que a redução dimensional ocorre: antes ou depois da construção do consenso entre seletores.
+
+Além de comparar a ordem entre agregação e definição de limiar, \citeonline{seijopardo2019automatic} propõem um \textit{threshold} automático baseado em medidas de complexidade dos dados. A ideia é substituir a escolha arbitrária de percentuais fixos por uma regra orientada pelas propriedades do problema. De forma geral, o critério combina uma medida de complexidade com a proporção de atributos retidos, de acordo com a Equação~\ref{eq:threshold_complexidade}, em que $CM$ representa uma medida de complexidade, $\rho$ corresponde à proporção de atributos retidos e $\alpha$ controla o equilíbrio entre a complexidade do problema e a redução dimensional. Os autores avaliam medidas de complexidade como razão discriminante de Fisher, volume de sobreposição e eficiência máxima de atributos, além de comparar limiares automáticos com percentuais fixos de 10\%, 25\% e 50\%. Os resultados indicam que limiares automáticos podem apresentar desempenho competitivo ou superior aos limiares fixos, sobretudo em cenários de alta dimensionalidade, nos quais o número de atributos é muito maior que o número de instâncias.
+
+
+%%%%%%%
+\begin{equation}\label{eq:threshold_complexidade}
+e = \alpha \times CM + (1-\alpha) \times \rho
+\end{equation}
+%%%%%%%
+
+O trabalho de \citeonline{abasabadi2021automatic} avança nessa direção ao propor o ATFS. Neste método, os \textit{rankings} produzidos por diferentes seletores são combinados por meio de \textit{fast non-dominated sorting}, o que permite incorporar a definição automática do limiar ao próprio processo de agregação. A contribuição do ATFS está em reduzir a dependência de escolha manual do número de atributos, tratando o \textit{threshold} como parte estrutural do algoritmo, e não como um ajuste posterior. Essa abordagem é especialmente relevante porque evita que o pesquisador precise testar diversos valores de corte até encontrar o melhor desempenho empiricamente.
+
+Em métodos eleitorais, o \textit{threshold} costuma aparecer como a quantidade final de atributos a serem selecionados ao término do processo de votação. \citeonline{drotar2019ensemble}, por exemplo, utilizam métodos como voto plural, voto único transferível, contagem de Borda e Borda ponderada para ordenar e selecionar atributos. Nesses casos, a etapa de aplicação de limiar está associada ao número desejado de atributos no subconjunto final. No voto único transferível, por exemplo, o número de atributos desejado participa da definição da cota de \textit{Droop}, utilizada para decidir quais atributos são eleitos. Desse modo, o \textit{threshold} não é apenas um corte aplicado ao \textit{ranking}, mas também um parâmetro que influencia a própria dinâmica eleitoral da seleção.
+
+Em aplicações baseadas em Borda, a definição do limiar pode ocorrer antes ou depois da agregação. No HBEFS de \citeonline{olabisi2025heterogeneous}, aplicado à detecção de \textit{URL phishing}, os autores utilizam filtros estatísticos para gerar \textit{rankings} primários e aplicam uma estratégia de corte para identificar subconjuntos informativos. Em seguida, a contagem de Borda é usada para combinar os atributos selecionados e produzir o conjunto de características de referência. O estudo também utiliza uma formulação baseada em complexidade e proporção de atributos retidos, aproximando-se da lógica proposta por \citeonline{seijopardo2019automatic}. Assim, o trabalho mostra que o \textit{threshold} pode atuar tanto na filtragem inicial dos ranqueadores quanto na consolidação do subconjunto final.
+
+Nos métodos baseados em tomada de decisão multicritério, o \textit{threshold} geralmente aparece após a produção de um ranking global. Em \citeonline{abellana2022ensemble}, o método EDAS é utilizado para ranquear atributos e reduzir conjuntos de dados de classificação binária pela retenção de uma proporção das variáveis. Nesse caso, a principal contribuição está na agregação multicritério, enquanto o limiar define a proporção de atributos mantidos para avaliar o efeito da redução dimensional. De modo semelhante, \citeonline{kaur2023mcdm} utilizam TOPSIS para atribuir uma pontuação final aos atributos em predição de defeitos de software. Após a geração do \textit{ranking} por TOPSIS, os atributos são selecionados com base nesse \textit{score} final, fazendo com que o \textit{threshold} opere como etapa de conversão do \textit{ranking} multicritério em subconjunto de entrada para os classificadores.
+
+Em propostas mais recentes com TOPSIS e modelos de decisão ampliados, a definição do \textit{threshold} tende a ser menos destacada que a estratégia de agregação. \citeonline{tang2023ensemble}, por exemplo, combinam ponderação por entropia e TOPSIS para gerar um \textit{ranking} final mais estável. \citeonline{kavitha2025decision}, por sua vez, formulam o EFS em domínio \textit{q-rung orthopair hesitant fuzzy}, combinando funções de \textit{score} com métodos multicritério. Nesses trabalhos, o problema central é a construção de uma pontuação agregada confiável; entretanto, a utilização prática do método ainda exige uma regra para definir quais atributos ranqueados serão preservados no subconjunto final.
+
+Há também estudos nos quais o \textit{threshold} é substituído ou absorvido por estratégias de busca e otimização. \citeonline{joseph2025hybrid} combinam diferentes métodos de agregação de \textit{rankings}, como MC4, distância de Kendall Tau e Borda, mas a seleção final do subconjunto é conduzida por uma etapa \textit{wrapper}. Nesse caso, o ponto de corte não aparece como percentual fixo explícito, pois a definição do subconjunto é delegada ao processo de avaliação orientado pelo classificador. Já \citeonline{fu2023reranking} propõem o RTEFS para categorização de texto, utilizando um \textit{pipeline} com união de subconjuntos, re-ranqueamento, TOPSIS e NSGA-III. Neste caso, a definição do subconjunto final é incorporada à otimização multiobjetivo, considerando simultaneamente relevância classe-atributo e relação atributo-atributo.
+
+%%%%%%%%
+A análise desses estudos permite distinguir quatro maneiras principais de definição do \textit{threshold} em EFS. A primeira é a aplicação de limiar fixa, baseada em percentuais ou no número dos melhores atributos. A segunda é a aplicação de limiar automática, orientada por medidas de complexidade, dominância ou características dos dados. A terceira é a aplicação de limiar dependente do agregador, na qual o próprio método de votação ou decisão multicritério define uma pontuação a partir da qual os atributos são selecionados. A quarta é a substituição do corte explícito por busca, \textit{wrapper} ou otimização multiobjetivo, em que o subconjunto final emerge de um processo de avaliação ou otimização.
+
+Portanto, a escolha do \textit{threshold} representa uma etapa relevante na literatura de EFS. Muitos estudos demonstram ganhos de acurácia ou estabilidade, mas nem sempre justificam adequadamente como o tamanho do subconjunto final foi definido. Esse aspecto é importante porque dois métodos de agregação podem apresentar desempenhos diferentes apenas em função do número de atributos retidos. Assim, em estudos experimentais com EFS, recomenda-se explicitar: (i) se o limiar é fixo, automático ou otimizado; (ii) se o corte ocorre antes ou depois da agregação; (iii) se o tamanho do subconjunto é definido por percentual, número absoluto, métrica de complexidade, desempenho do classificador ou otimização; e (iv) se a decisão de \textit{threshold} é ajustada no treinamento ou avaliada indevidamente sobre o teste. Essa transparência é essencial para evitar viés experimental e para tornar os resultados comparáveis entre diferentes métodos de seleção de atributos. A Tabela~\ref{tab:efs_thresholds} sumariza a seção aqui apresentada.
+
+%%%%%%%%%%%%%%%%%
+\begin{table}[H]
+\centering
+\small
+\caption{Estratégias de definição de \textit{threshold} em EFS.}\label{tab:efs_thresholds}
+\begin{tabular}{P{3.0cm}P{4.2cm}P{6.0cm}}
+\toprule
+\textbf{Referência} & \textbf{Estratégia} & \textbf{Implicação Metodológica} \\
+\midrule
+
+\citeonline{bolon2018scalability} &
+Percentual fixo ou número fixo de atributos &
+Identifica o \textit{threshold} como decisão necessária em \textit{ensembles} baseados em ranqueadores \\ \hline
+
+\citeonline{akhy2024comprehensive} &
+Percentuais fixos, $\log_2(n)$ e critérios discriminativos &
+Mostra que o desempenho do EFS depende da interação entre seletor, agregador e limiar \\ \hline
+
+\citeonline{seijopardo2019automatic} &
+Design CT, Design TC, percentuais fixos e limiar automático por complexidade &
+Compara aplicar o corte antes ou depois da agregação e propõe aplicação de limiar automático \\ \hline
+
+\citeonline{abasabadi2021automatic} &
+Limiar automático com \textit{fast non-dominated sorting} &
+Integra a definição do subconjunto final à própria agregação dos \textit{rankings} \\ \hline
+
+\citeonline{drotar2019ensemble} &
+Número requerido de atributos em métodos eleitorais &
+O tamanho do subconjunto influencia a votação, especialmente no voto único transferível \\ \hline
+
+\citeonline{olabisi2025heterogeneous} &
+Corte por complexidade e agregação posterior por Borda &
+Usa limiar para obter subconjuntos informativos antes da consolidação dos atributos finais \\ \hline
+
+\citeonline{abellana2022ensemble} &
+Retenção de proporção de atributos após \textit{ranking} por EDAS &
+A aplicação de limiar transforma o ranking multicritério em subconjunto para classificação binária \\ \hline
+
+\citeonline{kaur2023mcdm} &
+Seleção baseada no \textit{score} final do TOPSIS &
+O \textit{ranking} multicritério define a prioridade dos atributos preservados \\ \hline
+
+\citeonline{joseph2025hybrid} &
+Seleção final orientada por \textit{wrapper} &
+O corte explícito é substituído por avaliação do subconjunto com classificador \\ \hline
+
+\citeonline{fu2023reranking} &
+Seleção final por otimização multiobjetivo &
+O subconjunto final emerge da combinação entre re-ranqueamento, TOPSIS e NSGA-III \\
+
+\bottomrule
+\end{tabular}
+\end{table}
+%%%%%%%%%%%%%

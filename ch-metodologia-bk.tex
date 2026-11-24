@@ -1,0 +1,2812 @@
+% ============================================================================
+% CAPÍTULO 4 — EFS4AC
+% Arquivo preparado para inclusão no projeto principal da dissertação.
+%
+% Observações:
+% 1) O capítulo foi estruturado como um capítulo metodológico de dissertação,
+%    apresentando a proposta, a arquitetura em etapas, as decisões de projeto
+%    e a integração com a classificação associativa.
+% 2) Mantém o label cap:Metodologia para não quebrar referências anteriores e
+%    adiciona um label específico do método.
+% 3) Pacotes recomendados no preâmbulo do projeto: amsmath, amssymb, array.
+% ============================================================================
+\chapter{\textit{EFS4AC}: Método de \textit{Ensemble Feature Selection} via Agregação de Rankings para Classificadores Associativos}\label{cap:Metodologia}
+
+Este capítulo apresenta o método proposto nesta dissertação, denominado
+\textit{EFS4AC}. A proposta foi concebida para incorporar \textit{Ensemble
+Feature Selection} (EFS) ao contexto da Classificação Associativa, de modo a
+selecionar um subconjunto de atributos antes da indução das regras de
+classificação. A ideia central consiste em combinar diferentes métodos de
+\textit{Feature Selection} (FS), transformar suas saídas em rankings
+comparáveis, analisar a complementaridade entre eles, agregar essas evidências
+em um consenso e, por fim, definir o subconjunto final de atributos a ser
+utilizado pelo classificador associativo.
+
+A motivação do \textit{EFS4AC} decorre de três constatações principais.
+Primeiramente, a literatura mostra que diferentes métodos de FS capturam
+critérios distintos de relevância, redundância e interação entre atributos,
+de forma que a escolha de um único seletor pode introduzir dependência excessiva
+de uma única perspectiva de avaliação \citeonline{bolon2019ensembles,salman2026review}.
+Em segundo lugar, no contexto dos classificadores associativos, o número de
+atributos influencia diretamente o espaço de busca das regras, afetando tanto o
+custo computacional de indução quanto a complexidade do modelo final. Por fim,
+a revisão realizada neste trabalho indicou uma lacuna na interseção entre
+\textit{Ensemble Feature Selection} e Classificação Associativa, o que justifica
+a proposição de um método específico para esse cenário.
+
+Diferentemente de abordagens que alteram diretamente o mecanismo interno do
+classificador associativo, o \textit{EFS4AC} atua como uma etapa anterior à
+indução do modelo. Assim, o método não modifica a estrutura básica do
+classificador associativo adotado; em vez disso, ele controla quais atributos
+serão disponibilizados à mineração das regras. Essa decisão metodológica torna a
+proposta modular, reprodutível e comparável tanto com a ausência de seleção de
+atributos quanto com métodos individuais de FS.
+
+% ============================================================================
+\section{Visão Geral do Método}
+\label{sec:ac-efs-visao-geral}
+% ============================================================================
+
+O fluxo geral do \textit{EFS4AC} é composto por cinco etapas principais:
+
+\begin{enumerate}
+    \item seleção dos métodos-base de \textit{Feature Selection};
+    \item geração e padronização dos rankings individuais;
+    \item análise e controle da diversidade entre os rankings;
+    \item agregação dos rankings em um consenso global;
+    \item definição do subconjunto final de atributos.
+\end{enumerate}
+
+A Figura~\ref{fig:fluxo-geral-ac-efs} apresenta essas cinco etapas na forma de
+um fluxo metodológico. Cada caixa representa um bloco funcional do método, e as
+setas indicam a dependência entre as saídas de uma etapa e as entradas da etapa
+seguinte.
+
+\begin{figure}[ht]
+    \centering
+    \small
+    \setlength{\tabcolsep}{2pt}
+    \renewcommand{\arraystretch}{1.3}
+    \begin{tabular}{c@{\;$\rightarrow$\;}c@{\;$\rightarrow$\;}c@{\;$\rightarrow$\;}c@{\;$\rightarrow$\;}c}
+        \fbox{\parbox[c][1.8cm][c]{2.5cm}{\centering \textbf{Etapa 1}\\ Seleção dos\\ métodos-base de FS}}
+        &
+        \fbox{\parbox[c][1.8cm][c]{2.45cm}{\centering \textbf{Etapa 2}\\ Geração e\\ padronização\\ dos rankings}}
+        &
+        \fbox{\parbox[c][1.8cm][c]{2.3cm}{\centering \textbf{Etapa 3}\\ Análise da\\ diversidade\\ dos rankings}}
+        &
+        \fbox{\parbox[c][1.8cm][c]{2.3cm}{\centering \textbf{Etapa 4}\\ Agregação\\ dos rankings}}
+        &
+        \fbox{\parbox[c][1.8cm][c]{2.4cm}{\centering \textbf{Etapa 5}\\ Definição do\\ subconjunto\\ final}}
+    \end{tabular}
+    \caption{Fluxo geral do método \textit{EFS4AC}.}
+    \label{fig:fluxo-geral-ac-efs}
+\end{figure}
+
+Embora a Figura~\ref{fig:fluxo-geral-ac-efs} sintetize a proposta de forma
+compacta, cada etapa envolve decisões metodológicas específicas. Por esse
+motivo, a Tabela~\ref{tab:descricao-etapas-ac-efs} descreve resumidamente o
+papel de cada caixa apresentada na figura.
+
+\begin{table}[ht]
+    \centering
+    \small
+    \caption{Descrição resumida das cinco etapas do método \textit{EFS4AC}.}
+    \label{tab:descricao-etapas-ac-efs}
+    \begin{tabular}{p{1.3cm}p{3.5cm}p{8.8cm}}
+        \hline
+        \textbf{Etapa} & \textbf{Bloco} & \textbf{Descrição} \\
+        \hline
+        1 & Seleção dos métodos-base de FS & Define quais seletores irão compor o ensemble, buscando compatibilidade com dados discretizados e diversidade de critérios de avaliação. \\
+        2 & Geração e padronização dos rankings & Aplica cada seletor ao conjunto de treinamento e converte suas saídas para uma representação comum: um ranking completo dos atributos. \\
+        3 & Análise da diversidade dos rankings & Mede a similaridade entre os rankings produzidos, permitindo identificar redundância, complementaridade e diferentes estratégias de composição do ensemble. \\
+        4 & Agregação dos rankings & Combina os rankings individuais para produzir um ranking consensual global, utilizando um agregador de preferência. \\
+        5 & Definição do subconjunto final & Converte o ranking consensual em um subconjunto efetivo de atributos, que será então utilizado pelo classificador associativo. \\
+        \hline
+    \end{tabular}
+\end{table}
+
+Formalmente, seja $D^{tr}=(X,Y)$ o conjunto de treinamento, em que
+$X=\{f_1,f_2,\ldots,f_n\}$ representa o conjunto de atributos discretizados e
+$Y$ representa a variável classe. Seja ainda
+$\mathcal{S}=\{S_1,S_2,\ldots,S_M\}$ o conjunto de $M$ métodos-base de FS que
+compõem o ensemble. Cada seletor $S_j$ produz um ranking individual $R_j$ sobre
+os $n$ atributos. O conjunto desses rankings é então processado pelas etapas de
+diversidade e agregação, gerando um ranking consensual $R^{*}$. Por fim, uma
+função de corte $\mathcal{K}(\cdot)$ transforma esse ranking em um subconjunto
+final $F^{*}\subseteq X$, conforme expresso em
+
+\begin{equation}
+    F^{*}=\mathcal{K}(R^{*}).
+    \label{eq:subconjunto-final-ac-efs}
+\end{equation}
+
+Esse subconjunto $F^{*}$ é a saída principal do método e constitui a entrada da
+etapa de indução do classificador associativo.
+
+% ============================================================================
+% ============================================================================
+% ============================================================================
+\section{Etapa 1 -- Seleção dos Métodos-Base de \textit{Feature Selection}}
+\label{sec:ac-efs-etapa1}
+% ============================================================================
+
+A primeira etapa do método \textit{EFS4AC} consiste na definição dos
+métodos-base de \textit{Feature Selection} (FS) que irão compor o ensemble.
+Essa definição constitui uma decisão metodológica importante, uma vez que os
+seletores escolhidos determinam quais perspectivas sobre a relevância dos
+atributos estarão disponíveis para as etapas posteriores de geração, análise e
+agregação dos rankings.
+
+A utilização de múltiplos métodos de FS parte do princípio de que diferentes
+seletores podem avaliar os mesmos atributos segundo critérios distintos e,
+consequentemente, produzir resultados diferentes. No contexto de
+\textit{Ensemble Feature Selection} (EFS), essa característica pode ser
+explorada por meio de ensembles heterogêneos, nos quais diferentes métodos de
+seleção são combinados com o objetivo de incorporar múltiplas perspectivas
+sobre os dados. Dessa forma, busca-se reduzir a dependência de um único
+critério de relevância e fornecer uma base mais diversificada para a construção
+do consenso entre os seletores.
+
+No \textit{EFS4AC}, optou-se por uma configuração heterogênea formada por
+métodos supervisionados da categoria \textit{filter}. Além de não dependerem
+diretamente do algoritmo de classificação utilizado posteriormente, esses
+métodos permitem avaliar os atributos a partir de propriedades estatísticas e
+informacionais dos dados. A utilização de filtros também favorece a construção
+de uma representação comum baseada em rankings, necessária para as etapas
+posteriores do método.
+
+Do ponto de vista metodológico, esta etapa busca responder à seguinte questão:
+\textit{quais métodos devem compor o ensemble de seleção de atributos?}
+A resposta a essa questão é orientada por critérios relacionados tanto à
+compatibilidade dos seletores com o contexto da Classificação Associativa
+quanto à arquitetura proposta para o \textit{EFS4AC}. A
+Figura~\ref{fig:fluxo-etapa1-ac-efs} apresenta o fluxo geral dessa etapa.
+
+\begin{figure}[ht]
+    \centering
+    \small
+    \setlength{\tabcolsep}{2pt}
+    \renewcommand{\arraystretch}{1.3}
+
+    \begin{tabular}{c@{\;$\rightarrow$\;}c@{\;$\rightarrow$\;}c}
+
+        \fbox{\parbox[c][1.9cm][c]{3.0cm}{
+            \centering
+            \textbf{Entrada}\\
+            Conjunto candidato de\\
+            métodos de FS
+        }}
+
+        &
+
+        \fbox{\parbox[c][1.9cm][c]{5.0cm}{
+            \centering
+            \textbf{Critérios de inclusão}\\
+            dados discretizados; classe nominal;\\
+            ranking completo; diversidade\\
+            dos critérios de avaliação
+        }}
+
+        &
+
+        \fbox{\parbox[c][1.9cm][c]{4.0cm}{
+            \centering
+            \textbf{Saída}\\
+            Métodos-base elegíveis e\\
+            composições do ensemble
+        }}
+
+    \end{tabular}
+
+    \caption{Fluxo da Etapa 1 do método \textit{EFS4AC}.}
+    \label{fig:fluxo-etapa1-ac-efs}
+\end{figure}
+
+
+% ----------------------------------------------------------------------------
+\subsection{Critérios de inclusão dos métodos}
+\label{subsec:ac-efs-criterios-inclusao}
+% ----------------------------------------------------------------------------
+
+A seleção dos métodos-base do \textit{EFS4AC} é orientada por quatro critérios
+principais:
+
+\begin{itemize}
+
+    \item \textbf{compatibilidade com dados discretizados}: os métodos devem
+    ser aplicáveis à representação discretizada utilizada pela Classificação
+    Associativa, evitando a necessidade de reconstrução dos atributos contínuos
+    originais;
+
+    \item \textbf{aplicabilidade a problemas com classe nominal}: os métodos
+    devem ser supervisionados e capazes de operar em problemas de classificação
+    com variável-alvo categórica, contemplando cenários binários e multiclasse;
+
+    \item \textbf{capacidade de produzir uma ordenação completa dos atributos}:
+    cada método deve permitir, direta ou indiretamente, ordenar todos os
+    atributos avaliados, uma vez que o \textit{EFS4AC} utiliza rankings como
+    representação comum das saídas individuais;
+
+    \item \textbf{diversidade dos critérios de avaliação}: o conjunto de
+    métodos deve contemplar diferentes formas de avaliar a importância dos
+    atributos, incluindo associação estatística, relevância informacional,
+    redundância e interação ou complementaridade entre atributos.
+
+\end{itemize}
+
+Os três primeiros critérios estabelecem requisitos de compatibilidade com a
+arquitetura do \textit{EFS4AC}, enquanto o último orienta a heterogeneidade do
+ensemble. Dessa forma, a inclusão de um método não depende apenas de sua
+aplicabilidade ao problema, mas também da perspectiva adicional que ele pode
+incorporar ao conjunto de seletores.
+
+É importante observar que a diversidade considerada nesta etapa é
+\textit{conceitual}, isto é, decorre dos diferentes critérios utilizados pelos
+métodos-base. A diversidade efetivamente observada entre os rankings produzidos
+será analisada posteriormente, a partir da comparação entre as ordenações
+geradas pelos seletores.
+
+
+% ----------------------------------------------------------------------------
+\subsection{Configuração inicial dos métodos-base}
+\label{subsec:ac-efs-config-inicial}
+% ----------------------------------------------------------------------------
+
+Com base nos critérios estabelecidos, a configuração inicial do
+\textit{EFS4AC} é composta por dez métodos: Gini, $\chi^2$,
+\textit{Symmetric Uncertainty} (SU), \textit{Mutual Information Maximization}
+(MIM), MRMR, JMI, CIFE, CMIM, ICAP e MRI.
+
+A seleção desses métodos permite reunir duas perspectivas principais. A
+primeira corresponde aos métodos de avaliação individual, nos quais a
+relevância de cada atributo pode ser determinada diretamente em relação à
+classe. A segunda corresponde aos métodos multivariados ou sequenciais, nos
+quais a avaliação de um atributo considera, em diferentes graus, relações de
+redundância, dependência condicional ou interação com atributos previamente
+selecionados.
+
+A Tabela~\ref{tab:metodos-base-ac-efs} apresenta os métodos-base e sintetiza
+a contribuição conceitual de cada um para a composição do ensemble.
+
+\begin{table}[ht]
+    \centering
+    \small
+    \caption{Métodos-base da configuração inicial do \textit{EFS4AC}.}
+    \label{tab:metodos-base-ac-efs}
+
+    \begin{tabular}{p{2.0cm} p{3.0cm} p{7.2cm}}
+        \hline
+        \textbf{Método} &
+        \textbf{Tipo} &
+        \textbf{Critério predominante} \\
+        \hline
+
+        Gini
+        & Univariado
+        & Discriminação das classes a partir da distribuição dos dados. \\
+
+        $\chi^2$
+        & Univariado
+        & Associação estatística entre o atributo e a classe. \\
+
+        SU
+        & Univariado
+        & Dependência informacional normalizada entre atributo e classe. \\
+
+        MIM
+        & Univariado
+        & Relevância individual baseada em informação mútua com a classe. \\
+
+        \hline
+
+        MRMR
+        & Multivariado
+        & Maximização da relevância e redução da redundância. \\
+
+        JMI
+        & Multivariado
+        & Relevância conjunta e informação complementar entre atributos. \\
+
+        CIFE
+        & Multivariado
+        & Relevância condicionada e interação com atributos selecionados. \\
+
+        CMIM
+        & Multivariado
+        & Informação mútua condicional em relação aos atributos selecionados. \\
+
+        ICAP
+        & Multivariado
+        & Relevância, redundância e efeitos de interação entre atributos. \\
+
+        MRI
+        & Multivariado
+        & Relevância considerando redundância e interação informacional. \\
+
+        \hline
+    \end{tabular}
+\end{table}
+
+Os métodos Gini, $\chi^2$, SU e MIM constituem o grupo univariado da
+configuração inicial. Embora avaliem os atributos individualmente, eles não
+representam exatamente o mesmo critério: Gini e $\chi^2$ exploram propriedades
+estatísticas ou distributivas, enquanto SU e MIM utilizam medidas derivadas da
+teoria da informação.
+
+MRMR, JMI, CIFE, CMIM, ICAP e MRI, por sua vez, constituem o grupo
+multivariado ou sequencial. Esses métodos introduzem diferentes mecanismos para
+considerar relações entre atributos durante a seleção, permitindo incorporar
+aspectos como redundância, dependência condicional e complementaridade. A
+literatura de FS baseada em teoria da informação contempla, por exemplo,
+métodos consolidados como MRMR, JMI e CMIM, que diferem justamente na forma
+como relevância e dependências entre atributos são consideradas.
+
+Assim, a heterogeneidade da configuração inicial não decorre apenas da
+quantidade de métodos empregados, mas principalmente da combinação de
+diferentes critérios de avaliação. Essa característica é particularmente
+relevante para o \textit{EFS4AC}, uma vez que a proposta busca investigar se
+o consenso entre diferentes perspectivas de relevância pode produzir uma
+seleção de atributos mais adequada à Classificação Associativa.
+
+
+% ----------------------------------------------------------------------------
+\subsection{Métodos reservados para investigação posterior}
+\label{subsec:ac-efs-metodos-posteriores}
+% ----------------------------------------------------------------------------
+
+Além dos dez métodos da configuração inicial, foram considerados MIFS, DCSF,
+CFR, IWFS e DISR. Esses métodos não são descartados da pesquisa, mas são
+reservados para extensões ou análises posteriores, pois sua inclusão na
+configuração inicial introduziria decisões metodológicas adicionais.
+
+Em particular, MIFS requer a definição de um hiperparâmetro adicional
+($\beta$); DCSF, CFR e IWFS apresentam particularidades relacionadas à
+inicialização de seus procedimentos sequenciais; e DISR demanda uma análise
+adicional quanto à obtenção de uma ordenação completa dos atributos. A
+incorporação imediata desses métodos exigiria, portanto, parametrizações ou
+adaptações que acrescentariam novos fatores ao experimento principal.
+
+A decisão de mantê-los fora da configuração inicial busca preservar uma
+interface homogênea entre os métodos-base quanto à geração posterior dos
+rankings, reduzindo a necessidade de adaptações específicas para determinados
+seletores. Ao mesmo tempo, esses métodos permanecem como alternativas para
+avaliar, em experimentos complementares, a expansão do conjunto de componentes
+do ensemble.
+
+
+% ----------------------------------------------------------------------------
+\subsection{Composições experimentais do ensemble}
+\label{subsec:ac-efs-composicoes-ensemble}
+% ----------------------------------------------------------------------------
+
+A partir dos métodos selecionados, são definidas três composições experimentais
+para investigar a influência da natureza dos seletores sobre o comportamento
+do \textit{EFS4AC}:
+
+\begin{itemize}
+
+    \item $E_U$: ensemble composto pelos métodos univariados
+    $\{\text{Gini}, \chi^2, \text{SU}, \text{MIM}\}$;
+
+    \item $E_M$: ensemble composto pelos métodos multivariados ou sequenciais
+    $\{\text{MRMR}, \text{JMI}, \text{CIFE}, \text{CMIM},
+    \text{ICAP}, \text{MRI}\}$;
+
+    \item $E_{U+M}$: ensemble heterogêneo completo, formado pela união
+    $E_U \cup E_M$.
+
+\end{itemize}
+
+A configuração $E_{U+M}$ constitui a configuração principal do método, pois
+combina avaliações individuais com critérios capazes de considerar relações
+entre atributos. As configurações $E_U$ e $E_M$ são utilizadas como condições
+experimentais para investigar se a combinação dessas duas perspectivas produz
+comportamento distinto daquele observado quando o ensemble é composto apenas
+por métodos de uma mesma natureza.
+
+Essa comparação também permite analisar se eventuais diferenças observadas
+decorrem da natureza dos seletores empregados ou da complementaridade entre
+perspectivas univariadas e multivariadas. Como $E_U$, $E_M$ e $E_{U+M}$
+possuem números distintos de componentes, o efeito da quantidade de métodos
+deverá ser considerado na interpretação dos resultados experimentais.
+
+Em síntese, a Etapa 1 estabelece quais perspectivas de seleção de atributos
+serão incorporadas ao \textit{EFS4AC}. Sua saída é constituída pelo conjunto
+de métodos-base elegíveis e pelas respectivas composições experimentais. A
+etapa seguinte utiliza esses métodos para produzir uma representação comum na
+forma de rankings completos dos atributos.
+% ============================================================================
+% ============================================================================
+\section{Etapa 2 -- Geração e Padronização dos Rankings}
+\label{sec:ac-efs-etapa2}
+% ============================================================================
+
+A segunda etapa do \textit{EFS4AC} tem como objetivo transformar as saídas dos
+métodos-base definidos na Etapa 1 em uma representação comum. Essa padronização
+é necessária porque os seletores empregados possuem diferentes mecanismos de
+avaliação: enquanto alguns atribuem um escore individual a cada atributo,
+outros constroem a seleção de forma sequencial, considerando os atributos já
+selecionados. No \textit{EFS4AC}, essas diferentes saídas são convertidas em
+\textbf{rankings completos dos atributos}.
+
+A utilização das posições dos rankings, em vez dos valores brutos produzidos
+pelos seletores, evita a comparação direta entre medidas definidas em escalas
+distintas. Dessa forma, independentemente do critério empregado pelo método de
+FS, todos os seletores passam a representar a preferência sobre os atributos
+por meio de posições ordinais, nas quais a posição 1 corresponde ao atributo
+mais preferido.
+
+A Figura~\ref{fig:geracao-rankings-ac-efs} sintetiza esse procedimento,
+distinguindo as duas formas de obtenção dos rankings utilizadas no método.
+
+\begin{figure}[ht]
+    \centering
+
+    \begin{tikzpicture}[
+        every node/.style={
+            font=\small,
+            align=center
+        },
+        metodo/.style={
+            draw,
+            rectangle,
+            text width=3.0cm,
+            minimum height=1.65cm,
+            inner sep=5pt
+        },
+        processo/.style={
+            draw,
+            rectangle,
+            text width=2.8cm,
+            minimum height=1.65cm,
+            inner sep=5pt
+        },
+        ranking/.style={
+            draw,
+            rectangle,
+            text width=2.9cm,
+            minimum height=2.3cm,
+            inner sep=5pt
+        },
+        matriz/.style={
+            draw,
+            rectangle,
+            text width=3.0cm,
+            minimum height=2.3cm,
+            inner sep=5pt
+        },
+        seta/.style={
+            thick,
+            ->,
+            >=stealth
+        }
+    ]
+
+    % ============================================================
+    % COLUNA 1 -- Métodos
+    % ============================================================
+
+    \node[metodo] (uni) {
+        \textbf{Métodos univariados}\\[2mm]
+        Gini, $\chi^2$, SU, MIM
+    };
+
+    \node[metodo, below=0.65cm of uni] (multi) {
+        \textbf{Métodos multivariados}\\[2mm]
+        MRMR, JMI, CIFE,\\
+        CMIM, ICAP, MRI
+    };
+
+
+    % ============================================================
+    % COLUNA 2 -- Transformação
+    % ============================================================
+
+    \node[processo, right=0.70cm of uni] (score) {
+        \textbf{Ordenação}\\[2mm]
+        escores individuais
+    };
+
+    \node[processo, right=0.70cm of multi] (seq) {
+        \textbf{Seleção sequencial}\\[2mm]
+        ordem de entrada
+    };
+
+
+    % ============================================================
+    % COLUNA 3 -- Representação comum
+    % Posicionada explicitamente à direita das duas transformações
+    % ============================================================
+
+    \node[ranking, right=1.25cm of score, yshift=-1.15cm] (rank) {
+        \textbf{Ranking completo}\\[3mm]
+        $R_j$\\[2mm]
+        $r_j(f_i)\in\{1,\ldots,n\}$\\[2mm]
+        $1=$ melhor posição
+    };
+
+
+    % ============================================================
+    % COLUNA 4 -- Saída
+    % ============================================================
+
+    \node[matriz, right=0.75cm of rank] (matriz) {
+        \textbf{Matriz de rankings}\\[3mm]
+        $\mathbf{R}\in\mathbb{R}^{n\times M}$\\[2mm]
+        atributos $\times$ seletores
+    };
+
+
+    % ============================================================
+    % SETAS
+    % ============================================================
+
+    \draw[seta]
+        (uni.east) -- (score.west);
+
+    \draw[seta]
+        (multi.east) -- (seq.west);
+
+    % Univariados -> ranking
+    \draw[seta]
+        (score.east) -- ++(0.45,0)
+        |- ([yshift=0.45cm]rank.west);
+
+    % Multivariados -> ranking
+    \draw[seta]
+        (seq.east) -- ++(0.45,0)
+        |- ([yshift=-0.45cm]rank.west);
+
+    % Ranking -> matriz
+    \draw[seta]
+        (rank.east) -- (matriz.west);
+
+    \end{tikzpicture}
+
+    \caption{Geração e padronização dos rankings na Etapa 2 do
+    \textit{EFS4AC}.}
+    \label{fig:geracao-rankings-ac-efs}
+\end{figure}
+
+Seja $S_j$ um dos $M$ seletores e seja
+$F=\{f_1,f_2,\ldots,f_n\}$ o conjunto de atributos. O ranking produzido pelo
+seletor $S_j$ é representado por
+
+\begin{equation}
+    R_j =
+    \left(
+        r_j(f_1),
+        r_j(f_2),
+        \ldots,
+        r_j(f_n)
+    \right),
+    \label{eq:ranking-individual-ac-efs}
+\end{equation}
+
+em que $r_j(f_i)$ representa a posição atribuída ao atributo $f_i$ pelo
+seletor $S_j$. Em todos os rankings, posições menores representam maior
+preferência, de modo que $r_j(f_i)=1$ identifica o atributo mais bem
+posicionado pelo método.
+
+
+% ----------------------------------------------------------------------------
+\subsection{Rankings provenientes de métodos univariados}
+\label{subsec:ac-efs-univariados}
+% ----------------------------------------------------------------------------
+
+Gini, $\chi^2$, SU e MIM atribuem um escore individual a cada atributo.
+Considerando $s_j(f_i)$ o escore produzido pelo método $S_j$ para o atributo
+$f_i$, o ranking é obtido pela ordenação dos atributos segundo o sentido de
+preferência da respectiva medida.
+
+De forma geral, para critérios em que valores maiores indicam maior relevância,
+
+\begin{equation}
+    r_j(f_i)
+    =
+    1+
+    \sum_{\substack{f_k\in F\\k\neq i}}
+    \mathbb{I}
+    \left[
+        s_j(f_k)>s_j(f_i)
+    \right],
+    \label{eq:ranking-score-ac-efs}
+\end{equation}
+
+em que $\mathbb{I}[\cdot]$ representa a função indicadora. Caso determinado
+critério utilize o sentido inverso de preferência, sua orientação será
+normalizada antes da geração do ranking, mantendo-se a convenção de que a
+primeira posição corresponde sempre ao atributo mais preferido.
+
+Eventuais empates entre os escores serão tratados por uma regra determinística
+de desempate, aplicada igualmente a todos os conjuntos de dados e execuções.
+Essa padronização evita que decisões aleatórias de implementação introduzam
+variação artificial nos rankings produzidos.
+
+
+% ----------------------------------------------------------------------------
+\subsection{Rankings provenientes de métodos multivariados}
+\label{subsec:ac-efs-multivariados}
+% ----------------------------------------------------------------------------
+
+MRMR, JMI, CIFE, CMIM, ICAP e MRI produzem a ordenação por meio de um
+procedimento sequencial. Diferentemente dos métodos univariados, a preferência
+por um atributo pode depender dos atributos selecionados nas iterações
+anteriores.
+
+Inicialmente, considera-se vazio o conjunto de atributos selecionados:
+
+\begin{equation}
+    A_0=\emptyset.
+\end{equation}
+
+Na iteração $t$, seleciona-se, entre os atributos ainda disponíveis, aquele
+que maximiza o critério correspondente ao método $S_j$:
+
+\begin{equation}
+    f_t^{*}
+    =
+    \underset{f\in F\setminus A_{t-1}}
+    {\arg\max}
+    \;
+    J_j(f\mid A_{t-1}),
+    \label{eq:selecao-sequencial-ac-efs}
+\end{equation}
+
+em que $J_j(f\mid A_{t-1})$ representa a função de avaliação do seletor,
+considerando o conjunto de atributos previamente selecionados.
+
+Após a escolha de $f_t^{*}$, atualiza-se o conjunto:
+
+\begin{equation}
+    A_t=A_{t-1}\cup\{f_t^{*}\}.
+    \label{eq:atualizacao-conjunto-ac-efs}
+\end{equation}
+
+A posição atribuída ao atributo selecionado na iteração $t$ é definida por
+
+\begin{equation}
+    r_j(f_t^{*})=t.
+    \label{eq:rank-sequencial-ac-efs}
+\end{equation}
+
+O procedimento é repetido até $t=n$, de modo que todos os atributos sejam
+incluídos. Assim, a ordem de inserção no conjunto $A_t$ determina diretamente
+o ranking completo produzido pelo seletor.
+
+
+% ----------------------------------------------------------------------------
+\subsection{Padronização e saída da Etapa 2}
+\label{subsec:ac-efs-saida-etapa2}
+% ----------------------------------------------------------------------------
+
+Independentemente do mecanismo utilizado para sua geração, todos os rankings
+resultantes seguem a mesma convenção:
+
+\begin{equation}
+    1 \leq r_j(f_i) \leq n,
+\end{equation}
+
+sendo as menores posições associadas aos atributos mais preferidos. Dessa
+forma, as diferenças de escala e de interpretação dos escores originais são
+eliminadas antes das etapas de comparação e agregação.
+
+Após a execução dos $M$ seletores, obtém-se o conjunto
+
+\begin{equation}
+    \mathcal{R}
+    =
+    \{R_1,R_2,\ldots,R_M\}.
+\end{equation}
+
+Os rankings são então organizados em uma matriz de postos
+$\mathbf{R}\in\mathbb{R}^{n\times M}$:
+
+\begin{equation}
+    \mathbf{R}=
+    \begin{bmatrix}
+        r_1(f_1) & r_2(f_1) & \cdots & r_M(f_1) \\
+        r_1(f_2) & r_2(f_2) & \cdots & r_M(f_2) \\
+        \vdots   & \vdots   & \ddots & \vdots   \\
+        r_1(f_n) & r_2(f_n) & \cdots & r_M(f_n)
+    \end{bmatrix}.
+    \label{eq:matriz-ranks-ac-efs}
+\end{equation}
+
+Nessa matriz, cada linha corresponde a um atributo e cada coluna ao ranking
+produzido por um método-base. A matriz $\mathbf{R}$ constitui a saída da
+Etapa 2 e fornece a representação comum utilizada na etapa seguinte para
+analisar a similaridade e a diversidade entre os rankings.
+
+% ============================================================================
+% ============================================================================
+\section{Etapa 3 -- Análise e Controle da Diversidade dos Rankings}
+\label{sec:ac-efs-etapa3}
+% ============================================================================
+
+A terceira etapa do \textit{EFS4AC} tem como objetivo analisar o grau de
+concordância entre os rankings produzidos pelos métodos-base e investigar se
+rankers excessivamente semelhantes devem exercer influência independente na
+agregação. Essa análise é realizada sobre a matriz de rankings $\mathbf{R}$
+obtida na Etapa 2.
+
+A motivação para essa etapa decorre da própria natureza de um ensemble
+heterogêneo. Embora os métodos-base tenham sido selecionados por representarem
+diferentes critérios de avaliação, essa diversidade conceitual não garante que
+eles produzam rankings empiricamente distintos para um determinado conjunto de
+dados. Dois seletores fundamentados em critérios diferentes podem resultar em
+ordenações muito semelhantes e, nesse caso, sua participação simultânea na
+agregação pode aumentar implicitamente a influência de uma mesma preferência.
+
+Por outro lado, baixa concordância entre dois rankings não implica,
+necessariamente, que um deles deva ser descartado. Um ranker divergente pode
+capturar relações não identificadas pelos demais seletores. Dessa forma, o
+\textit{EFS4AC} não assume que maior diversidade seja sempre desejável, mas
+trata a similaridade entre rankings como uma propriedade a ser mensurada e
+controlada experimentalmente.
+
+A Figura~\ref{fig:diversidade-rankings-ac-efs} apresenta o fluxo geral da
+Etapa 3.
+
+\begin{figure}[ht]
+    \centering
+
+    \begin{tikzpicture}[
+        every node/.style={
+            font=\small,
+            align=center
+        },
+        bloco/.style={
+            draw,
+            rectangle,
+            text width=3.0cm,
+            minimum height=1.65cm,
+            inner sep=5pt
+        },
+        seta/.style={
+            thick,
+            ->,
+            >=stealth
+        }
+    ]
+
+    \node[bloco] (entrada) {
+        \textbf{Entrada}\\[1mm]
+        matriz de rankings\\
+        $\mathbf{R}\in\mathbb{R}^{n\times M}$
+    };
+
+    \node[bloco, right=0.65cm of entrada] (similaridade) {
+        \textbf{Similaridade}\\[1mm]
+        correlação de\\
+        Spearman $\rho_{ij}$
+    };
+
+    \node[bloco, right=0.65cm of similaridade] (matriz) {
+        \textbf{Diagnóstico}\\[1mm]
+        matriz de similaridade\\
+        $\mathbf{S}$
+    };
+
+    \node[bloco, right=0.65cm of matriz] (controle) {
+        \textbf{Controle}\\[1mm]
+        manutenção, limiar\\
+        ou agrupamento
+    };
+
+    \draw[seta] (entrada) -- (similaridade);
+    \draw[seta] (similaridade) -- (matriz);
+    \draw[seta] (matriz) -- (controle);
+
+    \end{tikzpicture}
+
+    \caption{Análise e controle da diversidade entre os rankings na
+    Etapa 3 do \textit{EFS4AC}.}
+    \label{fig:diversidade-rankings-ac-efs}
+\end{figure}
+
+
+% ----------------------------------------------------------------------------
+\subsection{Medição da similaridade entre rankings}
+\label{subsec:ac-efs-similaridade}
+% ----------------------------------------------------------------------------
+
+Sejam $R_i$ e $R_j$ dois rankings completos produzidos pelos seletores
+$S_i$ e $S_j$. A concordância entre suas ordenações é estimada por meio do
+coeficiente de correlação de postos de Spearman:
+
+\begin{equation}
+    \rho_{ij}
+    =
+    \rho(R_i,R_j),
+    \qquad
+    -1\leq\rho_{ij}\leq1.
+    \label{eq:spearman-ac-efs}
+\end{equation}
+
+Valores de $\rho_{ij}$ próximos de 1 indicam que os dois seletores atribuem
+posições semelhantes aos atributos. Valores próximos de zero indicam baixa
+associação monotônica entre as ordenações, enquanto valores próximos de $-1$
+representam preferências aproximadamente inversas.
+
+A utilização da correlação de postos é compatível com a representação adotada
+pelo \textit{EFS4AC}, pois a comparação é realizada diretamente sobre as
+posições dos atributos, sem depender das escalas originais dos escores
+produzidos pelos métodos-base.
+
+As similaridades calculadas para todos os pares de seletores são organizadas
+em uma matriz simétrica
+
+\begin{equation}
+    \mathbf{S}
+    =
+    \begin{bmatrix}
+        1          & \rho_{12} & \cdots & \rho_{1M} \\
+        \rho_{21}  & 1         & \cdots & \rho_{2M} \\
+        \vdots     & \vdots    & \ddots & \vdots    \\
+        \rho_{M1}  & \rho_{M2} & \cdots & 1
+    \end{bmatrix},
+    \label{eq:matriz-similaridade-ac-efs}
+\end{equation}
+
+em que cada elemento $S_{ij}=\rho_{ij}$ representa a concordância entre os
+rankings produzidos por $S_i$ e $S_j$.
+
+A matriz $\mathbf{S}$ fornece um diagnóstico da estrutura de concordância do
+ensemble. Em particular, blocos de valores elevados indicam grupos de
+seletores que tendem a produzir ordenações semelhantes e que, portanto, podem
+introduzir redundância na etapa de agregação.
+
+
+% ----------------------------------------------------------------------------
+\subsection{Representação da dissimilaridade entre rankers}
+\label{subsec:ac-efs-distancia}
+% ----------------------------------------------------------------------------
+
+Para estratégias que requerem uma representação de dissimilaridade, a
+correlação é transformada em
+
+\begin{equation}
+    d_{ij}
+    =
+    1-\rho_{ij}.
+    \label{eq:distancia-ac-efs}
+\end{equation}
+
+Nessa definição, rankings idênticos apresentam $d_{ij}=0$, enquanto a
+dissimilaridade aumenta à medida que diminui sua concordância.
+
+Optou-se por preservar o sinal da correlação, em vez de utilizar
+$|\rho_{ij}|$. Essa decisão é importante porque rankings fortemente
+anticorrelacionados não são considerados redundantes no \textit{EFS4AC}:
+embora apresentem forte associação, eles representam preferências opostas sobre
+os atributos. A redundância de interesse nesta etapa corresponde,
+principalmente, à repetição de ordenações semelhantes.
+
+
+% ----------------------------------------------------------------------------
+\subsection{Estratégias de controle da redundância}
+\label{subsec:ac-efs-estrategias-diversidade}
+% ----------------------------------------------------------------------------
+
+A influência do controle de diversidade será analisada por meio de três
+configurações. A primeira mantém todos os rankings e funciona como referência
+para verificar se a intervenção sobre a composição do ensemble é efetivamente
+necessária. As demais utilizam a matriz de similaridade para reduzir a
+influência de rankers redundantes.
+
+\begin{enumerate}
+
+    \item \textbf{Sem controle de redundância ($D_0$).}
+    Todos os rankings produzidos na Etapa 2 são preservados:
+
+    \begin{equation}
+        \mathcal{R}_{D_0}=\mathcal{R}.
+    \end{equation}
+
+    Essa configuração constitui o cenário de referência e permite avaliar se
+    os mecanismos de controle introduzidos nesta etapa proporcionam benefícios
+    nas etapas posteriores.
+
+    \item \textbf{Controle por limiar de similaridade ($D_L$).}
+    Pares de rankings cuja concordância ultrapasse um limiar $\tau$ são
+    identificados como potencialmente redundantes:
+
+    \begin{equation}
+        \rho_{ij}\geq\tau.
+        \label{eq:limiar-similaridade-ac-efs}
+    \end{equation}
+
+    Nesses casos, evita-se que ambos contribuam de maneira independente para
+    representar essencialmente a mesma ordenação. O valor de $\tau$ não será
+    definido a partir dos resultados finais de classificação, devendo ser
+    estabelecido previamente ou determinado exclusivamente nos dados de
+    treinamento.
+
+    \item \textbf{Controle por agrupamento de rankers ($D_C$).}
+    A matriz de dissimilaridade $\mathbf{D}=[d_{ij}]$ é utilizada para
+    identificar grupos de rankings semelhantes. Seja
+
+    \begin{equation}
+        \mathcal{C}
+        =
+        \{C_1,C_2,\ldots,C_K\}
+    \end{equation}
+
+    uma partição dos $M$ rankers em $K$ grupos. Cada grupo reúne métodos cujas
+    ordenações apresentam maior concordância entre si. A contribuição dos
+    grupos para a agregação é então controlada de modo a evitar que um conjunto
+    numeroso de rankers muito semelhantes exerça influência desproporcional
+    sobre o consenso.
+
+\end{enumerate}
+
+A comparação entre $D_0$, $D_L$ e $D_C$ permite avaliar empiricamente se o
+controle explícito da redundância entre rankings contribui para o
+\textit{EFS4AC}. Essa análise também evita assumir, \textit{a priori}, que a
+remoção ou o agrupamento de rankings semelhantes necessariamente melhora o
+ensemble.
+
+
+% ----------------------------------------------------------------------------
+\subsection{Saída da Etapa 3}
+\label{subsec:ac-efs-saida-etapa3}
+% ----------------------------------------------------------------------------
+
+A saída da Etapa 3 depende da estratégia de controle considerada. No cenário
+sem controle, a matriz original de rankings é preservada. Nas configurações
+com controle de redundância, obtém-se uma estrutura refinada que identifica
+quais rankings ou grupos de rankings participarão da etapa de agregação.
+
+De forma geral, essa saída pode ser representada por
+
+\begin{equation}
+    \mathcal{R}^{*}
+    =
+    \{R^{*}_1,R^{*}_2,\ldots,R^{*}_{M'}\},
+    \qquad
+    M'\leq M,
+    \label{eq:rankings-refinados-ac-efs}
+\end{equation}
+
+quando houver seleção de representantes, ou pela estrutura de grupos
+$\mathcal{C}$ quando a informação de agrupamento for preservada para a
+agregação.
+
+Além dos rankings refinados, a matriz de similaridade $\mathbf{S}$ constitui
+uma saída analítica da etapa, pois permite caracterizar o grau de concordância
+existente entre os diferentes métodos-base.
+
+Assim, a Etapa 3 atua como uma camada intermediária entre a geração dos
+rankings e sua agregação. Seu objetivo não é maximizar a diversidade de forma
+indiscriminada, mas identificar e controlar situações em que múltiplos
+seletores representam essencialmente a mesma preferência, preservando, sempre
+que possível, perspectivas complementares para a construção do ranking
+consensual.
+% ============================================================================
+% ============================================================================
+\section{Etapa 4 -- Agregação dos Rankings}
+\label{sec:ac-efs-etapa4}
+% ============================================================================
+
+A quarta etapa do \textit{EFS4AC} tem como objetivo integrar os rankings
+provenientes das etapas anteriores em uma única ordenação consensual dos
+atributos. Enquanto a Etapa 3 analisa e, quando necessário, controla a
+redundância entre os rankers, a presente etapa determina como as preferências
+individuais serão combinadas para produzir uma decisão coletiva.
+
+Seja
+
+\begin{equation}
+    \mathcal{R}^{*}
+    =
+    \{R^{*}_1,R^{*}_2,\ldots,R^{*}_{M'}\}
+\end{equation}
+
+o conjunto de rankings disponibilizado pela Etapa 3, em que $M'$ representa o
+número de rankings efetivamente considerados na agregação. No caso em que
+nenhum ranker tenha sido removido, tem-se $M'=M$.
+
+Para cada atributo $f_i$, as posições
+
+\begin{equation}
+    \mathbf{r}(f_i)
+    =
+    \left(
+        r_1(f_i),
+        r_2(f_i),
+        \ldots,
+        r_{M'}(f_i)
+    \right)
+\end{equation}
+
+representam as preferências atribuídas pelos diferentes seletores. A função de
+agregação utiliza essas posições para calcular um escore consensual
+$c(f_i)$:
+
+\begin{equation}
+    c(f_i)
+    =
+    \mathcal{A}
+    \left(
+        r_1(f_i),
+        r_2(f_i),
+        \ldots,
+        r_{M'}(f_i)
+    \right),
+    \label{eq:agregacao-geral-ac-efs}
+\end{equation}
+
+em que $\mathcal{A}$ representa o operador de agregação adotado.
+
+Os atributos são posteriormente ordenados de acordo com $c(f_i)$, produzindo
+o ranking consensual
+
+\begin{equation}
+    R^{*}
+    =
+    \left(
+        f_{(1)},f_{(2)},\ldots,f_{(n)}
+    \right),
+    \label{eq:ranking-consensual-ac-efs}
+\end{equation}
+
+em que $f_{(1)}$ representa o atributo de maior preferência segundo o
+consenso do ensemble.
+
+A Figura~\ref{fig:agregacao-ac-efs} sintetiza o procedimento da Etapa 4.
+
+\begin{figure}[ht]
+    \centering
+
+    \begin{tikzpicture}[
+        every node/.style={
+            font=\small,
+            align=center
+        },
+        bloco/.style={
+            draw,
+            rectangle,
+            text width=3.0cm,
+            minimum height=1.65cm,
+            inner sep=5pt
+        },
+        agregador/.style={
+            draw,
+            rectangle,
+            text width=3.3cm,
+            minimum height=2.0cm,
+            inner sep=5pt
+        },
+        seta/.style={
+            thick,
+            ->,
+            >=stealth
+        }
+    ]
+
+    \node[bloco] (entrada) {
+        \textbf{Rankings de entrada}\\[1mm]
+        $\mathcal{R}^{*}$\\
+        provenientes da Etapa 3
+    };
+
+    \node[agregador, right=0.75cm of entrada] (agregacao) {
+        \textbf{Agregação}\\[1mm]
+        Borda\\
+        RRF\\
+        TOPSIS
+    };
+
+    \node[bloco, right=0.75cm of agregacao] (escores) {
+        \textbf{Consenso}\\[1mm]
+        escores agregados\\
+        $c(f_i)$
+    };
+
+    \node[bloco, right=0.75cm of escores] (saida) {
+        \textbf{Saída}\\[1mm]
+        ranking consensual\\
+        $R^{*}$
+    };
+
+    \draw[seta] (entrada) -- (agregacao);
+    \draw[seta] (agregacao) -- (escores);
+    \draw[seta] (escores) -- (saida);
+
+    \end{tikzpicture}
+
+    \caption{Agregação dos rankings e geração do ranking consensual na
+    Etapa 4 do \textit{EFS4AC}.}
+    \label{fig:agregacao-ac-efs}
+\end{figure}
+
+
+% ----------------------------------------------------------------------------
+\subsection{Agregação por Borda}
+\label{subsec:ac-efs-borda}
+% ----------------------------------------------------------------------------
+
+O método de Borda transforma a posição atribuída a cada atributo em pontos.
+Considerando $n$ atributos, o atributo situado na primeira posição recebe
+$n$ pontos, o segundo recebe $n-1$ e assim sucessivamente. Dessa forma, para
+o atributo $f_i$, define-se
+
+\begin{equation}
+    c_{\mathrm{Borda}}(f_i)
+    =
+    \sum_{j=1}^{M'}
+    \left(
+        n-r_j(f_i)+1
+    \right).
+    \label{eq:borda-ac-efs}
+\end{equation}
+
+Quanto maior $c_{\mathrm{Borda}}(f_i)$, maior a preferência coletiva pelo
+atributo. O ranking consensual é obtido pela ordenação decrescente desses
+escores.
+
+A utilização de Borda é particularmente adequada como estratégia de referência
+por operar diretamente sobre posições e permitir que todos os rankings
+contribuam para a decisão final. Entretanto, por realizar uma transformação
+linear das posições, diferenças entre posições consecutivas exercem a mesma
+variação na pontuação independentemente de ocorrerem no início ou no final do
+ranking.
+
+
+% ----------------------------------------------------------------------------
+\subsection{Agregação por \textit{Reciprocal Rank Fusion}}
+\label{subsec:ac-efs-rrf}
+% ----------------------------------------------------------------------------
+
+Como segunda estratégia, será investigado o \textit{Reciprocal Rank Fusion}
+(RRF). Diferentemente da transformação linear utilizada por Borda, o RRF
+atribui maior influência às primeiras posições dos rankings por meio de uma
+função recíproca.
+
+Para cada atributo $f_i$, define-se
+
+\begin{equation}
+    c_{\mathrm{RRF}}(f_i)
+    =
+    \sum_{j=1}^{M'}
+    \frac{1}{k+r_j(f_i)},
+    \label{eq:rrf-ac-efs}
+\end{equation}
+
+em que $k>0$ é uma constante de suavização. Valores maiores de
+$c_{\mathrm{RRF}}(f_i)$ indicam maior consenso em favor do atributo.
+
+O parâmetro $k$ controla a diferença relativa entre posições sucessivas.
+Valores menores tornam o método mais sensível às primeiras posições, enquanto
+valores maiores suavizam essas diferenças. Por essa razão, o valor utilizado
+no experimento deverá ser previamente especificado e mantido constante entre
+os conjuntos de dados, ou definido exclusivamente a partir dos dados de
+treinamento, evitando sua escolha com base no conjunto de teste.
+
+
+% ----------------------------------------------------------------------------
+\subsection{Agregação por TOPSIS}
+\label{subsec:ac-efs-topsis}
+% ----------------------------------------------------------------------------
+
+A terceira estratégia considera a agregação como um problema de decisão
+multicritério por meio do \textit{Technique for Order Preference by Similarity
+to Ideal Solution} (TOPSIS). Nessa formulação, cada atributo corresponde a uma
+alternativa e cada ranker constitui um critério de decisão.
+
+Como as posições originais seguem a convenção de que valores menores
+representam maior preferência, elas são inicialmente convertidas em valores de
+benefício:
+
+\begin{equation}
+    x_{ij}
+    =
+    n-r_j(f_i)+1,
+    \label{eq:topsis-transformacao-ac-efs}
+\end{equation}
+
+de forma que valores maiores correspondam a melhores posições.
+
+A partir desses valores é construída a matriz de decisão
+
+\begin{equation}
+    \mathbf{X}
+    =
+    \begin{bmatrix}
+        x_{11} & x_{12} & \cdots & x_{1M'} \\
+        x_{21} & x_{22} & \cdots & x_{2M'} \\
+        \vdots & \vdots & \ddots & \vdots \\
+        x_{n1} & x_{n2} & \cdots & x_{nM'}
+    \end{bmatrix}.
+    \label{eq:topsis-matriz-ac-efs}
+\end{equation}
+
+Em seguida, os valores são normalizados:
+
+\begin{equation}
+    z_{ij}
+    =
+    \frac{x_{ij}}
+    {\sqrt{\sum_{i=1}^{n}x_{ij}^{2}}}.
+    \label{eq:topsis-normalizacao-ac-efs}
+\end{equation}
+
+Considerando inicialmente contribuição uniforme dos rankers, atribui-se
+
+\begin{equation}
+    w_j=\frac{1}{M'},
+    \qquad
+    \sum_{j=1}^{M'}w_j=1,
+    \label{eq:topsis-pesos-ac-efs}
+\end{equation}
+
+e obtém-se a matriz ponderada por
+
+\begin{equation}
+    v_{ij}=w_jz_{ij}.
+    \label{eq:topsis-ponderacao-ac-efs}
+\end{equation}
+
+A solução ideal positiva e a solução ideal negativa são definidas,
+respectivamente, por
+
+\begin{equation}
+    v_j^{+}
+    =
+    \max_i v_{ij},
+    \qquad
+    v_j^{-}
+    =
+    \min_i v_{ij}.
+    \label{eq:topsis-ideais-ac-efs}
+\end{equation}
+
+Para cada atributo, calculam-se então suas distâncias em relação às duas
+soluções:
+
+\begin{equation}
+    D_i^{+}
+    =
+    \sqrt{
+        \sum_{j=1}^{M'}
+        \left(v_{ij}-v_j^{+}\right)^2
+    },
+\end{equation}
+
+\begin{equation}
+    D_i^{-}
+    =
+    \sqrt{
+        \sum_{j=1}^{M'}
+        \left(v_{ij}-v_j^{-}\right)^2
+    }.
+\end{equation}
+
+Finalmente, o coeficiente de proximidade do atributo à solução ideal é dado
+por
+
+\begin{equation}
+    c_{\mathrm{TOPSIS}}(f_i)
+    =
+    \frac{D_i^{-}}
+    {D_i^{+}+D_i^{-}}.
+    \label{eq:topsis-score-ac-efs}
+\end{equation}
+
+Quanto maior $c_{\mathrm{TOPSIS}}(f_i)$, mais próximo o atributo se encontra
+da solução ideal e, consequentemente, melhor sua posição no ranking consensual.
+
+
+% ----------------------------------------------------------------------------
+\subsection{Integração com a Etapa 3}
+\label{subsec:ac-efs-agregacao-ponderada}
+% ----------------------------------------------------------------------------
+
+A formulação anterior considera, por padrão, que os rankers possuem a mesma
+influência. Entretanto, quando a estratégia adotada na Etapa 3 produzir pesos
+associados aos rankings ou aos grupos de rankings, esses pesos poderão ser
+incorporados à agregação.
+
+Seja
+
+\begin{equation}
+    \mathbf{w}
+    =
+    (w_1,w_2,\ldots,w_{M'}),
+    \qquad
+    w_j\geq0,
+    \qquad
+    \sum_{j=1}^{M'}w_j=1.
+    \label{eq:pesos-rankers-ac-efs}
+\end{equation}
+
+Nesse caso, a versão ponderada de Borda pode ser expressa por
+
+\begin{equation}
+    c_{\mathrm{Borda}}^{(w)}(f_i)
+    =
+    \sum_{j=1}^{M'}
+    w_j
+    \left(n-r_j(f_i)+1\right),
+    \label{eq:borda-ponderado-ac-efs}
+\end{equation}
+
+enquanto o RRF ponderado é definido por
+
+\begin{equation}
+    c_{\mathrm{RRF}}^{(w)}(f_i)
+    =
+    \sum_{j=1}^{M'}
+    \frac{w_j}{k+r_j(f_i)}.
+    \label{eq:rrf-ponderado-ac-efs}
+\end{equation}
+
+No TOPSIS, os mesmos pesos podem ser incorporados diretamente na matriz
+normalizada ponderada por meio de $v_{ij}=w_jz_{ij}$.
+
+Essa formulação permite que o mecanismo de controle de diversidade da Etapa 3
+seja integrado à agregação sem alterar a estrutura dos agregadores. Quando
+nenhuma ponderação for empregada, utiliza-se $w_j=1/M'$, recuperando-se a
+configuração de influência uniforme.
+
+
+% ----------------------------------------------------------------------------
+\subsection{Comparação entre as estratégias de agregação}
+\label{subsec:ac-efs-comparacao-agregadores}
+% ----------------------------------------------------------------------------
+
+Borda, RRF e TOPSIS representam mecanismos distintos de construção do
+consenso. Borda utiliza uma transformação linear das posições; RRF enfatiza
+não linearmente atributos posicionados nas primeiras colocações; e TOPSIS
+interpreta os rankers como critérios de decisão e avalia cada atributo em
+relação a soluções ideais.
+
+A comparação entre essas estratégias será realizada sob as mesmas entradas e
+o mesmo protocolo experimental. Dessa maneira, diferenças observadas nas
+etapas posteriores poderão ser associadas ao mecanismo de agregação, sem
+alterações simultâneas nos rankings fornecidos ao ensemble.
+
+
+% ----------------------------------------------------------------------------
+\subsection{Saída da Etapa 4}
+\label{subsec:ac-efs-saida-etapa4}
+% ----------------------------------------------------------------------------
+
+Independentemente do agregador utilizado, a Etapa 4 produz dois elementos:
+um escore consensual $c(f_i)$ para cada atributo e o correspondente ranking
+global $R^{*}$.
+
+Formalmente, após calcular os escores para todos os atributos,
+
+\begin{equation}
+    \mathbf{c}
+    =
+    \left(
+        c(f_1),c(f_2),\ldots,c(f_n)
+    \right),
+\end{equation}
+
+os atributos são ordenados do maior para o menor valor de consenso, resultando
+em $R^{*}$.
+
+A Etapa 4, portanto, não determina ainda quais atributos serão efetivamente
+mantidos. Sua função é produzir uma preferência global a partir das evidências
+fornecidas pelos diferentes métodos-base. A transformação desse ranking em um
+subconjunto de atributos é realizada exclusivamente na Etapa 5, preservando a
+separação entre os problemas de \textit{rank aggregation} e de definição do
+ponto de corte.
+
+% ============================================================================
+% ============================================================================
+\section{Etapa 5 -- Definição do Subconjunto Final de Atributos}
+\label{sec:ac-efs-etapa5}
+% ============================================================================
+
+A quinta etapa do \textit{EFS4AC} transforma o ranking consensual produzido na
+Etapa 4 em um subconjunto efetivo de atributos. Embora a agregação determine
+uma ordenação global de preferência, ela não estabelece, por si só, quantos
+atributos devem ser utilizados na indução do classificador associativo. Assim,
+esta etapa responde à seguinte questão metodológica: \textit{em qual posição do
+ranking consensual deve ser realizado o corte?}
+
+Seja
+
+\begin{equation}
+    R^{*}
+    =
+    \left(
+        f_{(1)},f_{(2)},\ldots,f_{(n)}
+    \right)
+\end{equation}
+
+o ranking consensual, em que $f_{(1)}$ representa o atributo mais bem
+posicionado, e seja
+
+\begin{equation}
+    \mathbf{c}^{*}
+    =
+    \left(
+        c_{(1)},c_{(2)},\ldots,c_{(n)}
+    \right)
+\end{equation}
+
+o vetor dos respectivos escores de consenso, ordenados de acordo com
+$R^{*}$.
+
+O subconjunto final é obtido por uma função de corte $\mathcal{K}$:
+
+\begin{equation}
+    F^{*}
+    =
+    \mathcal{K}
+    \left(
+        R^{*},\mathbf{c}^{*}
+    \right),
+    \qquad
+    F^{*}\subseteq F.
+    \label{eq:funcao-corte-ac-efs}
+\end{equation}
+
+A separação entre agregação e corte é deliberada. A Etapa 4 determina
+\textit{quais atributos são preferidos pelo ensemble}, enquanto a Etapa 5
+determina \textit{quantos desses atributos devem ser preservados}. Dessa forma,
+diferentes estratégias de corte podem ser comparadas sobre um mesmo ranking
+consensual sem modificar o mecanismo responsável por sua construção.
+
+A Figura~\ref{fig:corte-ac-efs} apresenta o fluxo da Etapa 5.
+
+\begin{figure}[ht]
+    \centering
+
+    \begin{tikzpicture}[
+        every node/.style={
+            font=\small,
+            align=center
+        },
+        bloco/.style={
+            draw,
+            rectangle,
+            text width=3.0cm,
+            minimum height=1.7cm,
+            inner sep=5pt
+        },
+        corte/.style={
+            draw,
+            rectangle,
+            text width=3.5cm,
+            minimum height=2.1cm,
+            inner sep=5pt
+        },
+        seta/.style={
+            thick,
+            ->,
+            >=stealth
+        }
+    ]
+
+    \node[bloco] (entrada) {
+        \textbf{Entrada}\\[1mm]
+        ranking consensual $R^{*}$\\
+        e escores $c(f_i)$
+    };
+
+    \node[corte, right=0.70cm of entrada] (regra) {
+        \textbf{Regra de corte}\\[1mm]
+        percentual fixo\\
+        ou adaptativo
+    };
+
+    \node[bloco, right=0.70cm of regra] (k) {
+        \textbf{Ponto de corte}\\[1mm]
+        $k^{*}$ atributos
+    };
+
+    \node[bloco, right=0.70cm of k] (saida) {
+        \textbf{Saída}\\[1mm]
+        subconjunto final\\
+        $F^{*}$
+    };
+
+    \draw[seta] (entrada) -- (regra);
+    \draw[seta] (regra) -- (k);
+    \draw[seta] (k) -- (saida);
+
+    \end{tikzpicture}
+
+    \caption{Definição do ponto de corte e obtenção do subconjunto final de
+    atributos na Etapa 5 do \textit{EFS4AC}.}
+    \label{fig:corte-ac-efs}
+\end{figure}
+
+
+% ----------------------------------------------------------------------------
+\subsection{Cortes percentuais fixos}
+\label{subsec:ac-efs-corte-percentual}
+% ----------------------------------------------------------------------------
+
+A primeira estratégia utiliza percentuais predefinidos do ranking consensual.
+Essa configuração fornece uma referência controlada para avaliar o efeito da
+quantidade de atributos sobre o classificador associativo.
+
+Seja $p\in(0,1]$ a proporção de atributos a ser preservada. O número de
+atributos selecionados é definido por
+
+\begin{equation}
+    k_p
+    =
+    \left\lceil
+        p\,n
+    \right\rceil.
+    \label{eq:k-percentual-ac-efs}
+\end{equation}
+
+O subconjunto correspondente é
+
+\begin{equation}
+    F^{*}_{p}
+    =
+    \left\{
+        f_{(1)},f_{(2)},\ldots,f_{(k_p)}
+    \right\}.
+    \label{eq:subset-percentual-ac-efs}
+\end{equation}
+
+Inicialmente, serão considerados os níveis
+
+\begin{equation}
+    p\in\{0{,}25,\;0{,}50,\;0{,}75\},
+\end{equation}
+
+correspondentes, respectivamente, à preservação dos primeiros 25\%, 50\% e
+75\% dos atributos.
+
+Esses cortes não pressupõem que determinado percentual seja universalmente
+adequado. Sua função é fornecer condições experimentais padronizadas que
+permitam observar o comportamento do \textit{EFS4AC} sob diferentes níveis
+de redução dimensional.
+
+
+% ----------------------------------------------------------------------------
+\subsection{Corte adaptativo baseado no consenso}
+\label{subsec:ac-efs-corte-adaptativo}
+% ----------------------------------------------------------------------------
+
+Além dos percentuais fixos, será investigada uma estratégia adaptativa capaz de
+determinar o ponto de corte a partir da própria distribuição dos escores
+produzidos pelo ensemble. A motivação é evitar que a quantidade de atributos
+selecionados dependa exclusivamente de percentuais definidos previamente,
+permitindo que o corte responda à estrutura de consenso observada em cada
+conjunto de dados.
+
+Como Borda, RRF e TOPSIS produzem escores em escalas distintas, os valores de
+consenso são inicialmente transformados para uma escala comum. Seja
+$c_{(i)}$ o escore do atributo situado na posição $i$ do ranking consensual.
+Define-se o escore normalizado
+
+\begin{equation}
+    \tilde{c}_{(i)}
+    =
+    \frac{
+        c_{(i)}-\min_{\ell}c_{(\ell)}
+    }{
+        \max_{\ell}c_{(\ell)}
+        -
+        \min_{\ell}c_{(\ell)}
+    },
+    \label{eq:normalizacao-consenso-ac-efs}
+\end{equation}
+
+de modo que
+
+\begin{equation}
+    0\leq\tilde{c}_{(i)}\leq1.
+\end{equation}
+
+Como os atributos estão ordenados por preferência,
+
+\begin{equation}
+    \tilde{c}_{(1)}
+    \geq
+    \tilde{c}_{(2)}
+    \geq
+    \cdots
+    \geq
+    \tilde{c}_{(n)}.
+\end{equation}
+
+A diferença de consenso entre duas posições consecutivas é definida por
+
+\begin{equation}
+    \Delta_i
+    =
+    \tilde{c}_{(i)}
+    -
+    \tilde{c}_{(i+1)},
+    \qquad
+    i=1,\ldots,n-1.
+    \label{eq:queda-consenso-ac-efs}
+\end{equation}
+
+Uma estratégia inicial de corte adaptativo consiste em identificar a maior
+separação entre posições consecutivas:
+
+\begin{equation}
+    k_{\Delta}
+    =
+    \underset{1\leq i<n}
+    {\arg\max}
+    \;
+    \Delta_i.
+    \label{eq:corte-maior-queda-ac-efs}
+\end{equation}
+
+O subconjunto resultante é então
+
+\begin{equation}
+    F^{*}_{\Delta}
+    =
+    \left\{
+        f_{(1)},f_{(2)},\ldots,f_{(k_{\Delta})}
+    \right\}.
+    \label{eq:subset-adaptativo-ac-efs}
+\end{equation}
+
+Essa regra interpreta uma queda acentuada no consenso como uma possível
+fronteira entre atributos fortemente apoiados pelo ensemble e atributos com
+menor suporte relativo. Entretanto, sua efetividade será avaliada
+experimentalmente, não sendo assumido \textit{a priori} que a maior diferença
+entre escores corresponda necessariamente ao melhor subconjunto para
+classificação.
+
+
+% ----------------------------------------------------------------------------
+\subsection{Estratégias de corte consideradas}
+\label{subsec:ac-efs-estrategias-corte}
+% ----------------------------------------------------------------------------
+
+As estratégias inicialmente consideradas na Etapa 5 podem ser sintetizadas
+conforme a Tabela~\ref{tab:cortes-ac-efs}.
+
+\begin{table}[ht]
+    \centering
+    \small
+    \caption{Estratégias de definição do subconjunto final no
+    \textit{EFS4AC}.}
+    \label{tab:cortes-ac-efs}
+
+    \begin{tabular}{p{2.5cm}p{3.3cm}p{6.5cm}}
+        \hline
+        \textbf{Estratégia}
+        & \textbf{Ponto de corte}
+        & \textbf{Finalidade} \\
+        \hline
+
+        Top-25\%
+        & $k=\lceil0{,}25n\rceil$
+        & Avaliar uma redução mais restritiva do conjunto de atributos. \\
+
+        Top-50\%
+        & $k=\lceil0{,}50n\rceil$
+        & Avaliar uma configuração intermediária de redução. \\
+
+        Top-75\%
+        & $k=\lceil0{,}75n\rceil$
+        & Avaliar uma redução mais conservadora do espaço de atributos. \\
+
+        Adaptativo
+        & $k_{\Delta}=\arg\max_i\Delta_i$
+        & Determinar o corte a partir da distribuição dos escores de consenso. \\
+
+        \hline
+    \end{tabular}
+\end{table}
+
+A comparação dessas configurações permite investigar se um ponto de corte
+determinado pela estrutura do consenso é capaz de produzir subconjuntos
+competitivos em relação aos percentuais fixos. Ao mesmo tempo, os cortes
+percentuais fornecem referências simples e reproduzíveis para avaliar o
+comportamento da estratégia adaptativa.
+
+
+% ----------------------------------------------------------------------------
+\subsection{Saída da Etapa 5}
+\label{subsec:ac-efs-saida-etapa5}
+% ----------------------------------------------------------------------------
+
+Independentemente da estratégia empregada, a saída desta etapa é um ponto de
+corte $k^{*}$ e o correspondente subconjunto
+
+\begin{equation}
+    F^{*}
+    =
+    \left\{
+        f_{(1)},f_{(2)},\ldots,f_{(k^{*})}
+    \right\},
+    \qquad
+    |F^{*}|=k^{*}.
+    \label{eq:subset-final-ac-efs}
+\end{equation}
+
+Além do subconjunto selecionado, serão registrados o valor de $k^{*}$, a
+proporção de atributos preservados e a proporção de redução obtida:
+
+\begin{equation}
+    \operatorname{Redução}(F^{*})
+    =
+    1-\frac{|F^{*}|}{n}.
+    \label{eq:reducao-ac-efs}
+\end{equation}
+
+Essas informações permitem analisar separadamente o desempenho preditivo e o
+grau de redução promovido pelo método.
+
+O conjunto de dados de treinamento é então projetado sobre $F^{*}$:
+
+\begin{equation}
+    D_{\mathrm{tr}}^{*}
+    =
+    \pi_{F^{*}}
+    \left(
+        D_{\mathrm{tr}}
+    \right),
+    \label{eq:projecao-ac-efs}
+\end{equation}
+
+e essa representação reduzida é utilizada na etapa subsequente de indução do
+classificador associativo.
+
+Assim, a Etapa 5 encerra o processo de seleção realizado pelo
+\textit{EFS4AC}: as Etapas 1 e 2 constroem as evidências individuais, a
+Etapa 3 analisa sua complementaridade, a Etapa 4 produz o consenso e a
+Etapa 5 converte esse consenso em uma decisão efetiva sobre quais atributos
+serão preservados.
+% ============================================================================
+% ============================================================================
+\section{Integração do \textit{EFS4AC} com a Classificação Associativa}
+\label{sec:ac-efs-integracao}
+% ============================================================================
+
+Concluídas as cinco etapas do \textit{EFS4AC}, obtém-se o subconjunto final de
+atributos $F^{*}\subseteq F$. A partir desse ponto, o método é integrado ao
+processo de Classificação Associativa (CA) como uma etapa supervisionada de
+seleção de atributos anterior à indução das regras. Dessa forma, o
+\textit{EFS4AC} não modifica diretamente os mecanismos internos do algoritmo
+de CA, tais como geração, ordenação ou poda de regras, mas modifica a
+representação dos dados sobre a qual esses mecanismos serão executados.
+
+Seja $D_{\mathrm{tr}}$ o conjunto de treinamento originalmente descrito pelo
+conjunto de atributos $F$. Após a execução do \textit{EFS4AC}, os dados são
+projetados sobre o subconjunto selecionado:
+
+\begin{equation}
+    D_{\mathrm{tr}}^{*}
+    =
+    \pi_{F^{*}}
+    \left(
+        D_{\mathrm{tr}}
+    \right),
+    \label{eq:projecao-treino-ca-ac-efs}
+\end{equation}
+
+em que $\pi_{F^{*}}(\cdot)$ representa a operação de projeção que preserva
+somente os atributos pertencentes a $F^{*}$, além do atributo de classe.
+
+O classificador associativo é então induzido utilizando $D_{\mathrm{tr}}^{*}$:
+
+\begin{equation}
+    \mathcal{M}_{CA}
+    =
+    \mathcal{L}_{CA}
+    \left(
+        D_{\mathrm{tr}}^{*}
+    \right),
+    \label{eq:inducao-ca-ac-efs}
+\end{equation}
+
+em que $\mathcal{L}_{CA}$ representa o algoritmo de indução do classificador
+associativo e $\mathcal{M}_{CA}$ o modelo resultante.
+
+Consequentemente, as regras de associação de classe são extraídas a partir de
+uma representação reduzida dos dados. O conjunto $F^{*}$ determina, portanto,
+quais atributos poderão participar dos antecedentes das regras induzidas,
+enquanto o atributo de classe permanece disponível como consequente durante
+o processo de mineração.
+
+A Figura~\ref{fig:posicionamento-ac-efs-ca} apresenta o posicionamento do
+\textit{EFS4AC} no fluxo de indução da Classificação Associativa.
+
+\begin{figure}[ht]
+    \centering
+
+    \begin{tikzpicture}[
+        every node/.style={
+            font=\small,
+            align=center
+        },
+        bloco/.style={
+            draw,
+            rectangle,
+            text width=2.25cm,
+            minimum height=1.45cm,
+            inner sep=4pt
+        },
+        destaque/.style={
+            draw,
+            rectangle,
+            very thick,
+            text width=2.25cm,
+            minimum height=1.45cm,
+            inner sep=4pt
+        },
+        seta/.style={
+            thick,
+            ->,
+            >=stealth
+        }
+    ]
+
+    \node[bloco] (dados) {
+        \textbf{Dados de}\\
+        treinamento
+    };
+
+    \node[bloco, right=0.45cm of dados] (pre) {
+        \textbf{Pré-processamento}\\
+        e discretização
+    };
+
+    \node[destaque, right=0.45cm of pre] (efs) {
+        \textbf{\textit{EFS4AC}}\\
+        seleção consensual\\
+        $F^{*}$
+    };
+
+    \node[bloco, right=0.45cm of efs] (regras) {
+        \textbf{Indução}\\
+        das regras\\
+        associativas
+    };
+
+    \node[bloco, right=0.45cm of regras] (modelo) {
+        \textbf{Classificador}\\
+        ordenação, poda\\
+        e predição
+    };
+
+    \draw[seta] (dados) -- (pre);
+    \draw[seta] (pre) -- (efs);
+    \draw[seta] (efs) -- (regras);
+    \draw[seta] (regras) -- (modelo);
+
+    \end{tikzpicture}
+
+    \caption{Posicionamento do \textit{EFS4AC} no fluxo de indução da
+    Classificação Associativa.}
+    \label{fig:posicionamento-ac-efs-ca}
+\end{figure}
+
+Essa integração permite investigar se a seleção consensual de atributos altera
+não apenas o desempenho preditivo, mas também propriedades estruturais do
+classificador associativo. Em particular, a redução do conjunto de atributos
+pode produzir três efeitos principais: (i) redução do espaço de busca
+disponível para a geração de regras; (ii) alteração da quantidade e da
+complexidade das regras induzidas; e (iii) alteração do desempenho preditivo
+do classificador.
+
+Esses efeitos não são assumidos como consequências necessariamente positivas
+do método. A remoção de atributos irrelevantes ou redundantes pode favorecer
+a construção do modelo, enquanto a exclusão de atributos informativos pode
+prejudicar sua capacidade discriminativa. Por esse motivo, os efeitos do
+\textit{EFS4AC} serão avaliados experimentalmente considerando conjuntamente
+o desempenho preditivo, o grau de redução de atributos e a complexidade do
+modelo associativo resultante.
+
+
+% ----------------------------------------------------------------------------
+\subsection{Cuidados com vazamento de informação}
+\label{subsec:ac-efs-vazamento}
+% ----------------------------------------------------------------------------
+
+Como os métodos-base utilizados pelo \textit{EFS4AC} empregam informação da
+classe para estimar a relevância dos atributos, todo o processo de seleção deve
+ser realizado exclusivamente a partir dos dados disponíveis para treinamento.
+Nenhuma informação proveniente das instâncias destinadas à avaliação final
+pode participar da construção dos rankings, da definição da composição do
+ensemble ou da escolha do subconjunto $F^{*}$.
+
+Assim, todas as operações dependentes dos dados devem ser ajustadas utilizando
+exclusivamente $D_{\mathrm{tr}}$. Isso inclui o pré-processamento e a
+discretização quando seus parâmetros forem estimados a partir dos dados, a
+execução dos métodos-base, a geração dos rankings, a análise da diversidade,
+a agregação e a determinação do ponto de corte.
+
+Seja $D_{\mathrm{te}}$ o conjunto reservado para avaliação. Após a obtenção de
+$F^{*}$ exclusivamente a partir de $D_{\mathrm{tr}}$, o mesmo subconjunto é
+utilizado para projetar os dados de teste:
+
+\begin{equation}
+    D_{\mathrm{te}}^{*}
+    =
+    \pi_{F^{*}}
+    \left(
+        D_{\mathrm{te}}
+    \right).
+    \label{eq:projecao-teste-ca-ac-efs}
+\end{equation}
+
+Dessa maneira, o conjunto de teste não participa da decisão sobre quais
+atributos serão selecionados. Sua função restringe-se à avaliação do modelo
+induzido a partir dos dados de treinamento.
+
+
+% ----------------------------------------------------------------------------
+\subsection{Execução em procedimentos de validação cruzada}
+\label{subsec:ac-efs-validacao-cruzada}
+% ----------------------------------------------------------------------------
+
+Em procedimentos de validação cruzada, essa separação deve ser preservada em
+cada partição. Para um procedimento com $K$ \textit{folds}, seja
+$D_{\mathrm{tr}}^{(q)}$ o conjunto de treinamento e
+$D_{\mathrm{va}}^{(q)}$ o conjunto de validação correspondente ao
+\textit{fold} $q$.
+
+Para cada $q=1,\ldots,K$, o \textit{EFS4AC} deve ser executado novamente sobre
+$D_{\mathrm{tr}}^{(q)}$:
+
+\begin{equation}
+    F_{q}^{*}
+    =
+    \operatorname{EFS4AC}
+    \left(
+        D_{\mathrm{tr}}^{(q)}
+    \right).
+    \label{eq:efs-fold-ac-efs}
+\end{equation}
+
+Em seguida, treinamento e validação são projetados utilizando exclusivamente
+o subconjunto obtido naquele \textit{fold}:
+
+\begin{equation}
+    D_{\mathrm{tr}}^{*(q)}
+    =
+    \pi_{F_q^{*}}
+    \left(
+        D_{\mathrm{tr}}^{(q)}
+    \right),
+\end{equation}
+
+\begin{equation}
+    D_{\mathrm{va}}^{*(q)}
+    =
+    \pi_{F_q^{*}}
+    \left(
+        D_{\mathrm{va}}^{(q)}
+    \right).
+\end{equation}
+
+O classificador associativo é então induzido em
+$D_{\mathrm{tr}}^{*(q)}$ e avaliado em $D_{\mathrm{va}}^{*(q)}$.
+
+Esse procedimento implica que diferentes \textit{folds} podem produzir
+diferentes rankings consensuais e diferentes subconjuntos $F_q^{*}$. Tal
+variação não constitui uma inconsistência do protocolo, mas uma consequência
+natural de estimar a seleção de atributos exclusivamente a partir dos dados
+disponíveis em cada conjunto de treinamento.
+
+A execução integral do \textit{EFS4AC} dentro de cada partição garante que a
+estimativa de desempenho do classificador associativo reflita todo o processo
+de seleção e indução, evitando que informações das instâncias de validação ou
+teste influenciem antecipadamente a escolha dos atributos.
+% ============================================================================
+% ============================================================================
+\section{Procedimento Geral do Método}
+\label{sec:ac-efs-procedimento}
+% ============================================================================
+
+As etapas anteriormente descritas constituem um fluxo sequencial no qual a
+saída de cada etapa fornece as informações necessárias para a etapa seguinte.
+De forma geral, o \textit{EFS4AC} recebe um conjunto de treinamento
+$D_{\mathrm{tr}}$ e uma configuração experimental definida pelos métodos-base,
+pela estratégia de controle da diversidade, pelo operador de agregação e pela
+regra de corte. Como resultado, produz um ranking consensual dos atributos e
+um subconjunto final $F^{*}$.
+
+O procedimento completo pode ser sintetizado da seguinte forma:
+
+\begin{enumerate}
+
+    \item definir o conjunto de métodos-base
+    $\mathcal{S}=\{S_1,S_2,\ldots,S_M\}$ que compõe o ensemble, de acordo com
+    os critérios estabelecidos na Etapa 1;
+
+    \item aplicar cada seletor $S_j\in\mathcal{S}$ exclusivamente ao conjunto
+    de treinamento $D_{\mathrm{tr}}$;
+
+    \item converter as saídas dos seletores em rankings completos
+    $R_j$ e organizá-los no conjunto
+    $\mathcal{R}=\{R_1,R_2,\ldots,R_M\}$ e na matriz de rankings
+    $\mathbf{R}$;
+
+    \item calcular a similaridade entre os rankings, construir a matriz
+    $\mathbf{S}$ e aplicar a estratégia de controle da redundância definida
+    para a Etapa 3;
+
+    \item obter, conforme a configuração adotada, o conjunto de rankings
+    disponibilizado para agregação $\mathcal{R}^{*}$ e, quando aplicável,
+    informações adicionais de agrupamento ou ponderação;
+
+    \item aplicar o operador de agregação $\mathcal{A}$ aos rankings de
+    $\mathcal{R}^{*}$, produzindo os escores de consenso
+    $\mathbf{c}$ e o ranking consensual $R^{*}$;
+
+    \item aplicar a função de corte $\mathcal{K}$ sobre o ranking consensual e
+    seus respectivos escores, determinando o ponto de corte $k^{*}$ e o
+    subconjunto final de atributos $F^{*}$;
+
+    \item projetar o conjunto de treinamento sobre os atributos selecionados,
+    obtendo $D_{\mathrm{tr}}^{*}=\pi_{F^{*}}(D_{\mathrm{tr}})$;
+
+    \item induzir o classificador associativo utilizando
+    $D_{\mathrm{tr}}^{*}$;
+
+    \item registrar as saídas finais e os diagnósticos intermediários
+    necessários à análise experimental, incluindo os rankings individuais,
+    a matriz de similaridade, o ranking consensual, os escores de consenso,
+    o ponto de corte e o subconjunto final selecionado.
+
+\end{enumerate}
+
+As cinco primeiras transformações metodológicas do \textit{EFS4AC} podem ser
+expressas, de forma compacta, pela composição
+
+\begin{equation}
+    D_{\mathrm{tr}}
+    \xrightarrow{\mathcal{S}}
+    \mathbf{R}
+    \xrightarrow{\mathcal{D}}
+    \mathcal{R}^{*}
+    \xrightarrow{\mathcal{A}}
+    \left(R^{*},\mathbf{c}\right)
+    \xrightarrow{\mathcal{K}}
+    F^{*},
+    \label{eq:fluxo-geral-ac-efs}
+\end{equation}
+
+em que $\mathcal{S}$ representa a aplicação dos métodos-base,
+$\mathcal{D}$ o mecanismo de análise e controle da diversidade,
+$\mathcal{A}$ o operador de agregação e $\mathcal{K}$ a regra responsável
+pela definição do subconjunto final.
+
+A Tabela~\ref{tab:entradas-saidas-ac-efs} sintetiza as entradas, operações e
+saídas correspondentes às cinco etapas centrais do método.
+
+\begin{table}[ht]
+    \centering
+    \small
+    \caption{Síntese das etapas do método \textit{EFS4AC}.}
+    \label{tab:entradas-saidas-ac-efs}
+    \renewcommand{\arraystretch}{1.20}
+    \setlength{\tabcolsep}{4pt}
+
+    \begin{tabular}{
+        p{0.7cm}
+        p{3.0cm}
+        p{3.0cm}
+        p{3.3cm}
+        p{3.2cm}
+    }
+        \hline
+        \textbf{Et.}
+        & \textbf{Objetivo}
+        & \textbf{Entrada}
+        & \textbf{Operação principal}
+        & \textbf{Saída} \\
+        \hline
+
+        1
+        & Definir os métodos-base
+        & Métodos candidatos e critérios de inclusão
+        & Composição do ensemble
+        & Conjunto de seletores $\mathcal{S}$ \\
+
+        2
+        & Padronizar as saídas
+        & $D_{\mathrm{tr}}$ e $\mathcal{S}$
+        & Geração de rankings completos
+        & $\mathcal{R}$ e matriz $\mathbf{R}$ \\
+
+        3
+        & Analisar e controlar redundância
+        & Matriz $\mathbf{R}$
+        & Similaridade e controle de diversidade
+        & $\mathbf{S}$, $\mathcal{R}^{*}$ e estrutura de controle \\
+
+        4
+        & Construir o consenso
+        & $\mathcal{R}^{*}$ e configuração de agregação
+        & Borda, RRF ou TOPSIS
+        & $R^{*}$ e escores $\mathbf{c}$ \\
+
+        5
+        & Definir o subconjunto final
+        & $R^{*}$ e $\mathbf{c}$
+        & Aplicação da regra de corte
+        & $k^{*}$ e subconjunto $F^{*}$ \\
+
+        \hline
+    \end{tabular}
+\end{table}
+
+Ao término dessas cinco etapas, o \textit{EFS4AC} fornece uma decisão
+estruturada sobre a relevância e a seleção dos atributos. O ranking
+$R^{*}$ preserva a ordenação consensual produzida pelo ensemble, enquanto
+$F^{*}$ materializa essa decisão na forma de um subconjunto de atributos.
+
+A projeção dos dados e a posterior indução do classificador associativo não
+constituem novas etapas internas do \textit{EFS4AC}, mas correspondem à sua
+integração com o processo de Classificação Associativa, conforme apresentado
+na Seção~\ref{sec:ac-efs-integracao}.
+
+% ============================================================================
+% ============================================================================
+\section{Configurações Metodológicas a Serem Investigadas}
+\label{sec:ac-efs-configuracoes}
+% ============================================================================
+
+A arquitetura do \textit{EFS4AC} foi definida de forma modular para permitir
+que decisões correspondentes a diferentes etapas do método sejam analisadas
+separadamente. Dessa forma, além de avaliar o desempenho final do método,
+pretende-se investigar como a composição do ensemble, o controle da
+redundância, o mecanismo de agregação e a regra de corte influenciam os
+subconjuntos produzidos e, posteriormente, o comportamento do classificador
+associativo.
+
+As configurações experimentais serão organizadas em quatro fatores principais:
+(i) composição do ensemble; (ii) estratégia de controle da diversidade;
+(iii) operador de agregação; e (iv) regra de definição do subconjunto final.
+Além desses fatores, serão consideradas configurações de referência externas
+ao ensemble para fins de comparação.
+
+
+% ----------------------------------------------------------------------------
+\subsection{Composição do ensemble}
+\label{subsec:ac-efs-config-composicao}
+% ----------------------------------------------------------------------------
+
+O primeiro fator investiga a influência da natureza dos métodos-base sobre o
+consenso produzido pelo \textit{EFS4AC}. Serão consideradas inicialmente três
+composições:
+
+\begin{equation}
+    E_U
+    =
+    \{
+        \mathrm{Gini},
+        \chi^2,
+        \mathrm{SU},
+        \mathrm{MIM}
+    \},
+\end{equation}
+
+\begin{equation}
+    E_M
+    =
+    \{
+        \mathrm{MRMR},
+        \mathrm{JMI},
+        \mathrm{CIFE},
+        \mathrm{CMIM},
+        \mathrm{ICAP},
+        \mathrm{MRI}
+    \},
+\end{equation}
+
+e
+
+\begin{equation}
+    E_{U+M}
+    =
+    E_U\cup E_M.
+\end{equation}
+
+A configuração $E_U$ reúne métodos univariados, enquanto $E_M$ reúne métodos
+multivariados/sequenciais. A configuração $E_{U+M}$ combina as duas famílias
+e representa o cenário de maior heterogeneidade metodológica entre os
+seletores inicialmente considerados.
+
+A comparação dessas configurações permitirá analisar se ensembles constituídos
+por métodos de uma mesma família e ensembles heterogêneos apresentam
+comportamentos distintos quanto aos rankings consensuais e aos subconjuntos
+selecionados.
+
+Entretanto, essa comparação deve ser interpretada considerando que as
+configurações possuem números diferentes de componentes: $E_U$, $E_M$ e
+$E_{U+M}$ contêm, respectivamente, 4, 6 e 10 seletores. Assim, eventuais
+diferenças observadas não podem ser atribuídas exclusivamente à
+heterogeneidade, uma vez que a quantidade de métodos-base também varia entre
+as configurações.
+
+
+% ----------------------------------------------------------------------------
+\subsection{Estratégia de controle da diversidade}
+\label{subsec:ac-efs-config-diversidade}
+% ----------------------------------------------------------------------------
+
+O segundo fator corresponde ao tratamento da similaridade entre os rankings
+produzidos pelos métodos-base. Conforme definido na Etapa 3, serão investigadas
+as seguintes configurações:
+
+\begin{itemize}
+
+    \item \textbf{$D_0$ -- sem controle:}
+    todos os rankings produzidos pelos métodos-base são disponibilizados
+    diretamente para a agregação;
+
+    \item \textbf{$D_L$ -- controle por limiar:}
+    a matriz de similaridade é utilizada para identificar rankings com
+    concordância elevada e controlar sua influência no ensemble;
+
+    \item \textbf{$D_C$ -- controle por agrupamento:}
+    os rankers são organizados segundo sua similaridade, permitindo controlar
+    a influência de grupos formados por rankings altamente concordantes.
+
+\end{itemize}
+
+A configuração $D_0$ funciona como referência interna para as estratégias
+$D_L$ e $D_C$, permitindo verificar se o controle explícito da redundância
+entre rankings modifica de maneira relevante o consenso produzido pelo
+ensemble.
+
+Quando uma estratégia da Etapa 3 resultar em pesos associados aos rankers ou
+aos grupos identificados, esses valores serão encaminhados à Etapa 4 e
+incorporados pelos respectivos operadores de agregação.
+
+
+% ----------------------------------------------------------------------------
+\subsection{Operador de agregação}
+\label{subsec:ac-efs-config-agregacao}
+% ----------------------------------------------------------------------------
+
+O terceiro fator corresponde ao mecanismo utilizado para transformar os
+rankings individuais em um ranking consensual. Serão comparados três
+operadores:
+
+\begin{itemize}
+
+    \item \textbf{Borda}, baseado na soma das pontuações derivadas das posições
+    dos atributos;
+
+    \item \textbf{\textit{Reciprocal Rank Fusion} (RRF)}, que atribui maior
+    influência relativa às primeiras posições dos rankings;
+
+    \item \textbf{TOPSIS}, que formula a agregação como um problema de decisão
+    multicritério e ordena os atributos de acordo com sua proximidade à
+    solução ideal.
+
+\end{itemize}
+
+Os três operadores receberão, para cada configuração experimental, as mesmas
+informações provenientes da Etapa 3. Dessa forma, busca-se analisar o efeito
+do mecanismo de agregação sem modificar simultaneamente a composição dos
+rankings fornecidos como entrada.
+
+
+% ----------------------------------------------------------------------------
+\subsection{Regra de definição do subconjunto}
+\label{subsec:ac-efs-config-corte}
+% ----------------------------------------------------------------------------
+
+O quarto fator corresponde à transformação do ranking consensual em um
+subconjunto efetivo de atributos. Serão consideradas quatro configurações:
+
+\begin{equation}
+    \mathcal{K}
+    \in
+    \{
+        K_{25},
+        K_{50},
+        K_{75},
+        K_{\Delta}
+    \},
+\end{equation}
+
+em que $K_{25}$, $K_{50}$ e $K_{75}$ correspondem, respectivamente, aos
+cortes Top-25\%, Top-50\% e Top-75\%, enquanto $K_{\Delta}$ representa a
+estratégia adaptativa baseada na maior queda entre escores consecutivos de
+consenso, conforme definida na Etapa 5.
+
+Os cortes percentuais fornecem níveis padronizados de redução, enquanto
+$K_{\Delta}$ permite investigar se a própria estrutura do consenso pode ser
+utilizada para determinar automaticamente a quantidade de atributos
+selecionados.
+
+
+% ----------------------------------------------------------------------------
+\subsection{Configurações de referência}
+\label{subsec:ac-efs-config-referencia}
+% ----------------------------------------------------------------------------
+
+Além das configurações internas do \textit{EFS4AC}, serão considerados
+cenários de referência para contextualizar seus resultados. O primeiro
+corresponde à indução do classificador associativo utilizando o conjunto
+completo de atributos, isto é, sem aplicação de seleção de atributos.
+
+O segundo grupo de referências corresponde à utilização individual dos
+métodos-base de FS. Nesse cenário, os seletores são avaliados separadamente,
+sem agregação de rankings, permitindo comparar os subconjuntos obtidos pelo
+ensemble com aqueles produzidos pelos seus componentes individuais.
+
+Essas referências permitem distinguir os efeitos associados à redução
+dimensional daqueles decorrentes especificamente da construção de um consenso
+entre diferentes métodos de seleção.
+
+
+% ----------------------------------------------------------------------------
+\subsection{Síntese das configurações}
+\label{subsec:ac-efs-config-sintese}
+% ----------------------------------------------------------------------------
+
+A Tabela~\ref{tab:configuracoes-ac-efs} sintetiza os fatores metodológicos
+previstos para a investigação experimental.
+
+\begin{table}[ht]
+    \centering
+    \small
+    \caption{Fatores e configurações metodológicas previstas para o
+    \textit{EFS4AC}.}
+    \label{tab:configuracoes-ac-efs}
+    \renewcommand{\arraystretch}{1.20}
+
+    \begin{tabular}{p{3.3cm}p{4.8cm}p{5.3cm}}
+        \hline
+        \textbf{Fator}
+        & \textbf{Configurações}
+        & \textbf{Questão investigada} \\
+        \hline
+
+        Composição do ensemble
+        & $E_U$, $E_M$, $E_{U+M}$
+        & Qual o efeito da composição dos métodos-base sobre o consenso? \\
+
+        Controle da diversidade
+        & $D_0$, $D_L$, $D_C$
+        & O controle de rankings redundantes modifica o resultado do ensemble? \\
+
+        Agregação
+        & Borda, RRF, TOPSIS
+        & Como diferentes mecanismos de consenso afetam a ordenação dos atributos? \\
+
+        Regra de corte
+        & $K_{25}$, $K_{50}$, $K_{75}$, $K_{\Delta}$
+        & Como a regra de corte influencia o subconjunto final selecionado? \\
+
+        Referências
+        & Sem FS e métodos individuais
+        & O ensemble apresenta comportamento distinto de suas referências? \\
+
+        \hline
+    \end{tabular}
+\end{table}
+
+A análise dessas configurações permitirá investigar separadamente as principais
+decisões que compõem o \textit{EFS4AC}. Em particular, pretende-se verificar
+como a composição dos métodos-base influencia o consenso, se o controle de
+redundância entre rankings altera os resultados da agregação, como diferentes
+operadores produzem ordenações consensuais distintas e se uma estratégia
+adaptativa de corte apresenta comportamento competitivo em relação aos
+percentuais fixos.
+
+Essas comparações serão realizadas sob um mesmo protocolo experimental,
+mantendo constantes, sempre que possível, os demais componentes do método ao
+analisar cada fator. Dessa forma, busca-se reduzir a atribuição de diferenças
+observadas a alterações simultâneas em múltiplos componentes da arquitetura.
+% ============================================================================
+% ============================================================================
+\section{Saídas e Critérios de Análise}
+\label{sec:ac-efs-saidas}
+% ============================================================================
+
+A avaliação do \textit{EFS4AC} não será restrita ao desempenho preditivo do
+classificador associativo. Como o método envolve diferentes decisões
+intermediárias --- composição do ensemble, controle da diversidade, agregação
+e definição do ponto de corte ---, serão registrados tanto os resultados
+finais quanto informações produzidas ao longo de suas etapas.
+
+Esse registro permitirá analisar não apenas se determinado subconjunto produz
+bom desempenho de classificação, mas também como ele foi obtido, qual redução
+dimensional foi alcançada, quais efeitos foram produzidos sobre a estrutura do
+classificador associativo e quão consistente é a seleção diante de variações
+nos dados de treinamento.
+
+Entre as principais saídas intermediárias e finais a serem registradas,
+destacam-se:
+
+\begin{itemize}
+
+    \item os rankings individuais $R_j$ produzidos pelos métodos-base;
+
+    \item a matriz de rankings $\mathbf{R}$;
+
+    \item a matriz de similaridade $\mathbf{S}$ entre os rankers;
+
+    \item a composição do ensemble após a aplicação da estratégia de controle
+    da diversidade e, quando aplicável, os grupos ou pesos associados aos
+    rankers;
+
+    \item os escores de consenso $\mathbf{c}$ e o ranking consensual $R^{*}$;
+
+    \item o ponto de corte $k^{*}$ e a regra de corte utilizada;
+
+    \item o subconjunto final de atributos $F^{*}$;
+
+    \item o tempo de execução das etapas do \textit{EFS4AC};
+
+    \item o tempo de indução do classificador associativo a partir do conjunto
+    de atributos selecionado.
+
+\end{itemize}
+
+A análise das diferentes configurações do método será organizada em quatro
+dimensões principais: desempenho preditivo, redução dimensional, complexidade
+do classificador associativo e estabilidade da seleção.
+
+
+% ----------------------------------------------------------------------------
+\subsection{Desempenho preditivo}
+\label{subsec:ac-efs-avaliacao-preditiva}
+% ----------------------------------------------------------------------------
+
+A primeira dimensão corresponde à capacidade preditiva do classificador
+associativo induzido após a seleção de atributos. A medida principal será a
+F1-Macro, calculada a partir das predições realizadas sobre dados não
+utilizados na construção do subconjunto $F^{*}$.
+
+A utilização da F1-Macro permite atribuir a mesma importância às diferentes
+classes no cálculo da medida global, independentemente da frequência relativa
+de cada uma delas. Para um problema com $C$ classes, define-se
+
+\begin{equation}
+    F1_{\mathrm{Macro}}
+    =
+    \frac{1}{C}
+    \sum_{c=1}^{C}
+    F1_c,
+    \label{eq:f1-macro-ac-efs}
+\end{equation}
+
+em que
+
+\begin{equation}
+    F1_c
+    =
+    2
+    \frac{
+        \operatorname{Precisão}_c
+        \operatorname{Revocação}_c
+    }{
+        \operatorname{Precisão}_c+
+        \operatorname{Revocação}_c
+    }.
+\end{equation}
+
+Os resultados obtidos pelas diferentes configurações do \textit{EFS4AC} serão
+comparados com os cenários de referência definidos anteriormente, incluindo o
+classificador associativo induzido sem seleção de atributos e os resultados
+obtidos pelos métodos individuais de FS.
+
+Essa comparação permitirá analisar se as alterações observadas no desempenho
+estão associadas apenas à redução dimensional ou se o consenso entre múltiplos
+seletores apresenta comportamento distinto das seleções individuais.
+
+
+% ----------------------------------------------------------------------------
+\subsection{Redução dimensional}
+\label{subsec:ac-efs-avaliacao-reducao}
+% ----------------------------------------------------------------------------
+
+A segunda dimensão corresponde ao grau de redução do espaço original de
+atributos. Para cada subconjunto $F^{*}$ serão registrados tanto o número
+absoluto de atributos selecionados, $|F^{*}|$, quanto sua proporção em relação
+ao conjunto original $F$.
+
+A taxa de redução é definida por
+
+\begin{equation}
+    \operatorname{Red}(F^{*})
+    =
+    1-
+    \frac{|F^{*}|}{|F|}.
+    \label{eq:reducao-atributos-ac-efs}
+\end{equation}
+
+Valores próximos de zero indicam pouca redução do conjunto original, enquanto
+valores maiores representam subconjuntos proporcionalmente menores.
+
+A taxa de redução não será interpretada isoladamente como indicadora de
+qualidade. Uma redução elevada pode ser desejável do ponto de vista de
+dimensionalidade, mas pode também eliminar atributos necessários à
+classificação. Por essa razão, $\operatorname{Red}(F^{*})$ será analisada em
+conjunto com o desempenho preditivo e com a complexidade do modelo associativo
+resultante.
+
+
+% ----------------------------------------------------------------------------
+\subsection{Complexidade do classificador associativo}
+\label{subsec:ac-efs-avaliacao-complexidade}
+% ----------------------------------------------------------------------------
+
+A terceira dimensão busca analisar como a seleção de atributos realizada pelo
+\textit{EFS4AC} afeta a estrutura do classificador associativo induzido.
+
+Como a redução do conjunto de atributos modifica o espaço disponível para a
+formação dos antecedentes das regras, serão registrados, inicialmente:
+
+\begin{itemize}
+
+    \item o número total de regras do classificador final;
+
+    \item o tamanho médio dos antecedentes das regras;
+
+    \item o tempo necessário para a indução do classificador associativo.
+
+\end{itemize}
+
+Seja $\mathcal{Q}$ o conjunto final de regras do classificador associativo e
+seja $\operatorname{ant}(q)$ o antecedente de uma regra $q\in\mathcal{Q}$.
+O tamanho médio dos antecedentes pode ser expresso por
+
+\begin{equation}
+    \overline{L}_{\mathrm{ant}}
+    =
+    \frac{1}{|\mathcal{Q}|}
+    \sum_{q\in\mathcal{Q}}
+    |\operatorname{ant}(q)|.
+    \label{eq:tamanho-medio-regras-ac-efs}
+\end{equation}
+
+Essas medidas permitirão verificar se diferentes configurações de seleção
+produzem alterações na quantidade e no tamanho das regras, além de mudanças no
+custo computacional de indução.
+
+Assim como ocorre com a redução dimensional, menor complexidade não será
+interpretada isoladamente como superioridade. A análise considerará
+conjuntamente a estrutura do modelo e seu desempenho preditivo.
+
+
+% ----------------------------------------------------------------------------
+\subsection{Estabilidade da seleção}
+\label{subsec:ac-efs-avaliacao-estabilidade}
+% ----------------------------------------------------------------------------
+
+A quarta dimensão corresponde à estabilidade dos subconjuntos produzidos pelo
+\textit{EFS4AC}. Neste trabalho, estabilidade refere-se à consistência da
+seleção quando o método é aplicado a diferentes partições dos dados de
+treinamento.
+
+Sejam
+
+\begin{equation}
+    F^{*}_{1},F^{*}_{2},\ldots,F^{*}_{K}
+\end{equation}
+
+os subconjuntos obtidos em $K$ partições de treinamento. A similaridade entre
+dois subconjuntos $F^{*}_{a}$ e $F^{*}_{b}$ pode ser calculada pelo índice de
+Jaccard:
+
+\begin{equation}
+    J
+    \left(
+        F^{*}_{a},F^{*}_{b}
+    \right)
+    =
+    \frac{
+        |F^{*}_{a}\cap F^{*}_{b}|
+    }{
+        |F^{*}_{a}\cup F^{*}_{b}|
+    }.
+    \label{eq:jaccard-estabilidade-ac-efs}
+\end{equation}
+
+A estabilidade global pode então ser expressa pela média das similaridades
+entre todos os pares de subconjuntos:
+
+\begin{equation}
+    \operatorname{Estab}
+    =
+    \frac{2}{K(K-1)}
+    \sum_{a=1}^{K-1}
+    \sum_{b=a+1}^{K}
+    J
+    \left(
+        F^{*}_{a},F^{*}_{b}
+    \right).
+    \label{eq:estabilidade-media-ac-efs}
+\end{equation}
+
+Valores mais próximos de 1 indicam maior sobreposição entre os subconjuntos
+produzidos nas diferentes partições, enquanto valores menores indicam maior
+variabilidade na composição de $F^{*}$.
+
+A estabilidade será analisada em conjunto com a quantidade de atributos
+selecionados, uma vez que a sobreposição entre subconjuntos também pode ser
+influenciada por seus tamanhos. Dessa forma, essa medida será utilizada como
+indicador complementar da consistência do processo de seleção, e não como
+critério isolado para determinar a melhor configuração.
+
+
+% ----------------------------------------------------------------------------
+\subsection{Custo computacional}
+\label{subsec:ac-efs-avaliacao-tempo}
+% ----------------------------------------------------------------------------
+
+Embora o tempo de execução esteja relacionado à complexidade computacional,
+serão registrados separadamente o custo da seleção e o custo da indução do
+classificador. Para cada execução, serão considerados:
+
+\begin{equation}
+    T_{\mathrm{EFS}}
+\end{equation}
+
+como o tempo total necessário para executar as etapas do \textit{EFS4AC}, e
+
+\begin{equation}
+    T_{\mathrm{CA}}
+\end{equation}
+
+como o tempo necessário para induzir o classificador associativo após a
+seleção.
+
+Quando pertinente, também poderá ser analisado o tempo total do fluxo:
+
+\begin{equation}
+    T_{\mathrm{total}}
+    =
+    T_{\mathrm{EFS}}
+    +
+    T_{\mathrm{CA}}.
+    \label{eq:tempo-total-ac-efs}
+\end{equation}
+
+Essa separação é importante porque uma configuração pode introduzir maior custo
+na etapa de seleção e, simultaneamente, reduzir o custo posterior de indução do
+classificador associativo.
+
+
+% ----------------------------------------------------------------------------
+\subsection{Análise conjunta dos critérios}
+\label{subsec:ac-efs-avaliacao-conjunta}
+% ----------------------------------------------------------------------------
+
+Os critérios anteriores serão analisados de forma complementar. O objetivo não
+é assumir que uma única medida seja suficiente para caracterizar o
+\textit{EFS4AC}, mas observar os efeitos das diferentes configurações sobre
+predição, dimensionalidade, estrutura do classificador e estabilidade.
+
+A comparação experimental considerará, portanto, o conjunto de resultados
+
+\begin{equation}
+    \mathcal{E}
+    =
+    \left\{
+        F1_{\mathrm{Macro}},
+        \operatorname{Red},
+        |\mathcal{Q}|,
+        \overline{L}_{\mathrm{ant}},
+        \operatorname{Estab},
+        T_{\mathrm{EFS}},
+        T_{\mathrm{CA}}
+    \right\}.
+    \label{eq:criterios-avaliacao-ac-efs}
+\end{equation}
+
+Essa análise permitirá caracterizar possíveis relações de compromisso entre
+os critérios. Por exemplo, configurações com diferentes graus de redução podem
+apresentar comportamentos distintos quanto ao desempenho preditivo, à
+estabilidade e à complexidade do classificador associativo. Tais relações
+serão examinadas experimentalmente, sem assumir previamente que a otimização
+de um único critério implique melhora nos demais.
+
+% ============================================================================
+% ============================================================================
+\section{Considerações Finais do Capítulo}
+\label{sec:ac-efs-consideracoes}
+% ============================================================================
+
+Neste capítulo foi apresentado o \textit{EFS4AC}, método de
+\textit{Ensemble Feature Selection} proposto para atuar previamente à indução
+de Classificadores Associativos. A proposta parte do princípio de que
+diferentes métodos de seleção de atributos podem produzir evidências distintas
+sobre a relevância dos atributos e, portanto, busca integrar essas evidências
+antes da etapa de mineração das regras.
+
+O método foi estruturado em cinco etapas interdependentes. A primeira define
+a composição do ensemble a partir de diferentes métodos-base de seleção de
+atributos. A segunda converte as saídas desses métodos para uma representação
+ordinal comum, produzindo rankings comparáveis. A terceira analisa a
+similaridade entre esses rankings e permite controlar a influência de
+evidências redundantes. A quarta integra os rankings por meio de operadores de
+agregação, produzindo uma ordenação consensual dos atributos. Por fim, a quinta
+etapa transforma esse consenso em um subconjunto efetivo de atributos por meio
+de uma regra de corte.
+
+De forma sintética, o fluxo central do método pode ser representado por
+
+\begin{equation}
+    D_{\mathrm{tr}}
+    \xrightarrow{\mathcal{S}}
+    \mathbf{R}
+    \xrightarrow{\mathcal{D}}
+    \mathcal{R}^{*}
+    \xrightarrow{\mathcal{A}}
+    \left(R^{*},\mathbf{c}\right)
+    \xrightarrow{\mathcal{K}}
+    F^{*},
+    \label{eq:sintese-final-ac-efs}
+\end{equation}
+
+em que $\mathcal{S}$ representa a aplicação dos métodos-base,
+$\mathcal{D}$ o mecanismo de análise e controle da diversidade,
+$\mathcal{A}$ o operador de agregação e $\mathcal{K}$ a regra de corte. O
+resultado desse processo é o subconjunto $F^{*}$, utilizado para projetar os
+dados antes da indução do classificador associativo.
+
+Uma característica importante da proposta é a separação explícita entre as
+decisões envolvidas no processo de seleção. A composição do ensemble, o
+controle da redundância entre rankers, a construção do consenso e a definição
+do número de atributos selecionados são tratados como problemas distintos.
+Essa organização permite analisar individualmente a contribuição de cada
+componente e evita associar o resultado final a uma única decisão metodológica.
+
+Além disso, o \textit{EFS4AC} foi concebido de forma modular. Diferentes
+composições de métodos-base, estratégias de controle da diversidade,
+operadores de agregação e regras de corte podem ser instanciados sem modificar
+a estrutura geral do método. Neste trabalho, essa característica será
+explorada por meio das composições $E_U$, $E_M$ e $E_{U+M}$, das estratégias
+de diversidade definidas anteriormente, dos agregadores Borda, RRF e TOPSIS e
+das regras de corte percentuais e adaptativa.
+
+A integração com a Classificação Associativa ocorre externamente ao mecanismo
+de indução das regras. O \textit{EFS4AC} determina quais atributos serão
+disponibilizados ao classificador, mas não modifica diretamente os
+procedimentos internos de geração, ordenação ou poda das regras. Essa
+separação permite analisar os efeitos da seleção consensual sobre o processo
+associativo mantendo inalterado o algoritmo de classificação utilizado como
+referência.
+
+Do ponto de vista experimental, a proposta também não será caracterizada
+exclusivamente pelo desempenho preditivo. Sua avaliação considerará
+conjuntamente a capacidade preditiva do classificador associativo, a redução
+do espaço de atributos, a complexidade estrutural do modelo induzido, a
+estabilidade dos subconjuntos selecionados e o custo computacional. Dessa
+forma, será possível investigar não apenas se determinada configuração produz
+bons resultados de classificação, mas também quais efeitos a seleção exerce
+sobre a dimensionalidade dos dados e sobre a estrutura do classificador
+baseado em regras.
+
+Outro aspecto fundamental do método é que todas as decisões dependentes dos
+dados são realizadas exclusivamente sobre as partições de treinamento. Em
+procedimentos de validação cruzada, o \textit{EFS4AC} deve ser executado
+integralmente em cada \textit{fold}, incluindo a geração dos rankings, a
+análise da diversidade, a agregação e a determinação do subconjunto final.
+As partições destinadas à validação ou ao teste são apenas projetadas sobre
+os atributos previamente selecionados. Esse procedimento preserva a
+independência da avaliação e evita que informações externas ao treinamento
+influenciem a seleção dos atributos.
+
+A contribuição metodológica pretendida com o \textit{EFS4AC} consiste,
+portanto, em estabelecer uma estrutura sistemática para investigar a
+combinação de múltiplas evidências de seleção de atributos no contexto da
+Classificação Associativa. Em vez de pressupor que uma determinada composição,
+estratégia de diversidade, agregador ou regra de corte seja superior, a
+arquitetura proposta permite que essas decisões sejam avaliadas
+experimentalmente sob um protocolo comum.
+
+No capítulo seguinte, essa arquitetura será instanciada experimentalmente. As
+diferentes configurações do \textit{EFS4AC} serão comparadas entre si e com
+cenários de referência, incluindo a utilização do conjunto completo de
+atributos e a aplicação individual dos métodos-base. A análise permitirá
+examinar as relações entre consenso, redução dimensional, estabilidade,
+desempenho preditivo, complexidade das regras e custo computacional,
+fornecendo evidências sobre o comportamento da abordagem proposta no contexto
+dos Classificadores Associativos.

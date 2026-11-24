@@ -1,0 +1,376 @@
+\documentclass[
+	% -- opções da classe memoir --
+	12pt,				% tamanho da fonte
+	openright,			% capítulos começam em pág ímpar (insere página vazia caso preciso)
+	oneside,			% para impressão em recto e verso. Oposto a oneside
+	a4paper,			% tamanho do papel. 
+	% -- opções da classe abntex2 --
+	%chapter=TITLE,		% títulos de capítulos convertidos em letras maiúsculas
+	%section=TITLE,		% títulos de seções convertidos em letras maiúsculas
+	%subsection=TITLE,	% títulos de subseções convertidos em letras maiúsculas
+	%subsubsection=TITLE,% títulos de subsubseções convertidos em letras maiúsculas
+	% -- opções do pacote babel --
+	english,			% idioma adicional para hifenização
+	brazilian				% o último idioma é o principal do documento
+	]{abntex2}
+\setlength{\headheight}{29pt}
+
+% ---
+% Pacotes acrescentados
+% \usepackage{arydshln}
+\usepackage{seqsplit}
+\usepackage{rotating}
+
+\usepackage{multirow}
+%\usepackage[boxruled,linesnumbered,portuguese]{algorithm2e}
+
+\usepackage{tabularray}
+\usepackage{verbatim}
+
+\usepackage{algpseudocode}
+
+
+
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows, positioning}
+
+% Definição de estilos
+\tikzstyle{startstop} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm,text centered, draw=black, fill=red!30]
+\tikzstyle{process} = [rectangle, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=orange!30]
+\tikzstyle{decision} = [diamond, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=green!30]
+\tikzstyle{arrow} = [thick,->,>=stealth]
+
+% -------------------------
+%%----------------------------------------------------------------------------------
+%% DEFINIÇÃO DE COMANDOS - adicionado 10/2020 - Modelo Willian
+%%----------------------------------------------------------------------------------
+\usepackage{rotating}				% Usado para rotacionar tabela
+\usepackage[table]{xcolor}			% Cores em tabelas
+\usepackage{caption}
+%%\usepackage{subcaption}
+\usepackage[skip=0.5ex]{subcaption}
+
+
+% Reduz a fonte das legendas de figuras e tabelas
+\captionnamefont{\small}
+\captiontitlefont{\small}
+
+
+% Conteúdo da tabela
+\newcommand{\cell}[1]{{\ttfamily \scriptsize #1}}
+
+\newcommand{\imgref}[1]{%
+	\begin{minipage}[h][1.8\fontcharwd\font`\B][c]{1.8\fontcharht\font`\B}%
+		%\centering%
+		%\vfill%
+		\includegraphics[height=1.7\fontcharht\font`\B]{images/#1.eps}%
+		%\vfill%
+	\end{minipage}%
+}
+
+%
+%\usepackage{algorithm}
+%\usepackage{algorithmic}
+
+% ---
+% Pacotes básicos 
+% ---
+\usepackage{lmodern}			% Usa a fonte Latin Modern			
+\usepackage[T1]{fontenc}		% Selecao de codigos de fonte.
+\usepackage[utf8]{inputenc}		% Codificacao do documento (conversão automática dos acentos)
+
+\usepackage{lastpage}			% Usado pela Ficha catalográfica
+\usepackage{indentfirst}		% Indenta o primeiro parágrafo de cada seção.
+\usepackage{color}				% Controle das cores
+\usepackage{url}				% Citar URLs
+\usepackage{graphicx}	
+\usepackage{enumitem}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+
+% Lista compacta dentro de célula
+\newcommand{\cellitemize}[1]{%
+\begin{minipage}[t]{\hsize}\vspace{0pt}\raggedright
+\begin{itemize}[leftmargin=1.2em,labelsep=0.4em,itemsep=0pt,topsep=0pt,parsep=0pt,partopsep=0pt]
+#1
+\end{itemize}
+\end{minipage}%
+}
+
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcommand{\tabitem}{\textbullet\ }
+% Inclusão de gráficos
+\graphicspath{ {img/} }
+
+%vide link - dois comandos abaixo
+%https://subscription.packtpub.com/book/business-and-other/9781801078658/2/ch02lvl1sec15/breaking-lines-and-paragraphs
+%\usepackage{microtype}
+%\usepackage[none]{hyphenat}
+\usepackage{microtype} 			% para melhorias de justificação
+
+\usepackage{multirow}
+\usepackage{varwidth} %for the varwidth minipage environment out/2020
+% ---
+		
+% ---
+% Pacotes adicionais, usados apenas no âmbito do Modelo Canônico do abnteX2
+% ---
+\usepackage{lipsum}				% para geração de dummy text
+\usepackage{amssymb}			% para uso de símbolos matemáticos
+% ---
+
+% ---
+% Pacotes de citações
+% ---
+\usepackage[brazilian,hyperpageref]{backref}	 % Paginas com as citações na bibl
+\usepackage[alf]{abntex2cite}	% Citações padrão ABNT
+
+% Pacotes adicionais Matheus
+\usepackage{array}
+%\usepackage{soul}
+%\usepackage{tablefootnote}
+\usepackage{afterpage}
+\usepackage{pdflscape}
+%\newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}} % comentado 10/2020
+\usepackage{amsmath}
+%\usepackage{algorithm} % comentado contado 30/04/2020
+\usepackage[portuguese, ruled, linesnumbered]{algorithm2e} % incluido
+\usepackage{adjustbox} % max width=\textwidth
+\usepackage{booktabs}
+% Tabelas longas
+
+% Tabelas com linhas profissionais: \toprule, \midrule, \bottomrule
+
+% Para criar coluna P{...}
+
+% Coluna P com alinhamento à esquerda e quebra automática de linha
+%% Adicionado por Cláudio para usar \citet
+%\usepackage{natbib}
+%\bibliographystyle{plainnat}
+\usepackage{longtable}
+\usepackage{makecell}
+\usepackage{tabularx}
+% Fim da adição
+\usepackage{float}
+\usepackage{forest}
+%\usepackage{algpseudocode}
+\usepackage{listings} % Para inclusao de codigos fontes
+\usepackage{xltabular} % quebra página + coluna X
+\usepackage{color}
+%\definecolor{gray}{rgb}{0.8,0.8,0.8}
+\definecolor{gray}{gray}{0.8}
+\lstset{ %
+	backgroundcolor=\color{white},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+	basicstyle=\footnotesize,        % the size of the fonts that are used for the code
+	breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
+	breaklines=true,                 % sets automatic line breaking
+	captionpos=t,                    % sets the caption-position to bottom
+	commentstyle=\color{mygreen},    % comment style
+	deletekeywords={...},            % if you want to delete keywords from the given language
+	escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+	extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+	frame=single,	                   % adds a frame around the code
+	keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+	keywordstyle=\color{blue},       % keyword style
+	language=Octave,                 % the language of the code
+	otherkeywords={*,...},           % if you want to add more keywords to the set
+	numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
+	numbersep=5pt,                   % how far the line-numbers are from the code
+	numberstyle=\tiny\color{mygray}, % the style that is used for the line-numbers
+	rulecolor=\color{black},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+	showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+	showstringspaces=false,          % underline spaces within strings only
+	showtabs=false,                  % show tabs within strings adding particular underscores
+	stepnumber=1,                    % the step between two line-numbers. If it's 1, each line will be numbered
+	stringstyle=\color{mymauve},     % string literal style
+	tabsize=2,	                   % sets default tabsize to 2 spaces
+	title=\lstname,                   % show the filename of files included with \lstinputlisting; also try caption instead of title
+	numberbychapter=false
+}
+\renewcommand\lstlistingname{Script}
+%Alteração Rondado - as linhas abaixo foram comentandas
+%\renewcommand{\listalgorithmname}{Lista de Algoritmos}
+%\renewcommand{\listalgorithmname}{Lista de Algoritmos}
+%\renewcommand{\lstlistlistingname}{Lista de Scripts}
+%\floatname{algorithm}{Algoritmo}
+
+%fim alteração
+
+%\usepackage[T1]{fontenc}
+%\usepackage[scaled]{beramono}
+%\usepackage{listings}
+%\lstset{
+%	language=Python,
+%	showstringspaces=false,
+%	formfeed=newpage,
+%	tabsize=1,
+%	commentstyle=itshape,
+%	basicstyle=ttfamily,
+%	stepnumber=1,
+%	morekeywords={models, lambda, forms}
+%}
+
+% ---
+
+
+% --- 
+% CONFIGURAÇÕES DE PACOTES
+% --- 
+
+%\hyphenation{a-di-cio-nal-men-te}
+
+% ---
+% Configurações do pacote backref
+% Usado sem a opção hyperpageref de backref
+\renewcommand{\backrefpagesname}{Citado na(s) página(s):~}
+% Texto padrão antes do número das páginas
+\renewcommand{\backref}{}
+% Define os textos da citação
+\renewcommand*{\backrefalt}[4]{
+	\ifcase #1 %
+		Nenhuma citação no texto.%
+	\or
+		Citado na página #2.%
+	\else
+		Citado #1 vezes nas páginas #2.%
+	\fi}%
+% ---
+
+%-----
+%Adaptações do formato ABNT para UNESP
+\addto\captionsbrazil{
+	\renewcommand{\listfigurename}{Lista de Figuras}
+	\renewcommand{\listtablename}{Lista de Tabelas}
+	\renewcommand{\listadesiglasname}{Lista de Abreviaturas e Siglas}
+	%\renewcommand{\folhadeaprovacaoname}{Folha de Aprovação}
+	\renewcommand{\listadesimbolosname}{Lista de Símbolos}
+}
+%-----
+
+
+
+%Comandos para padronização - Matheus
+\newcommand{\suporte}{\textit{suporte}}
+\newcommand{\confianca}{\textit{confiança}}
+\newcommand{\itemset}{\textit{itemset}}
+\newcommand{\itemsets}{\textit{itemsets}}
+\newcommand{\kitemset}{\textit{k-itemset}}
+\newcommand{\kitemsets}{\textit{k-itemsets}}
+\newcommand{\nitemset}[1]{\textit{#1-itemset}}
+\newcommand{\nitemsets}[1]{\textit{#1-itemsets}}
+\newcommand{\apriori}{\textit{Apriori }}
+\newcommand{\cl}{\textit{Clustering}}
+\newcommand{\sky}{\textit{Sky}}
+%\newcommand{\ABNTEXfontereduzidaTiny}{\tiny}
+%\newcommand{\ABNTEXfontereduzidaScriptsize}{\scriptsize}
+%\newcommand{\ABNTEXfontereduzidaSmall}{\small}
+
+\usepackage{ragged2e}
+\newcolumntype{L}[1]{>{\RaggedRight\arraybackslash}p{#1}}
+
+
+
+% ---
+% Configurações de aparência do PDF final
+
+% alterando o aspecto da cor azul
+\definecolor{blue}{RGB}{41,5,195}
+
+%veronica: adicionei
+\usepackage{hyperref}
+
+% informações do PDF
+\makeatletter
+%veronica: aqui que muda a cor do hyperlink
+\hypersetup{
+     	%pagebackref=true,
+		pdftitle={\@title}, 
+		pdfauthor={\@author},
+    	pdfsubject={\imprimirpreambulo},
+	    pdfcreator={regras de associação},
+		pdfkeywords={regras de associação}{mineração de dados}{trabalho de conclusão de curso}{unesp}, 
+		colorlinks=true,       		% false: boxed links; true: colored links
+    	linkcolor=blue,          	% color of internal links
+    	citecolor=blue,        		% color of links to bibliography
+    	filecolor=magenta,      		% color of file links
+		urlcolor=blue,
+		bookmarksdepth=4
+}
+\makeatother
+% --- 
+
+% --- 
+% Espaçamentos entre linhas e parágrafos 
+% --- 
+
+% O tamanho do parágrafo é dado por:
+\setlength{\parindent}{1.3cm}
+
+% Controle do espaçamento entre um parágrafo e outro:
+\setlength{\parskip}{0.2cm}  % tente também \onelineskip
+
+% ---
+% compila o indice
+% ---
+\makeindex
+% ---
+\DeclareMathOperator*{\median}{median}
+% ----
+% Início do documento
+% ----
+\begin{document}
+\include{metadados}
+% Seleciona o idioma do documento (conforme pacotes do babel)
+%\selectlanguage{english}
+\selectlanguage{brazil}
+
+% Retira espaço extra obsoleto entre as frases.
+\frenchspacing 
+
+% ----------------------------------------------------------
+% ELEMENTOS PRÉ-TEXTUAIS
+% ----------------------------------------------------------
+
+\pretextual
+
+
+\include{capa}
+
+\include{folharosto}
+
+\include{resumo}
+
+%%depois alterar
+%\begin{siglas}
+%\item [KDD] \textit{\underline{K}nowledge \underline{D}iscovery in \underline{D}atabases}
+%\item[MD] \textit{\underline{M}ineração de \underline{D}ados}
+%\end{siglas}
+
+%\include{abstract}
+
+\include{sumario}
+
+% ----------------------------------------------------------
+% ELEMENTOS TEXTUAIS
+% ----------------------------------------------------------
+\textual
+
+%Capitulos
+
+%%CONSIDERAÇÕES FINAIS
+%%REVISAR 1 PESSOA - TROCAR
+%%Padronizar método, abordagem, etc.
+%%Sigla CA = classificação associativa; classificadores associativos
+\include{ch-introducao}
+\include{ch-fundamentos/ch-fundamentos-main}
+\include{ch-revisao}
+%\include{ch-cba-fs}
+\include{ch-metologia}
+\include{ch-exps}
+\include{ch-cons-f}
+
+%https://tex.stackexchange.com/questions/23381/how-to-refer-a-figure-as-a-table
+
+\bibliographystyle{abntex2-alf}
+\bibliography{references}
+
+\end{document}

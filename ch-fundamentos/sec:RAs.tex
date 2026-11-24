@@ -1,0 +1,26 @@
+%%%%%%%%%%%%%%%%%
+\section{Regras de Associação}\label{sec:ra}
+%%%%%%%%%%%%%%%%%
+
+As regras de associação (RAs) compõem uma das maneiras mais tradicionais em aprendizado de máquina para se extrair padrões dos dados \cite{DBLP:conf/dawak/SharmaKPYD20}. Os algoritmos desta família são utilizados para extração de um conjunto de regras que buscam representar as relações intrínsecas dos atributos e seus valores em conjuntos de dados. Elas são classificadas dentro do aprendizado de máquina como não-supervisionada, tendo um caráter exploratório, com objetivo de realizar descobertas de padrões interessantes.
+
+As RAs são expressas via implicação lógica, tendo um formato do tipo $A \Rightarrow B$, onde o antecedente $A$ implica no consequente $B$. Esta representação torna a técnica transparente e de fácil entendimento, uma vez que as relações podem ser lidas, entendidas e validadas por um especialista. Uma regra de associação é definida formalmente da maneira descrita a seguir \cite{apriori}: seja $D$ um conjunto de dados composto por um conjunto de itens $I = \{i_{1},...,i_{m}\}$, ordenados lexicograficamente, e por um conjunto de transações $T=\{t_1,...,t_n\}$, na qual cada transação $t_i \in T$ é composta por um conjunto de itens (chamado \textit{itemset}) tal que $t_i \subseteq I$. A regra de associação é uma implicação na forma $A \Rightarrow B$, em que $A \subset I$, $B \subset I$ e $A \cap B = \varnothing$. A regra $A \Rightarrow B$ ocorre no conjunto de transações $T$ com \textbf{confiança} $conf$ e \textbf{suporte} $sup$, definidas pelas Equações~\ref{eq:suporte} e~\ref{eq:confiança}, em que $n(AB)$ representa a frequência com que ($A \cup B$) ocorrem conjuntamente no conjunto de transações, $|D|$ o número de transações e $|D(A)|$ o número de transações em que $A$ ocorre. Estas equações também são chamadas de medidas objetivas ou medidas de interesse, detalhadas na Seção~\ref{sec:mo}. Assim, os algoritmos de associação visam encontrar todas as possíveis regras (correlações) que apresentem valores de suporte e confiança superiores a valores previamente estabelecidos, denominados de suporte mínimo (\textbf{sup-min}) e confiança mínima (\textbf{conf-min}).
+
+\begin{equation}
+\text{Suporte} = \dfrac{n(AB)}{|D|} = P(AB)
+\label{eq:suporte}
+\end{equation}
+
+\begin{equation}
+\text{Confiança} = \dfrac{n(AB)}{|D(A)|} = P(B|A)
+\label{eq:confiança}
+\end{equation}
+
+O problema de obtenção de regras de associação é decomposto em dois passos \cite{agrawal1993mining}:
+\begin{enumerate}
+	\item Encontrar todos os $k$-\textit{itemsets} (conjunto de $k$	itens) que possuam suporte maior ou igual ao suporte mínimo especificado pelo usuário (\textbf{sup-min}). Os \textit{itemsets} com suporte igual ou superior a \textbf{sup-min} são definidos como \textit{itemsets} frequentes, os demais conjuntos são denominados de \textit{itemsets} não-frequentes. O suporte de um \textit{itemset} é dado por $P(\textit{Itemset}) = \frac{n(Itemset)}{|D|}$;
+	
+	\item Utilizar todos os $k$-\textit{itemsets} frequentes, com $k \geq 2$, para gerar as regras de associação. Somente regras que apresentem confiança maior ou igual a confiança mínima especificada pelo usuário (\textbf{conf-min}) são extraídas.
+\end{enumerate}
+
+A parte mais dispendiosa dos dois passos é a geração dos \textit{itemsets} frequentes. Assim, uma das principais diferenças entre os algoritmos está nas estratégias utilizadas para a obtenção dos itemsets frequentes. Isso se deve devido ao número de \textit{itemsets} que podem ser gerados, sendo proporcional a $2^{|I|}$, em que $|I|$ representa o número de itens distintos contidos em $I$. Assim, à medida que a quantidade de itens aumenta, o espaço de busca também aumenta. Neste sentido, os algoritmos buscam estratégias para encontrar os \textit{itemsets} frequentes sem a necessidade de percorrer todo o espaço de busca. Diversos algoritmos são encontrados na literatura para se obter os \textit{itemsets} frequentes, por conseguinte, gerar as regras de associação, sendo o Apriori \cite{apriori} um dos mais utilizados\footnote{Diversas outras implementações encontram-se disponíveis em \url{http://www.philippe-fournier-viger.com/spmf/}.}.

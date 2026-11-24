@@ -1,0 +1,95 @@
+%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Introdução}\label{intro}
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+A crescente utilização de técnicas de aprendizado de máquina em diferentes domínios tem ampliado o interesse por modelos capazes não apenas de apresentar desempenho preditivo adequado, mas também de fornecer representações compreensíveis do conhecimento extraído dos dados. Essa característica é particularmente relevante em aplicações nas quais os resultados produzidos pelo modelo precisam ser inspecionados, validados ou interpretados por especialistas. Nesse contexto, modelos baseados em regras constituem uma abordagem tradicional de aprendizado de máquina, uma vez que representam o conhecimento por meio de estruturas simbólicas que explicitam relações entre condições observadas nos dados e as decisões produzidas pelo modelo \cite{Rudin2019,margot2021interpretability,molnar2022}.
+
+Entre essas abordagens encontra-se a classificação associativa (CA), que integra conceitos de mineração de regras de associação e classificação supervisionada. Introduzida por \citeonline{liu1998}, essa abordagem utiliza padrões associados às classes para construir modelos preditivos baseados em regras de associação de classe (\textit{class association rules} (CARs)). De forma geral, uma regra pode ser representada como $A \Rightarrow c$, em que $A$ corresponde a um conjunto de condições presentes no antecedente e $c$ representa uma classe. Essa estrutura possibilita que os padrões empregados pelo classificador sejam explicitamente representados e posteriormente analisados.
+
+Diferentes algoritmos de CA foram desenvolvidos desde os primeiros trabalhos, incorporando estratégias distintas para geração, ordenação, seleção e poda das regras \cite{10.1016/j.eswa.2025.127454}. Embora a representação baseada em regras favoreça a compreensão do modelo, sua utilização não implica, necessariamente, na obtenção de classificadores simples. Um modelo associativo pode apresentar grande quantidade de regras, antecedentes extensos ou padrões redundantes, dificultando sua inspeção. Dessa forma, além do desempenho preditivo, propriedades relacionadas à quantidade e à estrutura das regras são relevantes para caracterizar a complexidade dos modelos induzidos.
+
+Esse problema torna-se especialmente importante à medida que aumenta a dimensionalidade dos conjuntos de dados. Na CA, o aumento do número de atributos amplia o espaço de busca de regras e, consequentemente, pode elevar a complexidade computacional do processo de indução. Além disso, a presença de atributos irrelevantes ou redundantes pode favorecer a geração de regras pouco informativas, aumentando a quantidade e a complexidade das regras produzidas.
+
+Nesse contexto, a seleção de atributos (\textit{feature selection} (FS)) constitui uma estratégia para reduzir a dimensionalidade dos dados por meio da identificação de um subconjunto dos atributos originais. Diferentemente de técnicas de transformação, a FS preserva a representação original das variáveis, removendo atributos considerados irrelevantes ou redundantes para a tarefa de aprendizagem \cite{Dhal2022,Theng2024}. Essa característica é particularmente interessante para modelos interpretáveis, uma vez que os atributos utilizados pelo modelo mantêm seu significado original.
+
+A aplicação de FS à CA apresenta, portanto, uma motivação que ultrapassa a redução dimensional convencional. Ao selecionar atributos antes da indução do classificador, restringe-se também o conjunto de itens disponibilizado ao processo de mineração. Essa alteração pode modificar o espaço de busca de padrões, a quantidade de regras produzidas e a estrutura do classificador resultante. Dessa forma, a avaliação de métodos de FS nesse contexto deve considerar não somente medidas de desempenho preditivo, mas também os efeitos da seleção sobre a redução dimensional e sobre a complexidade do modelo associativo.
+
+A literatura apresenta diferentes estratégias para incorporar FS à CA. Parte dos trabalhos realiza a seleção como uma etapa externa de pré-processamento, de modo que somente os atributos selecionados são posteriormente utilizados para a indução do classificador. Outras abordagens estabelecem uma integração mais estreita entre seleção e classificação, utilizando medidas de relevância durante a geração, ponderação ou avaliação das regras. Os estudos analisados nesta dissertação mostram, portanto, que a utilização de FS em CA já constitui uma linha de investigação estabelecida e que diferentes critérios de seleção podem afetar tanto o desempenho quanto a estrutura dos modelos resultantes.
+
+Entretanto, não existe um método de FS universalmente adequado a todos os problemas. Diferentes seletores são construídos a partir de diferentes pressupostos e critérios de avaliação e, consequentemente, podem produzir resultados distintos quando aplicados ao mesmo conjunto de dados. Métodos baseados em associação estatística, informação, correlação, dependência, redundância ou interação entre atributos capturam perspectivas diferentes acerca da relevância das variáveis \cite{KHAIRE20221060,Theng2024}. Assim, a utilização de um único seletor torna o processo dependente do critério adotado e de suas limitações particulares.
+
+Uma alternativa para reduzir essa dependência consiste na utilização de \textit{Ensemble Feature Selection} (EFS). Em vez de utilizar exclusivamente a decisão produzida por um método individual, abordagens de EFS combinam evidências provenientes de múltiplos processos de seleção para produzir uma decisão consensual sobre os atributos. A diversidade necessária à construção do ensemble pode ser obtida, por exemplo, por meio de perturbações dos dados, diferentes configurações de um mesmo seletor ou pela combinação de métodos heterogêneos de FS \cite{bolon2018scalability,mera2021framework}.
+
+A utilização de métodos heterogêneos é particularmente interessante quando os componentes do ensemble avaliam os atributos segundo critérios distintos. Nesse caso, cada seletor pode ser interpretado como uma fonte de evidência acerca da importância dos atributos, permitindo que o resultado final considere diferentes perspectivas sobre relevância, redundância e dependência. Entretanto, a simples utilização de múltiplos seletores não determina, por si só, como essas evidências devem ser combinadas. A construção de um EFS envolve diferentes decisões metodológicas, entre elas a composição do ensemble, a representação das saídas individuais, a análise da diversidade entre os seletores, a estratégia de agregação e o mecanismo utilizado para transformar o resultado agregado em um subconjunto final de atributos.
+
+Quando os métodos-base produzem ordenações dos atributos, essas saídas podem ser representadas como \textit{rankings} e posteriormente combinadas por meio de técnicas de agregação. A literatura apresenta diferentes estratégias para esse propósito, incluindo métodos eleitorais, técnicas de tomada de decisão multicritério, operadores de agregação, mecanismos de ponderação e abordagens de otimização \cite{drotar2019ensemble,hashemi2021pareto,abellana2022ensemble,kaur2023mcdm,abasabadi2021automatic}. Entre essas alternativas, métodos como Borda permitem construir uma ordenação consensual a partir das posições atribuídas pelos diferentes ranqueadores, enquanto técnicas como TOPSIS possibilitam formular a seleção como um problema de decisão multicritério, no qual os atributos representam alternativas avaliadas segundo diferentes critérios.
+
+Além da estratégia de agregação, outro problema consiste em determinar quais atributos do ranking consensual devem ser efetivamente selecionados. Um ranking estabelece uma ordem de preferência, mas não define necessariamente o tamanho adequado do subconjunto final. Estratégias baseadas em um número fixo de atributos, percentuais de retenção ou mecanismos adaptativos podem produzir diferentes níveis de redução e, consequentemente, diferentes efeitos sobre o classificador. A definição do ponto de corte constitui, portanto, uma etapa própria do processo de EFS e pode influenciar diretamente o compromisso entre preservação de informação e redução dimensional \cite{seijopardo2019automatic}.
+
+Embora diferentes estratégias de EFS tenham sido propostas na literatura, sua investigação no contexto específico da CA permanece comparativamente limitada. A análise dos trabalhos relacionados realizada nesta dissertação mostrou que a aplicação de métodos individuais de FS à CA é relativamente estabelecida e que existe precedente para a combinação de múltiplos seletores antes da indução de classificadores associativos. Destaca-se, nesse sentido, o trabalho de \citeonline{sowan2023hybrid}, que combina diferentes métodos de FS antes da construção do classificador associativo. Entretanto, a proposta investiga uma configuração específica de ensemble e não tem como objetivo analisar sistematicamente diferentes decisões envolvidas na construção de um EFS.
+
+A lacuna investigada nesta dissertação não corresponde, portanto, à ausência de FS ou mesmo à inexistência de EFS em CA. Ela está relacionada à necessidade de investigar, sob um protocolo experimental comum, como diferentes decisões de projeto de um EFS heterogêneo afetam a seleção de atributos e, posteriormente, a indução de classificadores associativos. Particularmente, permanecem relevantes questões relacionadas à composição do ensemble, à diversidade e redundância entre os ranqueadores, à estratégia utilizada para produzir o consenso e ao mecanismo empregado para transformar o ranking agregado em um subconjunto final.
+
+Essa lacuna apresenta uma particularidade importante no contexto associativo. Em classificadores convencionais, a seleção de atributos pode ser avaliada principalmente pela redução dimensional e pelo desempenho preditivo obtido após a seleção. Na CA, entretanto, a alteração do subconjunto de atributos modifica também o espaço disponível para a descoberta de padrões. Consequentemente, duas estratégias capazes de produzir desempenho preditivo semelhante podem resultar em classificadores estruturalmente diferentes, contendo quantidades e configurações distintas de regras. Assim, a avaliação de EFS nesse contexto requer considerar conjuntamente desempenho preditivo, redução de atributos e propriedades estruturais dos modelos induzidos.
+
+Diante desse cenário, esta dissertação propõe o EFS4AC (\textit{Ensemble Feature Selection for Associative Classification}), um pipeline de EFS baseado na combinação e agregação de rankings produzidos por diferentes métodos de seleção de atributos. A proposta utiliza métodos-base heterogêneos e organiza o processo de seleção em etapas que compreendem a escolha dos seletores, a geração e padronização dos rankings individuais, a análise da diversidade entre esses rankings, sua agregação em um consenso global e a definição do subconjunto final de atributos. O EFS4AC é aplicado antes da indução do classificador associativo, permitindo controlar quais atributos são disponibilizados ao processo de mineração sem modificar, inicialmente, o mecanismo interno do classificador.
+
+A hipótese investigada neste trabalho é que a combinação de
+diferentes métodos de seleção de atributos, por meio de um pipeline
+de EFS baseado em agregação de rankings, pode reduzir a dependência
+de um único critério de avaliação dos atributos e produzir subconjuntos
+capazes de manter ou melhorar o desempenho preditivo de classificadores
+associativos, ao mesmo tempo em que reduzem a complexidade dos modelos
+induzidos.. Essa hipótese não pressupõe a superioridade do ensemble em todos os cenários, mas estabelece como objeto de investigação a possibilidade de que a combinação de diferentes evidências de relevância proporcione um compromisso mais adequado entre capacidade preditiva e complexidade estrutural.
+
+A partir dessa hipótese, estabelece-se a seguinte questão de pesquisa: \textit{a combinação de diferentes métodos de seleção de atributos por meio de EFS pode proporcionar melhor equilíbrio entre desempenho preditivo e complexidade dos modelos de Classificação Associativa do que o uso de métodos individuais de seleção?}
+
+Para responder a essa questão, o objetivo geral deste trabalho consiste em desenvolver e investigar um pipeline de \textit{Ensemble Feature Selection} baseado na combinação e agregação de rankings produzidos por diferentes métodos de seleção de atributos para Classificação Associativa, analisando seus efeitos sobre o desempenho preditivo e a complexidade dos modelos induzidos.
+
+Para alcançar esse objetivo geral, estabelecem-se os seguintes
+objetivos específicos:
+
+\begin{itemize}
+
+    \item selecionar e caracterizar métodos de seleção de atributos
+    adequados ao contexto da Classificação Associativa, considerando
+    diferentes critérios de relevância e dependência e buscando compor
+    um conjunto heterogêneo de seletores;
+
+    \item analisar a diversidade e a redundância entre os rankings
+    produzidos pelos diferentes métodos de seleção de atributos,
+    investigando estratégias para composição do ensemble, como seleção,
+    agrupamento ou ponderação dos ranqueadores;
+
+    \item investigar estratégias de agregação dos rankings produzidos
+    pelos métodos que compõem o ensemble, considerando diferentes
+    mecanismos de consenso, como Borda e TOPSIS;
+
+    \item investigar estratégias para definição do subconjunto final de
+    atributos a partir do ranking agregado, considerando diferentes
+    níveis de redução e mecanismos adaptativos para determinação do
+    número de atributos selecionados;
+
+    \item avaliar experimentalmente as diferentes configurações do
+    pipeline de EFS no contexto da Classificação Associativa,
+    considerando desempenho preditivo, redução de atributos e
+    complexidade dos modelos induzidos, incluindo aspectos relacionados
+    à quantidade e à estrutura das regras geradas;
+
+    \item comparar as estratégias de EFS com métodos individuais de
+    seleção de atributos e com a Classificação Associativa sem seleção,
+    identificando as condições em que a combinação de diferentes métodos
+    proporciona melhor equilíbrio entre desempenho preditivo e
+    complexidade dos modelos;
+
+    \item investigar, como extensão do pipeline proposto, a possibilidade
+    de incorporar a relevância consensual dos atributos obtida pelo
+    ensemble diretamente ao processo de indução das regras de
+    classificação, por meio da ponderação dos atributos.
+
+\end{itemize}
+Adicionalmente, como extensão do pipeline proposto, investiga-se a possibilidade de incorporar a relevância consensual dos atributos obtida pelo ensemble diretamente ao processo de indução das regras de classificação. Nessa perspectiva, em vez de utilizar a informação produzida pelo EFS exclusivamente para determinar a permanência ou remoção dos atributos, os valores de relevância podem ser utilizados como pesos durante a construção ou avaliação das regras. Essa extensão permite analisar uma integração mais estreita entre EFS e CA e comparar duas formas de utilização da informação produzida pelo ensemble: como mecanismo externo de redução do espaço de atributos e como informação adicional ao processo de indução do classificador.
+
+A contribuição pretendida por esta dissertação encontra-se, portanto, na investigação sistemática da relação entre EFS e CA, considerando o processo de seleção não apenas como uma etapa de redução dimensional, mas como um componente capaz de modificar o espaço de descoberta de padrões e a estrutura do modelo resultante. Busca-se compreender como a heterogeneidade dos seletores, a diversidade entre os rankings, os mecanismos de agregação e a definição do subconjunto final se relacionam com o desempenho preditivo e com a complexidade dos classificadores associativos. Dessa forma, a avaliação proposta não parte da premissa de que o EFS seja necessariamente superior aos métodos individuais, mas procura estabelecer experimentalmente em quais condições sua utilização apresenta vantagens e quais decisões metodológicas contribuem para esses resultados.
+
+O restante desta dissertação está organizado da seguinte forma. O Capítulo~\ref{cap_fundamentos} apresenta os conceitos fundamentais que embasam o trabalho, abrangendo regras de associação, Classificação Associativa, Seleção de Atributos, Ensemble Feature Selection e os critérios utilizados na avaliação dos modelos. O Capítulo~\ref{trabRelac} apresenta os trabalhos relacionados, contemplando estudos sobre FS aplicada à CA e abordagens de EFS, e delimita a lacuna de pesquisa investigada. O Capítulo~\ref{cap:Metodologia} apresenta o método EFS4AC, descrevendo as etapas e decisões metodológicas que compõem o pipeline proposto. Os capítulos subsequentes apresentam o protocolo experimental, os resultados e sua análise, seguidos pelas conclusões e perspectivas de trabalhos futuros.

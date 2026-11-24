@@ -1,0 +1,63 @@
+%%%%%%%%%%%%%%
+\section{Medidas Objetivas}\label{sec:mo}
+%%%%%%%%%%%%%%
+
+As medidas objetivas (MOs), ou medidas de interesse, estão presentes de maneira unânime nas regras de associação e, consequentemente, na classificação associativa. Duas delas já foram apresentadas na etapa de extração, o suporte e a confiança (Equações~\ref{eq:suporte} e~\ref{eq:confiança}). Uma MO avalia a força estatística, ou as características, de um determinado padrão, baseando-se unicamente nos dados \cite{Bong2014}. As MOs podem ser utilizadas de três maneiras diferentes, a saber \cite{Geng2006}: (i) durante a extração das regras, a fim de podar o espaço de busca; (ii) para ordenar, i.e., ranquear as regras pelo seu grau de importância; (iii) para realizar o pós-processamento das regras, a fim de buscar padrões interessantes com correlações significativas.
+
+Como visto nas Equações~\ref{eq:suporte} e \ref{eq:confiança}, as MOs são definidas em termos da frequência que os elementos de uma regra aparecem nos dados. Assim, para que se avalie a importância de uma regra por meio de uma MO, é necessário também que se conheça toda a tabela de contingência da regra. A Tabela~\ref{tab:probs} apresenta esta estrutura e seus possíveis valores para uma regra abstrata $A \Rightarrow B$. $A$ representa o antecedente, $B$ representa o consequente, $\neg A$ representa a negação do antecedente e $\neg B$ a negação do consequente. $n(X)$ representa a frequência de $X$ e $N$ o número de transações do conjunto de dados. Assim, tem-se que:
+\begin{itemize}
+    \item $n(AB)$ = frequência com que $A$ e $B$ acontecem simultaneamente nas $N$ transações do conjunto de dados;
+    \item $n(\neg AB)$ = frequência com que $\neg A$ e $B$ acontecem simultaneamente nas $N$ transações do conjunto de dados;
+    \item $n(A \neg B)$ = frequência com que $A$ e $\neg B$ acontecem simultaneamente nas $N$ transações do conjunto de dados;
+    \item $n(\neg A \neg B)$ = frequência com que $\neg A$ e $\neg B$ acontecem simultaneamente nas $N$ transações do conjunto de dados.
+\end{itemize}
+
+\begingroup
+\setlength{\tabcolsep}{10pt}
+\renewcommand{\arraystretch}{1.5}
+\begin{table}[!htb]
+\caption{Tabela de contingência de uma regra abstrata $A \Rightarrow B$. Fonte: Adaptado de \citeonline{select2014}.}
+\label{tab:probs}
+\begin{tabular}{|c|c|c|c|}
+\hline
+                      & \textbf{$B$}          & \textbf{$\neg B$} &          \\ \hline
+\textbf{$A$}           
+& n($AB$)      & n($A \neg B$)            & n($A$)    \\ \hline
+\textbf{$\neg A$} & n($\neg A B$) & n($\neg A \neg B$)        & n($\neg A$) \\ \hline
+                      & n($B$)       & n($\neg B$)              & N \\ \hline
+\end{tabular}
+\centering
+\end{table}
+\endgroup
+
+A partir da Tabela~\ref{tab:probs} é possível se definir as probabilidades de ocorrência de $A$, $B$ e $AB$, respectivamente, $P(A)$, $P(B)$ e $P(AB)$, dividindo os elementos $n(A)$, $n(B)$ e $n(AB)$ por $N$. Tendo estes três valores de probabilidade é possível se obter 13 novas equações probabilísticas, as quais são utilizadas como base para se definir as MOs, como visto na Tabela~\ref{tab:probabs}. Nota-se que todas as equações derivam das três equações base ($P(A)$, $P(B)$, $P(AB)$), e que equações mais complexas são obtidas a partir das anteriores, como é o caso da equação No. 16, obtida a partir da equação No. 10, que por sua vez foi obtida a partir das Equações de No. 2 e No. 3. Vale mencionar que algumas destas equações já definem, por si só, algumas das MOs existentes na literatura (coluna ``Medida'').
+
+\begin{table}[!htb]
+    \centering
+    \caption{Probabilidades utilizadas para se definir as MOs disponíveis na literatura.}
+    \label{tab:probabs}
+    \begin{tblr}{
+      hlines,
+      vlines,
+    }
+    \textbf{No.} & \textbf{Probabilidade} & \textbf{Equação} & \textbf{Medida} \\
+    1 & $P(A)$ & $P(A)$ & Coverage \\ 
+    2 & $P(B)$ & $P(B)$ & Prevalence \\ 
+    3 & $P(AB)$ & $P(AB)$ & \textbf{Suporte} \\ 
+    4 & $P(\overline B)$ & $1 - P(B)$ & 1$-$Prevalence \\ 
+    5 & $P(\overline A)$ & $1 - P(A)$ & 1$-$Coverage\\ 
+    6 & $P(A \overline B)$ & $P(A) - P(AB)$ & - \\ 
+    7 & $P(\overline AB)$ & $P(B) - P(AB)$ & - \\ 
+    8 & $P(\overline {AB})$ & $1 - P(B) - P(A) + P(AB)$ & - \\ 
+    9 & $P(B|A)$ & $\frac{P(AB)}{P(A)}$ & \textbf{Confiança} \\ 
+    10 & $P(A|B)$ & $\frac{P(AB)}{P(B)}$ & Recall \\ 
+    11 & $P(B|\overline A)$ & $\frac{P(\overline AB)}{P(\overline A)}$ & 1$-$Specificity\\ 
+    12 & $P(A|\overline B)$ & $\frac{P(A\overline B)}{P(\overline B)}$ & 1$-$Complemente Class Support \\ 
+    13 & $P(\overline B|\overline A)$ & $1 - P(B|\overline A)$ & Specificity \\ 
+    14 & $P(\overline A|\overline B)$ & $1 - P(A|\overline B)$ & Complement Class Support \\ 
+    15 & $P(\overline B|A)$ & $1 - P(B|A)$ & 1$-$Confiança\\ 
+    16 & $P(\overline A|B)$ & $1 - P(A|B)$ & 1$-$Recall\\ 
+    \end{tblr}
+    \end{table}
+
+Embora o suporte e a confiança sejam as MOs mais tradicionais, ao longo dos anos mais de 60 medidas foram propostas, como visto em \citeonline{Tew:2014a} e \citeonline{scenario-2022}, visando superar limitações de algumas das medidas até então existentes, como a própria confiança \cite{Tan2020}. Este grande número de MOs existentes gerou um problema secundário, uma vez que não existe uma MO que seja adequada a todas as explorações \cite{DBLP:conf/dawak/SharmaKPYD20}. Assim, realizar a escolha de uma ou mais medidas para explorar um conjunto de regras torna-se importante dado os benefícios que se obtêm ao optar por uma ou outra MO. No entanto, fazer a escolha de qual utilizar é um problema difícil \cite{luna2018, DBLP:conf/dawak/SharmaKPYD20}, visto que existem diferenças significativas em relação aos objetivos (semânticas), entre outros aspectos, que as distinguem. Para tanto, diferentes abordagens foram propostas para realizar esta escolha. Visando solucionar tal problema, alguns trabalhos visam agregar os valores de diversas medidas em um único valor, fazendo com que sejam levadas em consideração a importância de várias medidas ao mesmo tempo, eliminando, consequentemente, a necessidade de se realizar uma seleção, como em \citeonline{Silva:2018a,iceis20,momac,rankagg,10571935} no contexto de ranqueamento de regras em classificadores associativos.

@@ -1,0 +1,673 @@
+%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Revisão Sistemática da Literatura}\label{trabRelac}
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+Diante dos desafios impostos pela alta dimensionalidade em classificadores associativos, especialmente relacionados à explosão combinatória do número de \textit{itemsets} candidatos e de regras geradas, torna-se fundamental investigar estratégias que possam mitigar tais limitações. Nesse contexto, a seleção de atributos surge como uma abordagem promissora, ao possibilitar a redução do espaço de busca, a eliminação de atributos irrelevantes ou redundantes e, consequentemente, a melhoria da interpretabilidade e do desempenho dos modelos.
+
+Diante do exposto, foi realizado um mapeamento sistemático da literatura com o objetivo de identificar e analisar trabalhos que exploram o uso de métodos de seleção de atributos em conjunto com classificadores associativos. Especificamente, buscou-se compreender como os métodos de FS têm sido aplicados nesse contexto, quais abordagens são mais frequentemente utilizadas e quais lacunas ainda persistem na literatura.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Protocolo}\label{sec:protocolo_rsl}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Uma Revisão Sistemática da Literatura (RSL) consiste em um processo metodológico de identificação, seleção, extração e síntese de estudos primários com base em questões de pesquisa \cite{kitchenham2007guidelines,dermeval2020mapeamento}. Neste trabalho, o protocolo foi definido para garantir rastreabilidade na busca, consistência na seleção dos estudos e comparabilidade entre as evidências extraídas. Em consonância com esse objetivo, o protocolo foi organizado em: questões de pesquisa (Seção~\ref{sec:RQs_TR}), identificação dos estudos primários (Seção~\ref{sec:busca_selecao}), extração de dados (Seção~\ref{sec:extracao}) e ameaças à validade (Seção~\ref{sec:ameacas}).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Questões de Pesquisa}\label{sec:RQs_TR}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+O objetivo desta RSL foi recuperar e analisar estudos primários que apresentam soluções que incorporem métodos de \textit{feature selection} no contexto de classificadores associativos. Para isso, as perguntas abaixo foram formuladas.
+
+\textbf{QP-1. Qual o \textit{pipeline} proposto pela solução?} Esta pergunta visa identificar as etapas dos CAs cobertas pelos artigos da literatura a fim de verificar se as etapas se mantém ou se há alguma modificação quando métodos de \textit{feature selection} são considerados.
+
+
+\textbf{QP-2. Os métodos de FS são utilizados de maneira externa ao processo, i.e., como uma etapa de pré-processamento, ou de maneira interna, i.e., durante o processo de indução do modelo?} Esta pergunta busca identificar em que etapa do \textit{pipeline} os métodos de FS são utilizados e com qual objetivo (redução dimensional, robustez, interpretabilidade, custo computacional, etc.).
+    
+\textbf{QP-3. Quais abordagens e métodos de FS são utilizados?} Esta pergunta visa identificar as abordagens utilizadas, i.e., filtro, \textit{wrapper}, etc., assim como seus respectivos métodos, i.e., $\chi^2$, ReliefF, etc.
+    
+\textbf{QP-4. As soluções utilizam outras estratégias além de FS para melhorar o desempenho e/ou interpretabilidade dos modelos?} Esta pergunta visa identificar se as soluções utilizaram outras MOs, múltiplos suportes, etc.
+    
+\textbf{QP-5. Como a avaliação experimental é conduzida?} Esta pergunta visa identificar os \textit{baselines} utilizados, assim como medidas e/ou aspectos de avaliação.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Identificação dos Estudos Primários}\label{sec:busca_selecao}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Para identificar os estudos primários relevantes para a extração de dados, é necessário definir a \textit{string} de busca, as bases de dados para recuperação dos artigos, os critérios de inclusão e exclusão para selecionar ou não um artigo como relevante e os passos para realizar a seleção.
+
+\textbf{\textit{String} de Busca} e \textbf{Seleção das Fontes.} A \textit{string} foi construída para recuperar trabalhos em que (i) classificadores associativos são o
+objeto de estudo central (incluindo sinônimos consagrados na literatura) e (ii) exista incorporação explícita de métodos de \textit{feature} e/ou item \textit{selection}. A \textit{string} foi ajustada conforme as diretrizes de cada biblioteca digital utilizada, a saber: Scopus\footnote{\url{https://www.scopus.com}.}, Compendex\footnote{\url{https://www.engineeringvillage.com}.}, ISI Web of Science\footnote{\url{https://www.webofscience.com}.}. Tais bibliotecas são amplamente utilizadas. A \textit{string} foi direcionada para os campos de \textit{título},
+\textit{resumo} e \textit{palavras-chave}. A Tabela~\ref{tab:fontes_busca}
+resume as fontes e o volume de resultados retornados. As \textit{strings} utilizadas em cada biblioteca foram:
+
+\begin{itemize}
+    \item \textbf{Scopus.} {\ttfamily\raggedright TITLE-ABS-KEY ( ( "association classification" OR "associative classification" OR
+    "associative rule mining" OR "associative classifier" OR "associative classifiers" OR
+    "predictive association rules" OR "predictive association rule" OR
+    "class association rules" OR "class association rule" OR
+    "classification association rules" OR "classification association rule" )
+    AND ( "feature selection" OR "item selection") ) \par}
+
+    \item \textbf{Compendex.} {\ttfamily\raggedright ( ( "association classification" OR "associative classification" OR "associative rule mining" OR
+    "associative classifier" OR "associative classifiers" OR "predictive association rules" OR
+    "predictive association rule" OR "class association rules" OR "class association rule" OR
+    "classification association rules" OR "classification association rule" )
+    AND ( "feature selection" OR "item selection") ) WN KY \par}
+
+    \item \textbf{Web of Science.} {\ttfamily\raggedright TS=( ( "association classification" OR "associative classification" OR "associative rule mining" OR
+    "associative classifier" OR "associative classifiers" OR "predictive association rules" OR
+    "predictive association rule" OR "class association rules" OR "class association rule" OR
+    "classification association rules" OR "classification association rule" )
+    AND ( "feature selection" OR "item selection") ) \par}
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%
+\begin{table}[htbp]
+\centering
+\caption{Bibliotecas consultadas, data de execução e número de artigos retornados pela \textit{string} de busca.}
+\label{tab:fontes_busca}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{Biblioteca} & \textbf{Data de execução} & \textbf{\#Artigos retornados} \\
+\hline
+Scopus & 10/11/2025 & 80 \\
+Compendex & 12/11/2025 & 61 \\
+Web of Science & 12/11/2025 & 50 \\
+\hline
+\textbf{Total} & -- & 191 \\
+\hline
+\end{tabular}
+\end{table}
+%%%%%%%%%%%%%%%%
+
+
+\textbf{Critérios de Inclusão e Exclusão.} O propósito de se definir esses critérios é identificar os estudos primários que fornecem evidências diretas em relação às perguntas de pesquisa. Assim, os estudos a serem selecionados para a extração de dados são aqueles que não se encaixam em nenhum critério de exclusão. Os seguintes critérios de exclusão foram considerados: (i) o artigo está fora do escopo, ou seja, não propõe uma solução que correlacione classificadores associativos e \textit{feature selection}; (ii) o artigo atende ao escopo, mas aborda outros aspectos também, como escalabilidade por meio de soluções paralelas e/ou distribuídas, soluções incrementais e/ou \textit{lazy}, etc.; (iii) o artigo atende ao escopo, mas não induz realmente um classificador, i.e., não propõe um fluxo algorítmico completo; (iv) o artigo atende ao escopo, mas propõe uma solução específica para um determinado problema que não se aplica a outros contextos; (v) o artigo é uma cópia ou outra versão de um artigo já considerado; (vi) o artigo não está em inglês; (vii) não foi possível se ter acesso ao artigo completo; (viii) o artigo não é um estudo primário (\textit{proceedings} de congressos, relatórios técnicos, etc.); (ix) artigos anteriores ao ano de 2015 ($\leq$ 2014) foram desconsiderados.
+
+
+\textbf{Passos de Seleção.} Os passos utilizados para selecionar os artigos relevantes aqui apresentados foram os seguintes:
+
+\begin{itemize}
+    %%%%%%%%%%%%%%%%%%%%
+    \item Passo 1: Identificação e organização dos artigos retornados das bibliotecas digitais utilizando a ferramenta Parsifal\footnote{\texttt{https://parsif.al/}}. Ao todo 191 artigos foram recuperados (vide Tabela~\ref{tab:fontes_busca}).
+    
+    \item Passo 2: Remoção automática e/ou manual de artigos duplicados usando a ferramenta Parsifal. Ao final deste passo, 95 artigos permaneceram.
+
+    \item Passo 3: Revisão de títulos e resumos para aplicar os critérios de exclusão. Artigos que atendiam aos critérios de exclusão foram removidos e os restantes foram mantidos. Em caso de dúvida, o artigo foi mantido. Ao final deste passo, 29 artigos permaneceram.
+    
+    \item Passo 4: Revisão dos artigos completos. Artigos que atendiam aos critérios de exclusão foram removidos e os restantes foram mantidos. Ao final deste passo, 10 artigos permaneceram.
+\end{itemize}
+
+%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%
+\subsection{Extração de Dados}\label{sec:extracao}
+ A extração de dados diz respeito à coleta de informações dos artigos selecionados para responder às perguntas de pesquisa. A extração de dados foi realizada por meio da leitura dos artigos selecionados. Os formulários de extração foram elaborados no Excel. Os resultados da extração são apresentados na Seção~\ref{sec:resultados_analise_discussao}.
+
+%%
+%%%%%%%%%%%%%%%%%%%% 
+\subsection{Ameaças à Validade}\label{sec:ameacas}
+%%%%%%%%%%%%%%%%%%%%
+Uma das vantagens de se realizar uma RSL é apresentar uma visão geral do estado da arte por meio de um processo metodológico e não arbitrário. No entanto, mesmo neste caso, é possível que artigos relevantes não sejam incluídos. Em relação a este trabalho, podem ser mencionadas as seguintes questões: (i) embora as buscas tenham sido realizadas nas maiores bibliotecas digitais, algumas outras não foram utilizadas, como a Springer\footnote{\url{https://link.springer.com/}.}, o que pode ter resultado na perda de estudos; (ii) como foi decidido não selecionar soluções que atendiam ao escopo, porém que apresentavam alguma restrição tendo como base os critérios de exclusão (ii), (iii) e (iv), estudos interessantes podem ter ficado de fora.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Resultados, Análise e Discussão}\label{sec:resultados_analise_discussao}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Esta seção detalha como cada um dos 10 estudos selecionados aborda os desafios da classificação associativa em conjunto com abordagens de seleção de atributos.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Descrição dos Trabalhos}
+\label{sec:descricao-trabalhos}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Embora a descrição individual dos estudos não seja uma prática obrigatória em revisões sistemáticas da literatura, esta seção apresenta uma síntese analítica dos trabalhos selecionados. O objetivo é oferecer um panorama metodológico que auxilie a interpretação dos resultados discutidos nas perguntas de pesquisa, especialmente no que se refere ao papel desempenhado por métodos de \textit{feature selection} (FS) em classificadores associativos (CAs).
+
+Para manter a uniformidade da análise, cada trabalho é descrito considerando quatro aspectos principais: (i) o objetivo do estudo; (ii) a estrutura geral do \textit{pipeline}; (iii) o papel desempenhado pela FS; e (iv) a forma de integração entre FS e classificação associativa, isto é, se a seleção ocorre de maneira externa, como etapa de pré-processamento, ou interna, quando incorporada ao processo de indução, ponderação, geração ou poda de regras.
+
+De modo geral, observa-se que a FS é utilizada com diferentes finalidades nos trabalhos analisados, incluindo redução de dimensionalidade, remoção de atributos irrelevantes e redundantes, controle do número de regras geradas, melhoria da acurácia, aumento da interpretabilidade, redução de custo computacional e, em alguns casos, incorporação direta da relevância dos atributos ao processo de descoberta de regras. Assim, a contribuição da FS não se limita à redução do espaço de atributos, mas também influencia a qualidade, a quantidade, a estrutura e a capacidade discriminativa das regras produzidas pelos classificadores associativos.
+
+%%%%%%%%%%% TRAB-1 %%%%%%%%%%%
+\textbf{Trabalho de \citeonline{wu2024novel}.} 
+\citeonline{wu2024novel} propõem o MCWCAR (\textit{Mutual Information and Correlation Coefficient Weighted Class Association Rule Mining}), um modelo de classificação associativa ponderada voltado à predição de defeitos de software. Embora o domínio de aplicação seja a engenharia de software, a proposta apresenta elementos metodológicos relevantes para o estudo de FS em CAs, pois incorpora medidas de relevância diretamente ao processo de mineração de \textit{itemsets} e geração de regras.
+
+\begin{description}
+    \item[Objetivo do trabalho.] O objetivo central do estudo é propor um classificador associativo capaz de lidar com limitações recorrentes da mineração de regras em bases desbalanceadas, especialmente em cenários de predição de defeitos de software. Os autores buscam enfrentar três problemas principais: (i) a influência do desbalanceamento de classes sobre suporte e confiança; (ii) a dificuldade de definir pesos adequados para itens discretizados; e (iii) a limitação de medidas tradicionais de interesse, como a confiança, em cenários assimétricos e com associações negativas.
+
+    \item[Pré-processamento.] Os dados são inicialmente tratados, discretizados e particionados, preservando a distribuição desbalanceada original entre as classes. Essa decisão é importante, pois os autores não adotam estratégias clássicas de reamostragem, como \textit{oversampling} ou \textit{undersampling}; em vez disso, procuram tratar o desbalanceamento no próprio mecanismo de mineração das regras.
+
+    \item[Mineração ponderada de \textit{itemsets}.] Para contornar o problema de desbalanceamento, os autores utilizam uma estratégia de aprendizado sensível a custo. Durante a mineração de \textit{itemsets}, são atribuídos pesos distintos aos itens, e o suporte tradicional é substituído por um suporte ponderado. Os \textit{itemsets} são divididos em três categorias: (i) \textit{defective itemsets}, que contêm o item de classe \textit{defect=true}; (ii) \textit{non-defective itemsets}, que contêm o item de classe \textit{defect=false}; e (iii) \textit{feature itemsets}, que contêm apenas itens de atributos, representando relações entre características sem associação direta com a classe.
+
+    Para \textit{defective itemsets} e \textit{non-defective itemsets}, o peso dos itens é obtido pelo Coeficiente de Correlação (CCO) entre cada item discretizado e o respectivo item de classe. Assim, itens mais correlacionados com a classe defeituosa ou não defeituosa exercem maior influência no cálculo do suporte ponderado. Para \textit{feature itemsets}, o peso é obtido por meio da Informação Mútua (MI) entre o atributo correspondente ao item e a variável alvo \textit{Defect}, de modo que atributos mais informativos sejam priorizados antes da formação de combinações em \textit{itemsets}.
+
+    \item[Geração, filtragem e predição.] O suporte ponderado é calculado multiplicando-se o suporte original pelo peso dos itens. Em seguida, são definidos três limiares de suporte mínimo, um para cada tipo de \textit{itemset}. Os \textit{itemsets} que satisfazem seus respectivos limiares são mantidos e convertidos em regras. Para avaliar e filtrar as regras, os autores adotam a medida \textit{Added Value} (AV), considerada mais adequada que a confiança tradicional por capturar assimetria e associações negativas. As regras geradas são posteriormente ordenadas, podadas e utilizadas na predição.
+
+    \item[Contribuição da FS.] A contribuição da FS ocorre de maneira interna ao processo de mineração. Em vez de remover atributos previamente, o MCWCAR incorpora a relevância dos atributos e itens ao cálculo do suporte ponderado. A MI atua como mecanismo de ponderação para \textit{feature itemsets}, enquanto o CCO pondera itens associados às classes defeituosa e não defeituosa. Dessa forma, a FS funciona como um mecanismo de ponderação e triagem de combinações relevantes durante a mineração dos \textit{itemsets}, favorecendo regras mais discriminativas.
+
+    \item[Forma de integração.] A integração entre FS e CA é interna, pois as medidas de relevância não são aplicadas como uma etapa isolada de pré-processamento. Elas participam diretamente da mineração de \textit{itemsets}, da definição do suporte ponderado e, consequentemente, da geração das regras de associação de classe.
+\end{description}
+
+
+%%%%%%%%%%% TRAB-2 %%%%%%%%%%%
+\textbf{Trabalho de \citeonline{nandhini2020performance}.} 
+\citeonline{nandhini2020performance} investigam o desempenho do classificador associativo CPAR em bases de dados da área da saúde, com foco no aprimoramento de duas etapas fundamentais do algoritmo: a seleção de atributos durante a geração das regras e a avaliação das regras produzidas.
+
+\begin{description}
+    \item[Objetivo do trabalho.] O objetivo do estudo é melhorar o desempenho do CPAR por meio da substituição da medida original de seleção de atributos, baseada em FOIL's Information Gain, por medidas alternativas de ganho. Para isso, os autores comparam o CPAR original com duas variantes: CPAR-GR, baseada em \textit{Gain Ratio}, e CPAR-IG, baseada em \textit{Information Gain}. Além disso, investigam o impacto de medidas de erro, como \textit{Laplace Accuracy} (La) e \textit{Likelihood Ratio} (Lr), na avaliação e seleção das melhores regras.
+
+    \item[Pré-processamento.] Os conjuntos de dados são inicialmente preparados para a geração de regras, incluindo discretização de atributos contínuos e remoção de atributos irrelevantes, como identificadores. Essa etapa adequa os dados ao formato necessário para a aplicação do CPAR e de suas variantes.
+
+    \item[Geração de regras e seleção dinâmica de atributos.] O processo de geração das regras é conduzido de forma incremental. A cada iteração, os atributos candidatos são avaliados por uma medida de ganho, e aqueles considerados mais promissores são incluídos no antecedente das regras. Diferentemente de abordagens que selecionam apenas o melhor atributo, o CPAR também considera atributos \textit{close-to-the-best}, definidos a partir de um limiar baseado no parâmetro \textit{Gain Similarity Ratio} (GSR). Esse mecanismo permite gerar múltiplas regras simultaneamente e amplia a diversidade do conjunto de regras.
+
+    \item[Avaliação e ranqueamento de regras.] Após a geração das regras, estas são avaliadas por medidas de erro. O estudo considera a \textit{Laplace Accuracy} e o \textit{Likelihood Ratio} para ranquear e selecionar as regras mais relevantes. As melhores regras são então utilizadas para compor o modelo final de classificação.
+
+    \item[Predição.] Para classificar uma nova instância, o modelo seleciona as melhores $k$ regras de cada classe que correspondem ao exemplo. A classe final é definida com base na média da medida de avaliação das regras selecionadas, atribuindo-se o rótulo da classe com maior valor médio.
+
+    \item[Contribuição da FS.] A FS contribui diretamente para a geração das regras, pois a escolha dos atributos ocorre dinamicamente durante a construção dos antecedentes das CARs. Assim, a seleção não atua como uma etapa externa de redução dimensional, mas como parte do mecanismo indutivo do CPAR. A principal contribuição do trabalho está em demonstrar que medidas alternativas, especialmente \textit{Gain Ratio} e \textit{Information Gain}, podem produzir regras mais relevantes e melhorar o desempenho do classificador em bases de saúde.
+
+    \item[Forma de integração.] A integração é interna, pois a seleção de atributos ocorre durante o processo de indução das regras, influenciando diretamente quais atributos serão incorporados aos antecedentes das CARs.
+\end{description}
+
+
+%%%%%%%%%%% TRAB-3 %%%%%%%%%%%
+\textbf{Trabalho de \citeonline{gayathri2015efficient}.} 
+\citeonline{gayathri2015efficient} propõem o BSIC-AC (\textit{Bayes Shared Information Criterion based on Associative Classifier}), um modelo de classificação associativa voltado à predição e ao diagnóstico de doenças, com ênfase na detecção precoce de AVC. A proposta combina seleção de atributos baseada em informação compartilhada com um classificador associativo otimizado.
+
+\begin{description}
+    \item[Objetivo do trabalho.] O objetivo do estudo é desenvolver um modelo preditivo e diagnóstico capaz de reduzir a dimensionalidade dos dados médicos, melhorar a acurácia da classificação e diminuir a taxa de falsos positivos. Para isso, os autores propõem integrar o critério BSIC a um classificador associativo otimizado, buscando capturar padrões de doença relacionados e reduzir a complexidade das regras geradas.
+
+    \item[Pré-processamento.] O modelo recebe como entrada padrões de treinamento associados a diferentes padrões de doença. Esses dados são preparados para as etapas subsequentes de seleção de atributos, geração de regras e classificação. O artigo, contudo, apresenta limitações quanto ao detalhamento operacional dessa etapa, não especificando de forma exaustiva os procedimentos de preparação dos dados.
+
+    \item[Seleção de atributos pelo BSIC.] A seleção de atributos é realizada por meio do \textit{Bayes Shared Information Criterion} (BSIC). O diferencial da proposta está em conduzir a seleção considerando múltiplos padrões de classe correlacionados. Diferentemente de abordagens que avaliam a importância dos atributos de maneira independente para cada classe, o BSIC explora informação compartilhada entre padrões de doença, permitindo capturar dependências inter-relacionadas entre tarefas.
+
+    Para isso, a solução utiliza uma matriz de seleção de atributos (\textit{feature selection matrix}) para representar a relação entre atributos e padrões de classe, combinada a uma função de informação compartilhada baseada em um modelo Bayesiano. Esse mecanismo busca avaliar a consistência entre atributos e classes, selecionar subconjuntos mais relevantes e reduzir atributos redundantes ou irrelevantes.
+
+    \item[Construção do classificador associativo e poda.] Com base nos atributos selecionados, o modelo constrói regras de classificação por meio de um classificador associativo. Para lidar com o grande volume de regras geradas, os autores introduzem o \textit{Optimized Associative Classifier} (OAC), responsável por podar e compactar o conjunto de regras. O OAC adota os princípios de máxima relevância e mínima redundância, selecionando regras mais informativas e eliminando redundâncias, o que contribui para melhorar a interpretabilidade e a eficiência do modelo.
+
+    \item[Otimização gulosa.] Para reduzir a geração excessiva de subconjuntos de atributos e minimizar a taxa de falsos positivos, o BSIC-AC incorpora um algoritmo guloso baseado em árvore binária, denominado GTCL (\textit{Greedy Total Compatible Length}). Nesse procedimento, os atributos são ordenados e selecionados iterativamente, priorizando aqueles mais compatíveis com o subconjunto atual. O critério TCL busca maximizar a relevância e minimizar a redundância entre atributos e padrões de classe.
+
+    \item[Predição e diagnóstico.] Na fase de predição, as regras resultantes, após seleção, poda e otimização, são aplicadas ao processo de correspondência com padrões de doença. As classes são atribuídas com base nas regras que melhor correspondem aos padrões observados, produzindo o diagnóstico ou a predição final.
+
+    \item[Contribuição da FS.] A FS é uma das contribuições centrais do trabalho. O BSIC seleciona atributos considerando informação compartilhada entre múltiplos padrões de doença, buscando identificar atributos consistentes para classes correlacionadas. Além disso, a seleção de atributos está articulada à poda de regras e ao critério de máxima relevância e mínima redundância, contribuindo para reduzir dimensionalidade, melhorar a acurácia, diminuir redundâncias e reduzir falsos positivos.
+
+    \item[Forma de integração.] A integração é interna, pois a seleção de atributos compõe o próprio \textit{framework} BSIC-AC e está diretamente associada à construção, otimização e poda do classificador associativo.
+\end{description}
+
+
+%%%%%%%%%%% TRAB-4 %%%%%%%%%%%
+\textbf{Trabalho de \citeonline{sowan2023hybrid}.} 
+\citeonline{sowan2023hybrid} propõem uma abordagem híbrida de seleção de atributos combinada à classificação associativa para detecção de câncer de mama. O estudo é motivado pela necessidade de construir modelos preditivos interpretáveis, capazes de reduzir atributos irrelevantes e redundantes, diminuir o número de regras geradas e manter ou melhorar o desempenho preditivo.
+
+\begin{description}
+    \item[Objetivo do trabalho.] O objetivo do estudo é propor modelos de classificação associativa para diagnóstico de câncer de mama, utilizando subconjuntos de atributos mais discriminativos. A proposta busca aumentar a eficiência e a interpretabilidade dos classificadores, reduzindo o número de regras e eliminando características pouco informativas.
+
+    \item[Pré-processamento.] Os dados são preparados para a classificação associativa, incluindo tratamento de valores faltantes e discretização de atributos contínuos, quando necessário. Essa preparação é essencial para adequar os dados ao formato categórico exigido pela mineração de regras.
+
+    \item[Seleção de atributos.] Os autores propõem duas estratégias de FS. A primeira, denominada WARF (\textit{Weighted Average of Relative Frequency}), consiste em um método filtro baseado em ensemble de ranqueadores. O WARF combina CFS, Information Gain, Gain Ratio, $\chi^2$ e ReliefF para calcular uma média ponderada das frequências relativas dos atributos, selecionando aqueles considerados mais informativos.
+
+    A segunda estratégia, denominada \textit{Hybrid PSO-WARF}, estende o WARF por meio de um mecanismo wrapper baseado em \textit{Particle Swarm Optimization} (PSO). Nessa abordagem, diferentes classificadores são utilizados para avaliar subconjuntos candidatos de atributos, permitindo refinar a busca por combinações mais adequadas ao modelo preditivo.
+
+    \item[Classificação associativa.] A etapa de modelagem utiliza o PCBA (\textit{Predictive Classification Based on Associations}), que combina geração de regras por CBA-RG e \textit{predictive} Apriori. Dois modelos são construídos: WARF-PCBA e Hybrid PSO-WARF-PCBA. Ambos utilizam os atributos selecionados como entrada para a indução das regras associativas.
+
+    \item[Poda e interpretabilidade.] O modelo inclui ainda um processo de poda de regras, visando reduzir redundâncias e privilegiar regras mais simples, com menor número de atributos. Esse procedimento contribui para aumentar a interpretabilidade e a eficiência do classificador.
+
+    \item[Contribuição da FS.] A contribuição da FS está na combinação de estratégias filtro, ensemble e wrapper para identificar subconjuntos discriminativos. O WARF reduz o espaço de atributos por meio da agregação de múltiplos critérios de ranqueamento, enquanto o PSO-WARF refina a busca por subconjuntos ótimos. Com isso, a FS contribui para reduzir dimensionalidade, diminuir o número de regras, aumentar a interpretabilidade e melhorar o desempenho dos classificadores associativos.
+
+    \item[Forma de integração.] A integração é externa, pois os subconjuntos de atributos são selecionados antes da indução do classificador associativo. Contudo, a FS possui papel estruturante no pipeline, uma vez que determina diretamente o espaço de atributos utilizado pelo PCBA.
+\end{description}
+
+
+%%%%%%%%%%% TRAB-5 %%%%%%%%%%%
+\textbf{Trabalho de \citeonline{shaharanee2015irrelevant}.} 
+\citeonline{shaharanee2015irrelevant} investigam o uso de seleção de atributos em classificação associativa estrutural, com foco na remoção de atributos irrelevantes e na redução do número de regras geradas.
+
+\begin{description}
+    \item[Objetivo do trabalho.] O objetivo do estudo é avaliar se a remoção de atributos irrelevantes antes da mineração de regras pode reduzir a quantidade e a complexidade das regras geradas, sem comprometer a acurácia e a cobertura do classificador. A proposta parte do pressuposto de que atributos irrelevantes podem gerar regras desnecessárias, complexas e pouco úteis para a tarefa de classificação.
+
+    \item[Pré-processamento.] Os atributos contínuos são discretizados de modo a adequá-los ao processo de mineração de regras. Em seguida, os dados são submetidos a métodos de avaliação de relevância dos atributos.
+
+    \item[Seleção de atributos.] A relevância dos atributos é avaliada por meio de duas medidas: \textit{Symmetrical Tau} (ST) e \textit{Mutual Information} (MI). Os atributos são ranqueados conforme sua relevância em relação à variável de classe. Em seguida, é definido um ponto de corte (\textit{cut-point}) com base na variação entre valores consecutivos no ranking. Quando o valor de um atributo passa a ser inferior à metade do valor do atributo imediatamente anterior, os atributos subsequentes são considerados irrelevantes e removidos.
+
+    \item[Classificação associativa.] Após a seleção de atributos, as regras são geradas por meio de um algoritmo de mineração de associação, representado genericamente como $AR_{AL}$. O artigo não especifica de forma detalhada qual algoritmo de mineração é utilizado, tratando essa etapa em nível conceitual. Após a geração inicial, regras compostas por atributos considerados irrelevantes são eliminadas, reforçando a relação entre seleção de atributos e simplificação do conjunto de regras.
+
+    \item[Contribuição da FS.] A FS contribui como etapa de pré-processamento para remover atributos irrelevantes antes da geração das regras. Sua principal contribuição está em reduzir substancialmente o número de regras, diminuir a complexidade do modelo e preservar, ou eventualmente melhorar, a acurácia e a cobertura. Além disso, ao impedir que atributos irrelevantes participem da geração das regras, a FS favorece modelos mais interpretáveis e com menor risco de sobreajuste.
+
+    \item[Forma de integração.] A integração é externa, pois a seleção de atributos é realizada antes da mineração de regras. A FS atua como filtro inicial do espaço de atributos, condicionando o conjunto de regras que poderá ser gerado posteriormente.
+
+    \item[Observação crítica.] Embora a proposta seja relevante para a discussão sobre FS em CAs, o artigo apresenta certa limitação metodológica ao não detalhar completamente o algoritmo de mineração utilizado nem a operacionalização exata da remoção posterior de regras compostas por atributos irrelevantes. Ainda assim, o trabalho é importante por explicitar a relação entre atributos irrelevantes, volume de regras e complexidade do classificador associativo.
+\end{description}
+
+
+%%%%%%%%%%% TRAB-6 %%%%%%%%%%%
+\textbf{Trabalho de \citeonline{cicek2021assessment}.} 
+\citeonline{cicek2021assessment} aplicam classificação associativa a dados de expressão gênica com o objetivo de classificar pacientes COVID-19 positivos e negativos, bem como revelar relações interpretáveis entre genes selecionados e a presença da doença.
+
+\begin{description}
+    \item[Objetivo do trabalho.] O objetivo do estudo é utilizar um modelo de classificação associativa para classificar COVID-19 a partir de dados gênicos e identificar genes potencialmente relacionados à doença. Além do desempenho preditivo, o trabalho busca produzir regras interpretáveis que auxiliem na compreensão das relações entre padrões gênicos e status clínico.
+
+    \item[Pré-processamento.] O conjunto de dados apresenta alta dimensionalidade, contendo milhares de genes para um número relativamente pequeno de indivíduos. Essa característica torna necessária a aplicação de técnicas de redução dimensional antes da indução do classificador associativo.
+
+    \item[Seleção de atributos.] A FS é realizada por meio do método LASSO (\textit{Least Absolute Shrinkage and Selection Operator}), utilizado para selecionar preditores relevantes em cenários nos quais o número de atributos é muito superior ao número de amostras. O LASSO combina estimação e seleção de variáveis ao penalizar coeficientes, reduzindo alguns deles a zero.
+
+    \item[Classificação associativa.] Após a seleção dos genes, os autores aplicam o algoritmo CBA (\textit{Classification Based on Associations}) para gerar regras de associação de classe e construir o modelo de classificação. As regras resultantes relacionam intervalos ou padrões de expressão gênica à classe COVID-19 positiva ou negativa.
+
+    \item[Contribuição da FS.] A FS contribui para reduzir o custo computacional, eliminar ineficiências decorrentes da alta dimensionalidade e facilitar a interpretação dos resultados. No contexto do estudo, o LASSO permite selecionar um subconjunto menor de genes potencialmente associados à COVID-19, tornando viável a indução de regras associativas interpretáveis. Assim, a FS tem papel essencial tanto na viabilidade computacional quanto na utilidade biomédica das regras geradas.
+
+    \item[Forma de integração.] A integração é externa, pois o LASSO é aplicado antes da construção do classificador associativo. O subconjunto de genes selecionado alimenta posteriormente o algoritmo CBA.
+\end{description}
+
+
+%%%%%%%%%%% TRAB-7 %%%%%%%%%%%
+\textbf{Trabalho de \citeonline{alhawari2021classification}.} 
+\citeonline{alhawari2021classification} investigam a classificação de avaliações de aplicativos móveis em tarefas de manutenção de software, comparando classificadores tradicionais e associativos. Além disso, os autores propõem o ACRM (\textit{Associative Classification for Reviews Mining}), uma abordagem de classificação associativa voltada à mineração de avaliações textuais.
+
+\begin{description}
+    \item[Objetivo do trabalho.] O objetivo do estudo é classificar avaliações de usuários em categorias relacionadas a tarefas de manutenção de software, tais como descoberta de problemas, solicitação de funcionalidades, busca de informações e fornecimento de informações. O trabalho também busca avaliar se classificadores associativos podem superar ou complementar classificadores tradicionais em problemas de mineração de textos curtos.
+
+    \item[Pré-processamento e extração de atributos.] As avaliações, originalmente não estruturadas, são transformadas em um conjunto de dados estruturado por meio de técnicas de Processamento de Linguagem Natural (NLP) e análise textual. Essa etapa inclui procedimentos como tokenização, remoção de palavras pouco informativas, normalização textual e representação das avaliações por atributos derivados dos termos presentes nos textos.
+
+    \item[Seleção de atributos.] Os autores aplicam métodos de FS baseados em Information Gain e $\chi^2$, com o objetivo de reduzir dimensionalidade, remover ruído textual e selecionar termos mais relevantes para a classificação. Essa etapa é particularmente importante porque avaliações de aplicativos são textos curtos, esparsos e frequentemente ruidosos, nos quais muitos atributos podem ter baixa contribuição discriminativa.
+
+    \item[Classificação e avaliação.] O conjunto de dados estruturado é utilizado para treinar e avaliar classificadores tradicionais, como J48, Naive Bayes, KNN, SVM e Random Forest, além de classificadores associativos, como CBA, CBA2, CMAR e CPAR. A comparação busca verificar o impacto da FS no desempenho dos diferentes modelos.
+
+    \item[Proposta ACRM.] O ACRM integra mineração de padrões frequentes e classificação. Seu funcionamento envolve: (i) binarização dos dados, convertendo atributos em indicadores de presença ou ausência; (ii) extração de \textit{itemsets} frequentes por meio do FP-Growth; (iii) geração de regras com base em limiares de suporte e confiança; (iv) seleção de regras com maior confiança e, em caso de empate, maior \textit{conviction}; e (v) atribuição da classe com base na regra selecionada.
+
+    \item[Contribuição da FS.] A FS contribui para reduzir o ruído textual e remover atributos ineficientes gerados durante a representação das avaliações. Os métodos Information Gain e $\chi^2$ selecionam termos mais relevantes para distinguir as categorias de manutenção, contribuindo para melhorar o desempenho dos classificadores e tornar as regras extraídas mais interpretáveis.
+
+    \item[Forma de integração.] A integração é externa, pois a seleção de atributos ocorre após a representação textual e antes do treinamento dos classificadores. A FS atua como etapa de preparação do espaço de atributos utilizado pelos algoritmos de classificação, incluindo os classificadores associativos.
+\end{description}
+
+
+%%%%%%%%%%% TRAB-8 %%%%%%%%%%%
+\textbf{Trabalho de \citeonline{ashi2021enhancing}.} 
+\citeonline{ashi2021enhancing} investigam o uso de classificadores associativos para predição de rotatividade de clientes (\textit{customer churn}) em telecomunicações, conduzindo um estudo experimental no ambiente KEEL.
+
+\begin{description}
+    \item[Objetivo do trabalho.] O objetivo do estudo é predizer a rotatividade de clientes em telecomunicações por meio de algoritmos de classificação associativa. Os autores comparam diferentes classificadores, incluindo CBA, CBA2, CPAR e FARC-HD, avaliando métricas como acurácia, erro, curva ROC, número de regras e tempo de execução.
+
+    \item[Pré-processamento.] Os dados são inicialmente preparados para a aplicação dos classificadores, incluindo tratamento de valores faltantes, discretização de atributos numéricos, transformação de atributos nominais em representações adequadas ao ambiente KEEL e seleção de instâncias de treinamento.
+
+    \item[Seleção de atributos.] Os autores avaliam o impacto da FS por meio do método \textit{Sequential Backward Search using Inconsistent Examples Pairs} (SBS-IEP-FS). O desempenho dos classificadores é comparado em dois cenários: com o conjunto completo de atributos e com o subconjunto reduzido produzido pela seleção.
+
+    \item[Classificação associativa.] A etapa de modelagem utiliza algoritmos de classificação associativa disponíveis no KEEL, incluindo CBA, CBA2, CPAR e FARC-HD. O estudo compara os modelos antes e depois da aplicação da FS, observando o impacto da redução de atributos sobre desempenho, complexidade e tempo de execução.
+
+    \item[Contribuição da FS.] A FS contribui como etapa externa de pré-processamento, reduzindo o conjunto de atributos utilizado pelos classificadores. Seu papel é buscar modelos mais compactos, menos suscetíveis a ruído e potencialmente mais eficientes. Embora o foco principal do artigo seja a predição de \textit{churn} com classificadores associativos, a análise com SBS-IEP-FS permite observar como a redução de atributos afeta o desempenho dos modelos.
+
+    \item[Forma de integração.] A integração é externa, pois a seleção de atributos é aplicada antes do treinamento dos classificadores associativos.
+
+    \item[Observação crítica.] Este trabalho possui contribuição mais complementar para a discussão sobre FS em CAs, pois seu foco central não é propor um novo método de FS nem analisar profundamente o mecanismo de seleção. Ainda assim, ele é relevante para a revisão por comparar classificadores associativos com e sem seleção de atributos em um problema aplicado de CRM.
+\end{description}
+
+
+%%%%%%%%%%% TRAB-9 %%%%%%%%%%%
+\textbf{Trabalho de \citeonline{alazaidah2021feature}.} 
+\citeonline{alazaidah2021feature} investigam diretamente o impacto de diferentes métodos de FS no desempenho de classificadores associativos, por meio de um estudo comparativo conduzido no ambiente KEEL.
+
+\begin{description}
+    \item[Objetivo do trabalho.] O objetivo do estudo é identificar quais métodos de FS são mais adequados para algoritmos de classificação associativa. Para isso, os autores avaliam nove métodos de seleção de atributos em conjunto com cinco classificadores associativos, buscando verificar como diferentes estratégias de seleção afetam a acurácia dos modelos.
+
+    \item[Pré-processamento.] Os conjuntos de dados são analisados quanto ao tipo de atributos. Quando há atributos numéricos, é aplicada discretização para adequá-los aos algoritmos de classificação associativa. Essa etapa é necessária porque muitos classificadores associativos dependem de atributos categóricos ou discretizados para gerar regras.
+
+    \item[Seleção de atributos.] São avaliados nove métodos de FS, incluindo ABB-IEP, ABB-LIU, Focus, LVF, Relief, SBS-IEP, SBS-LIU, SFS-IEP e SFS-LIU. Esses métodos representam diferentes estratégias de busca e avaliação de atributos, permitindo comparar seu impacto em bases com características distintas.
+
+    \item[Classificação associativa.] A modelagem é realizada por meio de cinco algoritmos de classificação associativa disponíveis no KEEL: CBA, CBA2, CFAR, CMAR e CPAR. Os classificadores são avaliados em combinação com os diferentes métodos de FS, utilizando acurácia como métrica principal.
+
+    \item[Contribuição da FS.] A FS é o objeto central do estudo. A principal contribuição está em demonstrar que a escolha do método de FS deve considerar as características dos dados e o classificador associativo utilizado. Os resultados indicam que ABB-IEP e ABB-LIU apresentam melhor desempenho em bases com atributos nominais, enquanto Relief tende a obter melhores resultados em bases com atributos reais e inteiros. Dessa forma, o trabalho contribui para orientar a escolha de métodos de FS em pipelines de classificação associativa.
+
+    \item[Forma de integração.] A integração é externa, pois os métodos de FS são aplicados antes da indução dos classificadores associativos. No entanto, diferentemente de trabalhos em que a FS é apenas uma etapa auxiliar, neste estudo ela constitui o principal objeto de investigação.
+\end{description}
+
+
+%%%%%%%%%%% TRAB-10 %%%%%%%%%%%
+\textbf{Trabalho de \citeonline{piri2019exploring}.} 
+\citeonline{piri2019exploring} investigam o uso de classificação associativa para avaliação do estado de saúde fetal a partir de dados de cardiotocografia (CTG), considerando um cenário desbalanceado com classes normal, suspeita e patológica.
+
+\begin{description}
+    \item[Objetivo do trabalho.] O objetivo do estudo é construir um modelo baseado em classificação associativa para classificar o estado fetal em três categorias: normal, suspeito e patológico. A proposta busca apoiar o diagnóstico clínico por meio de regras interpretáveis derivadas de atributos extraídos de exames de CTG.
+
+    \item[Pré-processamento.] Os atributos contínuos são discretizados por meio de uma abordagem baseada em entropia, sendo convertidos em intervalos categóricos adequados à mineração de regras. Essa etapa é necessária para viabilizar a aplicação do classificador associativo.
+
+    \item[Seleção de atributos.] O estudo avalia dois cenários: com e sem FS. Quando utilizada, a seleção de atributos é realizada por meio do \textit{ExtraTreesClassifier}, que estima a importância dos atributos com base em um ensemble de árvores. A partir dessa avaliação, são selecionadas as características mais relevantes do conjunto CTG.
+
+    \item[Classificação associativa.] A modelagem é realizada por meio do algoritmo CBA, seguindo o fluxo tradicional de geração de regras de associação de classe e construção do classificador. O desempenho é comparado antes e depois da aplicação da FS.
+
+    \item[Contribuição da FS.] A FS contribui para reduzir o número de atributos antes da indução do classificador, buscando melhorar a eficiência e a capacidade preditiva do modelo sem comprometer a interpretabilidade das regras. No estudo, a seleção baseada em ExtraTreesClassifier permite concentrar a modelagem nos atributos mais relevantes para distinguir os estados fetais.
+
+    \item[Forma de integração.] A integração é externa, pois o ExtraTreesClassifier é aplicado como etapa de pré-processamento antes da construção do classificador CBA.
+\end{description}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{\textit{Pipelines} Propostos (QP-1)}\label{sec:qp1}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+O objetivo da pergunta QP-1 era identificar as etapas dos CAs cobertas pelos artigos selecionados a fim de verificar se as etapas se mantém ou se há alguma modificação quando métodos de \textit{feature selection} são considerados. A Tabela~\ref{tab:etapas-pipeline} apresenta o resultado. Nota-se que a maioria dos trabalhos (70\%) mantém as etapas gerais de um classificador associativo, i.e., extração, ordenação, poda e predição. Apenas o trabalho de \citeonline{shaharanee2015irrelevant} não especifica como o modelo foi gerado (deixa em aberto para que se utilize qualquer algoritmo $AR_{AL}$). Apenas \citeonline{gayathri2015efficient} utilizam-se de outras etapas voltadas a otimização do modelo. Ademais, nota-se que em 90\% dos trabalhos menciona-se uma etapa prévia de pré-processamento dos dados, principalmente ao que se refere a discretização dos dados. Por fim, nota-se que 80\% dos trabalhos incluem uma etapa explicita de \textit{feature selection} (maiores detalhes na Seção~\ref{sec:qp2-3}). Constata-se, portanto, que em geral a única alteração refere-se, justamente, a incorporação de uma etapa de seleção de atributos, mantendo-se, contudo, as demais etapas. Este fato se deve aos tipos de trabalhos encontrados, os quais podem ser divididos em:
+\begin{itemize}
+    \item trabalhos que se utilizam exclusivamente de algoritmos próprios \cite{wu2024novel,gayathri2015efficient,sowan2023hybrid} (30\%);
+    \item trabalhos que mesclam algoritmos próprios e da literatura \cite{nandhini2020performance,alhawari2021classification} (20\%);
+    \item trabalhos que utilizam exclusivamente algoritmos da literatura \cite{cicek2021assessment,ashi2021enhancing,alazaidah2021feature,piri2019exploring} (40\%).
+\end{itemize}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Please add the following required packages to your document preamble:
+% \usepackage{multirow}
+% \usepackage[table,xcdraw]{xcolor}
+% Beamer presentation requires \usepackage{colortbl} instead of \usepackage[table,xcdraw]{xcolor}
+\begin{table}[H]
+\centering
+\footnotesize
+\caption{Etapas identificadas nos trabalhos selecionados.}\label{tab:etapas-pipeline}
+\begin{adjustbox}{angle=90}
+\begin{tabular}{|l|c|c|cccc|c|}
+\hline
+\multicolumn{1}{|c|}{} &  &  & \multicolumn{4}{c|}{\cellcolor[HTML]{EFEFEF}\textbf{Etapas CAs}} &  \\ \cline{4-7}
+\multicolumn{1}{|c|}{\multirow{-2}{*}{\textbf{Referência}}} & \multirow{-2}{*}{\textbf{Pré-processamento}} & \multirow{-2}{*}{\textbf{\begin{tabular}[c]{@{}c@{}}Seleção de \\ atributos\end{tabular}}} & \multicolumn{1}{c|}{\textbf{\begin{tabular}[c]{@{}c@{}}Extração de \\ regras\end{tabular}}} & \multicolumn{1}{c|}{\textbf{Ordenação}} & \multicolumn{1}{c|}{\textbf{Poda}} & \multicolumn{1}{l|}{\textbf{Predição}} & \multirow{-2}{*}{\textbf{Outros}} \\ \hline
+\citeonline{wu2024novel} & X &  & \multicolumn{1}{c|}{X} & \multicolumn{1}{c|}{X} & \multicolumn{1}{c|}{X} & X &  \\ \hline
+\citeonline{nandhini2020performance} & X &  & \multicolumn{1}{c|}{X} & \multicolumn{1}{c|}{X} & \multicolumn{1}{c|}{X} & X &  \\ \hline
+\citeonline{gayathri2015efficient} & X & X & \multicolumn{1}{c|}{X} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{X} & X & X \\ \hline
+\citeonline{sowan2023hybrid} & X & X & \multicolumn{1}{c|}{X} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{X} & X &  \\ \hline
+\citeonline{shaharanee2015irrelevant} & X & X & \multicolumn{1}{c|}{---} & \multicolumn{1}{c|}{---} & \multicolumn{1}{c|}{---} & --- &  \\ \hline
+\citeonline{cicek2021assessment} &  & X & \multicolumn{1}{c|}{X} & \multicolumn{1}{c|}{X} & \multicolumn{1}{c|}{X} & X &  \\ \hline
+\citeonline{alhawari2021classification} & X & X & \multicolumn{1}{c|}{X} & \multicolumn{1}{c|}{X} & \multicolumn{1}{c|}{X} & X &  \\ \hline
+\citeonline{ashi2021enhancing} & X & X & \multicolumn{1}{c|}{X} & \multicolumn{1}{c|}{X} & \multicolumn{1}{c|}{X} & X &  \\ \hline
+\citeonline{alazaidah2021feature} & X & X & \multicolumn{1}{c|}{X} & \multicolumn{1}{c|}{X} & \multicolumn{1}{c|}{X} & X &  \\ \hline
+\citeonline{piri2019exploring} & X & X & \multicolumn{1}{c|}{X} & \multicolumn{1}{c|}{X} & \multicolumn{1}{c|}{X} & X &  \\ \hline
+\end{tabular}
+\end{adjustbox}
+\end{table}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+A Tabela~\ref{tab:algs} sumariza os algoritmos utilizados em cada trabalho. Nota-se que o CBA é o algoritmo mais utilizado dentre os disponíveis na literatura (50\%). Este fato vai de encontro com \citeonline{EasyChair:501}, que afiram que o CBA é provavelmente o algoritmo mais utilizado da família. Por fim, vale mencionar como informação adicional que apenas dois trabalhos \cite{alazaidah2021feature,shaharanee2015irrelevant} realizam os experimentos via \textit{benchmarks} generalistas (UCI), sendo os demais voltados a domínios/datasets específicos, como saúde \cite{sowan2023hybrid,cicek2021assessment,nandhini2020performance,piri2019exploring,gayathri2015efficient} e defeito de software \cite{wu2024novel}.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Please add the following required packages to your document preamble:
+% \usepackage{graphicx}
+\begin{table}[H]
+\caption{Algoritmos de CA utilizados pelos trabalhos selecionados.}
+\label{tab:algs}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|l|c|c|c|c|c|c|c|}
+\hline
+\multicolumn{1}{|c|}{\textbf{Referência}} & \textbf{CBA} & \textbf{CBA2} & \textbf{CMAR} & \textbf{CPAR} & \textbf{CFAR} & \textbf{FARC-HD} & \textbf{Proposto} \\ \hline
+\citeonline{wu2024novel} &  &  &  &  &  &  & X \\ \hline
+\citeonline{nandhini2020performance} &  &  &  & X &  &  & X \\ \hline
+\citeonline{gayathri2015efficient} &  &  &  &  &  &  & X \\ \hline
+\citeonline{sowan2023hybrid} &  &  &  &  &  &  & X \\ \hline
+\citeonline{shaharanee2015irrelevant} & --- & --- & --- & --- & --- & --- &  \\ \hline
+\citeonline{cicek2021assessment} & X &  &  &  &  &  &  \\ \hline
+\citeonline{alhawari2021classification} & X & X & X & X &  &  & X \\ \hline
+\citeonline{ashi2021enhancing} & X & X &  & X &  & X &  \\ \hline
+\citeonline{alazaidah2021feature} & X & X & X & X & X &  &  \\ \hline
+\citeonline{piri2019exploring} & X &  &  &  &  &  &  \\ \hline
+\end{tabular}%
+}
+\end{table}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Meios de Integração (QP-2), Abordagens e Métodos de FS Empregados (QP-3)}\label{sec:qp2-3}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Uma vez que as perguntas QP-2 e QP-3 são correlacionadas, optou-se por discuti-las juntamente nesta seção. O objetivo da pergunta QP-2 era identificar se os métodos de FS são utilizados de maneira externa ao processo, i.e., como uma etapa de pré-processamento, ou de maneira interna, i.e., durante o processo de indução do modelo. Essa distinção é importante uma vez que não se trata apenas de quando selecionar atributos, mas do papel da seleção no processo de indução dos modelos. Já o objetivo da QP-3 era identificar as abordagens utilizadas, i.e., filtro, \textit{wrapper}, etc., assim como seus respectivos métodos, i.e., $\chi^2$, ReliefF, etc.
+
+A Tabela~\ref{tab:met-fs-abord} sumariza os resultados encontrados. É possível notar que:
+\begin{itemize}
+    \item a maior parte dos trabalhos (70\%) realiza a integração de \textit{feature selection} com os CAs de maneira externa, enquanto 30\% realizam essa integração de maneira interna. Diferentemente da versão anterior, o trabalho de \citeonline{gayathri2015efficient} foi classificado como interno, pois o BSIC compõe o próprio \textit{framework} BSIC-AC, atuando em conjunto com o classificador associativo otimizado e com a poda das regras. Em geral, integrações externas visam reduzir dimensionalidade, eliminar atributos irrelevantes e tornar o espaço de busca mais controlável antes da indução do classificador. Por outro lado, integrações internas incorporam a seleção, ponderação ou avaliação de atributos ao próprio mecanismo de geração, ponderação, poda ou seleção de regras discriminativas.
+
+    \item em relação as abordagens, tem-se que 60\% dos trabalhos empregaram métodos filtro (50\%) ou ensemble de filtro (10\%), 30\% embedded, 20\% wrapper e 10\% híbrido. O somatório dos percentuais ultrapassa os 100\% uma vez que alguns trabalhos utilizam mais de uma abordagem. Vale mencionar que nos trabalhos de \citeonline{wu2024novel} e de \cite{nandhini2020performance} os métodos de filtro são utilizados de maneira não tradicional, i.e., os mesmos não são utilizados para remover atributos, mas sim para ponderá-los ou selecioná-los de maneira dinâmica - em ambos os casos os mesmos são utilizados internamente ao processo de indução dos modelos;
+
+    \item em relação aos métodos de fato utilizados, não houve destaque para nenhum deles dentre as abordagens embedded e wrapper. Por outro lado, em relação a abordagem filtro, destacam-se os métodos a seguir: Information Gain (3), Mutual Information (2), Gain Ratio (2), $\chi^2$ (2) e ReliefF (2). Vale destacar o trabalho de \citeonline{sowan2023hybrid}, único a utilizar 4 deles em uma proposta de ensemble de filtros.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Please add the following required packages to your document preamble:
+% \usepackage{multirow}
+% \usepackage{graphicx}
+\begin{table}[H]
+\centering
+\caption{Meios de integração, abordagens e métodos de FS empregados nos trabalhos selecionados.}
+\label{tab:met-fs-abord}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|p{3.0cm}|p{2.1cm}|p{3.0cm}|p{4.3cm}|p{5.2cm}|}
+\hline
+\textbf{Trabalho} & \textbf{Integração} & \textbf{Abordagem} & \textbf{Método(s)} & \textbf{Justificativa de enquadramento} \\ \hline
+
+\citeonline{shaharanee2015irrelevant} 
+& Externa 
+& Filtro 
+& Symmetrical Tau; Mutual Information 
+& A seleção de atributos é aplicada antes da geração das regras de associação, como etapa de pré-processamento para remover atributos irrelevantes. \\ \hline
+
+\citeonline{wu2024novel} 
+& Interna 
+& Embedded / ponderação interna 
+& Mutual Information; coeficiente de correlação 
+& A relevância dos itens é incorporada ao processo de mineração de itemsets frequentes por meio de pesos usados na geração das regras. \\ \hline
+
+\citeonline{nandhini2020performance} 
+& Interna 
+& Seleção dinâmica na indução de regras 
+& FOIL's Information Gain; Gain Ratio; Mutual Information Gain 
+& As medidas são usadas dentro do CPAR para escolher atributos durante a construção dos antecedentes das regras de associação de classe. \\ \hline
+
+\citeonline{cicek2021assessment} 
+& Externa 
+& Embedded, aplicado externamente ao CA 
+& LASSO 
+& O LASSO é usado para selecionar preditores relevantes antes da aplicação do classificador associativo. \\ \hline
+
+\citeonline{piri2019exploring} 
+& Externa 
+& Embedded, aplicado externamente ao CA 
+& ExtraTreesClassifier 
+& A seleção ocorre no pré-processamento, gerando um conjunto reduzido de atributos que posteriormente alimenta o classificador associativo. \\ \hline
+
+\citeonline{gayathri2015efficient} 
+& Interna 
+& Embedded / baseada em modelo 
+& BSIC 
+& O BSIC integra o framework BSIC-AC, combinando seleção de atributos, informação compartilhada e poda de regras no processo de indução. \\ \hline
+
+\citeonline{alhawari2021classification} 
+& Externa 
+& Filtro 
+& Information Gain; $\chi^2$ 
+& As técnicas de FS removem termos ou atributos ineficientes antes do treinamento e avaliação dos classificadores. \\ \hline
+
+\citeonline{alazaidah2021feature} 
+& Externa 
+& Filtro e wrapper 
+& Relief; LVF; Focus; SBS-IEP; SBS-LIU; SFS-IEP; SFS-LIU; ABB-IEP; ABB-LIU 
+& O estudo avalia métodos de FS como etapa de pré-processamento associada a classificadores AC. \\ \hline
+
+\citeonline{ashi2021enhancing} 
+& Externa 
+& Wrapper 
+& SBS-IEP 
+& O método SBS-IEP é aplicado antes da execução dos classificadores associativos avaliados. \\ \hline
+
+\citeonline{sowan2023hybrid} 
+& Externa 
+& Ensemble de filtro e híbrida 
+& WARF: CFS + Information Gain + Gain Ratio + $\chi^2$ + ReliefF; PSO-WARF 
+& Os subconjuntos de atributos são selecionados antes da construção dos modelos WARF-PCBA e PSO-WARF-PCBA. \\ \hline
+
+\end{tabular}%
+}
+\end{table}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Estratégias Adicionais (QP-4)}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+O objetivo da pergunta QP-4 era identificar se as soluções dos artigos selecionados utilizaram outras estratégias além de \textit{feature selection} como, por exemplo, MOs adicionais. Em geral, observou-se que os trabalhos que fazem uso de estratégias adicionais voltam-se para aspectos de (i) como as regras são geradas (limiares/ponderações) e (ii) como são avaliadas (MOs) e/ou selecionadas/podadas (heurísticas e/ou estimadores de erro). Assim, nota-se que:
+\begin{itemize}
+    \item em relação ao item (i), \citeonline{wu2024novel} utilizam aprendizado sensível a custo via ponderação de itens e, portanto, suportes ponderado.
+
+    \item em relação ao item (ii), \citeonline{wu2024novel} utilizam durante o processo as MOs CCO, para ponderação de itens, e AV nas etapas de extração, ordenação e poda. \citeonline{gayathri2015efficient} utilizam os critérios \textit{maximal-relevance} e \textit{minimal-redundancy} para poda de regras, além de otimização GTCL. \citeonline{alhawari2021classification} utilizam a MO conviction na etapa de predição. \citeonline{nandhini2020performance} utilizam as medidas La e Lr nas etapas de poda e predição, assim como conceitos de qualidade e cobertura na etapa de ordenação.
+\end{itemize}
+
+Vale mencionar que optou-se por destacar apenas aspectos mais essenciais. Ademais, notou-se que tais estratégias acabam sendo específicas para cada uma das soluções propostas. Contudo, nota-se uma tendência um pouca mais predominante do uso de MOs alternativas ao suporte e a confiança.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Avaliação Experimental (QP-5)}
+\label{sec:qp5}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+O objetivo da QP-5 foi identificar como a avaliação experimental é conduzida nos trabalhos selecionados, considerando os métodos avaliados, os \textit{baselines} utilizados, os conjuntos de dados empregados, as métricas reportadas e a presença, ou ausência, de testes estatísticos. Essa análise é relevante porque permite verificar não apenas se as soluções propostas apresentam desempenho competitivo, mas também se a avaliação é suficientemente robusta, reprodutível e adequada às características dos problemas investigados.
+
+A Tabela~\ref{tab:avaliacao-experimental} sumariza os principais elementos da avaliação experimental dos trabalhos analisados. Para evitar ambiguidade, medidas utilizadas internamente pelos algoritmos para geração, ranqueamento ou seleção de regras, como confiança, \textit{Added Value}, \textit{Laplace Accuracy} ou \textit{Likelihood Ratio}, não foram tratadas como métricas experimentais, salvo quando o próprio trabalho as reporta explicitamente como critério de avaliação de desempenho. Assim, a coluna de métricas e aspectos avaliados contempla apenas medidas de avaliação experimental, como acurácia, AUC, F1-score, MCC, G-Mean, cobertura, número de regras, tempo de execução, tamanho do modelo ou interpretabilidade.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{table}[H]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.18}
+\caption{Síntese da avaliação experimental dos trabalhos selecionados (QP-5).}
+\label{tab:avaliacao-experimental}
+\begin{adjustbox}{angle=90,center}
+\begin{tabular}{|p{3.0cm}|p{4.2cm}|p{4.0cm}|p{4.4cm}|p{5.4cm}|p{3.0cm}|}
+\hline
+\rowcolor[HTML]{EFEFEF}
+\textbf{Estudo} 
+& \textbf{Métodos avaliados} 
+& \textbf{\textit{Baselines}/comparativos} 
+& \textbf{\textit{Datasets}} 
+& \textbf{Métricas e aspectos avaliados} 
+& \textbf{Teste estatístico} \\ 
+\hline
+
+\citeonline{wu2024novel} 
+& MCWCAR e variantes de ablação do próprio método. 
+& CWCAR, CBA3, ACAR; comparação adicional com KPWE e GIS. 
+& 27 conjuntos de dados de predição de defeitos de software do repositório PROMISE. 
+& Balance, MCC, G-Mean e F-measure. Avalia também estabilidade por rankings e comparação entre modelos baseados e não baseados em regras. 
+& Scott-Knott ESD e Wilcoxon signed-rank. \\ 
+\hline
+
+\citeonline{gayathri2015efficient} 
+& BSIC-AC. 
+& DD-MSM e GIA-RST. 
+& Echocardiogram Data Set, do repositório UCI. 
+& Acurácia de classificação, taxa de falsos positivos, desempenho da seleção de atributos e redução de dimensionalidade. 
+& -- \\ 
+\hline
+
+\citeonline{cicek2021assessment} 
+& LASSO + CBA. 
+& Não apresenta \textit{baseline} explícito de classificação. 
+& Base gênica aberta com 15979 genes e 234 indivíduos, sendo 141 COVID-19 negativos e 93 positivos. 
+& Accuracy, Balanced Accuracy, Sensitivity, Specificity, PPV, NPV e F1-score. Reporta regras interpretáveis associadas aos genes selecionados. 
+& Mann-Whitney U para análise dos genes; não há teste comparativo entre classificadores. \\ 
+\hline
+
+\citeonline{alhawari2021classification} 
+& ACRM; CBA, CBA2, CMAR, CPAR; classificadores tradicionais. 
+& J48, NB, KNN, SVM, GBT, RF e algoritmos AC clássicos. 
+& Dois conjuntos de avaliações de aplicativos: Panichella/Pan e Maalej, voltados à classificação de \textit{app reviews} em tarefas de manutenção. 
+& Precision, Recall, F-score e Accuracy. Avalia também impacto da FS, extração de CARs e interpretabilidade das regras para compreensão da intenção do usuário. 
+& Wilcoxon signed-rank e Cliff's delta. \\ 
+\hline
+
+\citeonline{ashi2021enhancing} 
+& CBA, CBA2, CPAR e FARC-HD, com e sem SBS-IEP-FS. 
+& Comparação entre os próprios classificadores AC e entre cenários com e sem FS. 
+& Conjunto de dados de \textit{customer churn} em telecomunicações, avaliado no KEEL. 
+& Accuracy, Error Rate e ROC. Avalia também número de regras e tempo de execução como aspectos de complexidade do modelo. 
+& Friedman Aligned. \\ 
+\hline
+
+\citeonline{piri2019exploring} 
+& CBA com e sem ExtraTreesClassifier para FS. 
+& CBA sem FS. 
+& UCI Cardiotocography (CTG), com 2126 amostras, 21 atributos e três classes de estado fetal. 
+& Accuracy. Compara o efeito da redução de atributos e mantém a interpretabilidade por regras. 
+& -- \\ 
+\hline
+
+\citeonline{alazaidah2021feature} 
+& Nove métodos de FS: ABB-IEP, ABB-LIU, Focus, LVF, Relief, SBS-IEP, SBS-LIU, SFS-IEP e SFS-LIU. 
+& CBA, CBA2/msCBA, CFAR, CMAR e CPAR avaliados sob diferentes métodos de FS. 
+& Seis bases do KEEL: Car, Kr-vs-k, Nursery, Glass, Page Blocks e Heart. 
+& Accuracy. Avalia a adequação dos métodos de FS conforme o tipo dos atributos dos datasets. 
+& -- \\ 
+\hline
+
+\citeonline{sowan2023hybrid} 
+& WARF-PCBA e Hybrid PSO-WARF-PCBA. 
+& CBA, CMAR, MCAR, FACA, ECBA e WCBA. 
+& Dois conjuntos UCI de câncer de mama: Breast Cancer Recurrences e Breast Cancer Diagnosis. 
+& Accuracy. Analisa também número de atributos selecionados e redução da complexidade decorrente da FS. 
+& -- \\ 
+\hline
+
+\citeonline{shaharanee2015irrelevant} 
+& Classificação associativa estrutural com filtros Symmetrical Tau e Mutual Information. 
+& Modelo inicial com todos os atributos; comparação entre ST e MI. 
+& Bases UCI de diferentes complexidades, incluindo Adult, Mushroom, Wine e Iris. 
+& Accuracy Rate, Coverage Rate e número de regras. O número de regras é usado como indicador de complexidade e interpretabilidade. 
+& -- \\ 
+\hline
+
+\citeonline{nandhini2020performance} 
+& CPAR, CPAR-GR e CPAR-IG. 
+& CPAR original. 
+& Breast Cancer, Cleve, Heart, Hepatitis, Pima e Sick, do repositório UCI; Diabetes como base adicional. 
+& Classification Accuracy e AUC. Compara também 10-fold cross-validation e divisão 50:50. 
+& Friedman, Nemenyi e Bonferroni-Dunn. \\ 
+\hline
+
+\end{tabular}
+\end{adjustbox}
+\end{table}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+A Tabela~\ref{tab:avaliacao-experimental} evidencia diferenças relevantes no modo como os trabalhos conduzem suas avaliações experimentais. Em relação aos \textit{baselines}, observa-se que parte dos estudos realiza comparações amplas com classificadores associativos clássicos e métodos do estado da arte, como ocorre em \citeonline{wu2024novel}, \citeonline{alhawari2021classification}, \citeonline{sowan2023hybrid} e \citeonline{nandhini2020performance}. Em contrapartida, alguns trabalhos possuem avaliação mais restrita, concentrando-se no próprio método proposto ou na comparação entre cenários com e sem FS, como em \citeonline{cicek2021assessment} e \citeonline{piri2019exploring}.
+
+Quanto aos conjuntos de dados, nota-se predominância de bases públicas, especialmente dos repositórios UCI, KEEL e PROMISE. Esse aspecto favorece a reprodutibilidade dos experimentos, embora nem todos os estudos descrevam com o mesmo nível de detalhe os procedimentos de particionamento, validação ou reamostragem. O trabalho de \citeonline{wu2024novel} se destaca por utilizar 27 conjuntos de dados do repositório PROMISE, enquanto \citeonline{alazaidah2021feature} e \citeonline{nandhini2020performance} também apresentam maior abrangência experimental ao avaliarem múltiplas bases.
+
+Em relação às métricas, a acurácia permanece como a medida mais recorrente. Embora seja uma métrica intuitiva, sua utilização isolada é limitada em cenários com desbalanceamento de classes. Nesse sentido, \citeonline{wu2024novel} apresenta avaliação mais robusta ao reportar Balance, MCC, G-Mean e F-measure. De forma semelhante, \citeonline{cicek2021assessment} inclui Balanced Accuracy, Sensitivity, Specificity, PPV, NPV e F1-score, enquanto \citeonline{nandhini2020performance} complementa a análise com AUC. Por outro lado, estudos baseados apenas em acurácia, como \citeonline{alazaidah2021feature} e \citeonline{piri2019exploring}, oferecem menor capacidade de análise em contextos nos quais a distribuição das classes é assimétrica.
+
+Outro aspecto relevante refere-se à avaliação da complexidade e interpretabilidade dos modelos. Como classificadores associativos produzem modelos baseados em regras, medidas como número de regras, tempo de execução, redução de atributos e cobertura são particularmente importantes. Esses aspectos aparecem de forma mais explícita em \citeonline{shaharanee2015irrelevant}, que reportam número de regras e cobertura, em \citeonline{ashi2021enhancing}, que avaliam tempo de execução e número de regras, e em \citeonline{sowan2023hybrid}, que analisam a redução de atributos decorrente dos métodos de FS.
+
+Por fim, observa-se que o uso de testes estatísticos ainda não é uniforme. \citeonline{wu2024novel}, \citeonline{alhawari2021classification}, \citeonline{ashi2021enhancing} e \citeonline{nandhini2020performance} apresentam maior rigor nesse aspecto, utilizando testes como Scott-Knott ESD, Wilcoxon signed-rank, Friedman, Nemenyi, Bonferroni-Dunn ou medidas de tamanho de efeito. Nos demais trabalhos, a ausência de testes estatísticos limita a força das conclusões, pois não permite verificar se as diferenças observadas entre métodos são estatisticamente significativas.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Considerações Finais do Capítulo}
+\label{sec:consideracoes_finais_trabrelac}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Este capítulo apresentou uma Revisão Sistemática da Literatura (RSL) sobre o uso de métodos de \textit{feature selection} (FS) em classificadores associativos (CAs). A investigação foi motivada por uma limitação recorrente dessa família de modelos: a tendência à geração de grande volume de \textit{itemsets} candidatos e regras de associação de classe, especialmente em bases de dados de alta dimensionalidade. Nesse cenário, a FS foi analisada não apenas como uma etapa de redução dimensional, mas como um mecanismo capaz de influenciar diretamente a qualidade, a quantidade, a interpretabilidade e a capacidade discriminativa das regras produzidas.
+
+O protocolo adotado permitiu conduzir a busca e a seleção dos estudos de forma sistemática e rastreável. A busca inicial retornou 191 trabalhos nas bibliotecas digitais selecionadas. Após a remoção de duplicatas, aplicação dos critérios de exclusão em títulos e resumos e posterior leitura integral dos artigos, 10 estudos foram mantidos para análise. Embora esse conjunto seja relativamente restrito, ele oferece uma visão representativa das principais formas pelas quais a literatura tem integrado FS e classificação associativa no período considerado.
+
+Em relação à QP-1, observou-se que os trabalhos analisados preservam, em linhas gerais, a estrutura clássica dos classificadores associativos, composta por pré-processamento, geração de regras, seleção ou poda de regras e classificação. Entretanto, a presença de FS introduz variações relevantes nesse \textit{pipeline}. Em parte dos estudos, a FS ocorre antes da mineração de regras, reduzindo o espaço de atributos utilizado pelo classificador. Em outros, ela é incorporada ao próprio processo de indução, influenciando a escolha de atributos durante a construção dos antecedentes, a ponderação de itens, a mineração de \textit{itemsets} ou a poda das regras geradas. Assim, a FS deixa de ser apenas uma preparação dos dados e passa a atuar, em alguns casos, como componente estrutural do mecanismo de aprendizagem.
+
+Quanto à QP-2, verificou-se que a integração entre FS e CAs ocorre de duas formas principais: externa e interna. A integração externa é predominante nos trabalhos em que a FS é aplicada como etapa de pré-processamento, selecionando um subconjunto de atributos antes da execução do classificador associativo. Essa estratégia é conceitualmente simples, favorece modularidade e pode reduzir o custo computacional da mineração de regras. No entanto, sua principal limitação é tratar a seleção de atributos de maneira dissociada do comportamento posterior do classificador. Por outro lado, a integração interna ocorre quando critérios de relevância são utilizados durante a geração, ponderação, seleção ou poda das regras. Essa forma tende a ser metodologicamente mais alinhada ao funcionamento dos CAs, pois permite que a relevância dos atributos seja considerada no momento em que as combinações entre itens são efetivamente exploradas.
+
+No que se refere à QP-3, os métodos de FS identificados abrangem diferentes abordagens, incluindo filtros, \textit{wrappers}, métodos \textit{embedded}, estratégias híbridas e métodos baseados em ensemble. Entre os métodos observados estão \textit{Information Gain}, \textit{Gain Ratio}, $\chi^2$, ReliefF, LASSO, ExtraTreesClassifier, métodos baseados em inconsistência, técnicas com PSO e estratégias de ponderação por informação mútua ou coeficiente de correlação. Essa diversidade indica que não há consenso sobre uma abordagem dominante para FS em CAs. Além disso, os resultados sugerem que a adequação do método de FS depende fortemente das características da base de dados, do tipo dos atributos, do algoritmo associativo utilizado e do objetivo da solução, seja ele aumentar acurácia, reduzir regras, melhorar interpretabilidade ou diminuir custo computacional.
+
+Em relação à QP-4, constatou-se que vários trabalhos combinam FS com outras estratégias para melhorar desempenho, robustez ou interpretabilidade. Entre essas estratégias estão o uso de múltiplos limiares de suporte, ponderação de itens, medidas alternativas à confiança, critérios de interesse, poda de regras, algoritmos evolutivos, otimização por enxame de partículas e mecanismos de ranqueamento. Esse resultado evidencia que a FS, isoladamente, nem sempre é tratada como suficiente para resolver os desafios da classificação associativa. Pelo contrário, a literatura tende a combiná-la com mecanismos adicionais para controlar o volume de regras, lidar com desbalanceamento de classes, reduzir redundância e selecionar regras mais relevantes. Essa constatação reforça que a melhoria de CAs em cenários de alta dimensionalidade exige uma abordagem integrada, e não apenas a aplicação pontual de um método de seleção de atributos.
+
+A análise da QP-5 mostrou que a avaliação experimental dos trabalhos é heterogênea. As métricas mais recorrentes incluem acurácia, AUC, F1-score, sensibilidade, especificidade, MCC, G-Mean, número de regras, tempo de execução e medidas relacionadas à interpretabilidade. Entretanto, nem todos os estudos apresentam avaliação estatística robusta, comparação ampla com \textit{baselines} ou análise detalhada do impacto da FS sobre o número e a qualidade das regras. Em alguns casos, a avaliação enfatiza predominantemente desempenho preditivo, enquanto aspectos como interpretabilidade, estabilidade dos subconjuntos selecionados, custo computacional e complexidade do conjunto de regras recebem menor atenção. Essa limitação é relevante, pois classificadores associativos são frequentemente valorizados não apenas pela acurácia, mas também pela capacidade de produzir conhecimento compreensível na forma de regras.
+
+De forma geral, os resultados desta RSL indicam que a FS é uma estratégia relevante para mitigar limitações clássicas dos CAs. A redução de atributos pode diminuir o espaço de busca, restringir a geração de combinações pouco informativas, reduzir a quantidade de regras e favorecer modelos mais interpretáveis. Contudo, a literatura ainda apresenta lacunas importantes. A primeira diz respeito à ausência de uma caracterização sistemática sobre quando a FS deve ser aplicada externa ou internamente ao processo de indução. A segunda refere-se à falta de avaliações mais consistentes sobre o impacto da FS na interpretabilidade, no número de regras e na estabilidade dos modelos. A terceira está relacionada à limitada exploração de estratégias que combinem seleção de atributos, ponderação de itens e seleção de regras dentro de um mesmo fluxo metodológico. Por fim, poucos trabalhos discutem de maneira aprofundada como a escolha do método de FS afeta a estrutura final do classificador associativo, especialmente em bases de alta dimensionalidade.
+
+Essas lacunas justificam a continuidade da investigação desenvolvida nesta tese. A literatura mostra que FS pode melhorar o desempenho dos CAs, mas ainda há espaço para propostas que tratem a seleção de atributos de forma mais integrada ao processo associativo, considerando simultaneamente redução dimensional, qualidade das regras, interpretabilidade e custo computacional. Assim, os resultados deste capítulo fornecem a base conceitual e empírica para os próximos capítulos, nos quais serão discutidos os fundamentos e a construção da abordagem proposta. Em particular, a análise realizada reforça a necessidade de investigar mecanismos capazes de selecionar atributos relevantes sem comprometer a capacidade dos classificadores associativos de descobrir padrões interpretáveis e úteis para a tarefa de classificação.

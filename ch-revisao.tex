@@ -1,0 +1,264 @@
+% ==================================================================================================================================
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Trabalhos Relacionados}
+\label{trabRelac}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Este capítulo apresenta os trabalhos relacionados às duas vertentes que fundamentam esta pesquisa. A primeira, apresentada na Seção~\ref{sec:fs-ca}, compreende estudos que investigam a utilização de métodos de seleção de atributos em classificadores associativos. A segunda, apresentada na Seção~\ref{ensambleFS}, aborda estratégias de \textit{Ensemble Feature Selection} (EFS), com ênfase na diversidade entre seletores, nos mecanismos de agregação, na estabilidade da seleção e na definição dos subconjuntos finais de atributos. Por fim, a Seção~\ref{sec:consideracoes-relacionados} sintetiza as evidências identificadas e as lacunas que motivam esta pesquisa.
+
+% =====================================================================
+% =====================================================================
+% =====================================================================
+% =====================================================================
+\section{Seleção de Atributos em Classificadores Associativos}
+\label{sec:fs-ca}
+% =====================================================================
+
+A literatura apresenta diferentes estratégias para integrar a seleção de atributos à classificação associativa, que podem ser organizadas em duas categorias principais: seleção externa e seleção interna. Na seleção externa, os atributos são selecionados previamente à construção do classificador associativo, por meio de métodos individuais, híbridos ou baseados em \textit{ensemble} \cite{abubacker2017integrated,alagukumar2025impacts,alazaidah2021feature,alhawari2021classification,ashi2021enhancing,cicek2021assessment,ghareb2018enhanced,piri2019exploring,rad2024framework,sowan2023hybrid}. Na seleção interna, critérios de relevância dos atributos são incorporados à própria construção do classificador, como na seleção de condições durante a geração de regras ou na ponderação de \textit{itemsets} \cite{nandhini2022performance,wu2024novel}.
+
+Esta seção apresenta e analisa trabalhos que combinam seleção de atributos e classificação associativa, destacando as estratégias de integração, os métodos empregados e os principais resultados obtidos. Os trabalhos foram identificados por meio de buscas em bases bibliográficas (\textit{Scopus}, \textit{IEEE Xplore}, \textit{ACM Digital Library}, \textit{Web of Science} e \textit{Google Scholar}), utilizando combinações de termos relacionados à classificação associativa e à seleção de atributos\footnote{A busca utilizou variações da seguinte expressão, adaptadas à sintaxe de cada base consultada: \textit{((``association classification'' OR ``associative classification'' OR ``associative rule mining'' OR ``associative classifier'' OR ``associative classifiers'' OR ``predictive association rules'' OR ``predictive association rule'' OR ``class association rules'' OR ``class association rule'' OR ``classification association rules'' OR ``classification association rule'') AND (``feature selection'' OR ``attribute selection'' OR ``feature ranking'' OR ``item selection''))}. Nas bases que permitiam a delimitação dos campos de busca, a consulta foi aplicada ao título, resumo e palavras-chave, utilizando, por exemplo, o operador \texttt{TITLE-ABS-KEY} na Scopus.}. A seleção priorizou estudos que investigam explicitamente a utilização de métodos de seleção de atributos em classificadores associativos, considerando diferentes estratégias de integração. Ao todo, foram selecionados 12 trabalhos para análise.
+
+% ---------------------------------------------------------------------
+\subsection{Visão Geral dos Trabalhos}
+\label{subsec:trabalhos-ca}
+% ---------------------------------------------------------------------
+
+Os trabalhos analisados são apresentados conforme a forma de integração da seleção de atributos à classificação associativa. Inicialmente, são discutidas as abordagens de seleção externa, seguidas pelas estratégias que incorporam critérios de relevância à construção do classificador. Por fim, destaca-se uma proposta de \textit{Ensemble Feature Selection} particularmente relacionada a esta dissertação.
+
+%ref
+\citeonline{alazaidah2021feature} comparam nove métodos de seleção de atributos (ABB-IEP, ABB-LIU, Focus, LVF, Relief, SBS-LIU, SBS-IEP, SFS-IEP e SFS-LIU) aplicados como pré-processamento de cinco classificadores associativos (CBA, CBA2, CFAR, CMAR e CPAR). A avaliação considera conjuntos de dados com diferentes tipos de atributos e indica que não há um método de seleção consistentemente superior: ABB-IEP e ABB-LIU destacam-se em conjuntos com atributos nominais, enquanto Relief apresenta melhores resultados em conjuntos com atributos numéricos. O estudo evidencia, assim, que a eficácia da seleção depende das características dos dados e do classificador associativo utilizado.
+
+%ref
+\citeonline{ghareb2018enhanced} propõem três métodos de seleção de atributos baseados em filtros (CRFM, MCDM e OR2) para categorização de textos em língua árabe. Os métodos são comparados com doze estratégias tradicionais de seleção, utilizando três conjuntos de documentos e os classificadores Naive Bayes e classificação associativa baseada em Apriori. Os resultados mostram que, na classificação associativa, MCDM e OR2 apresentam os melhores desempenhos em diferentes conjuntos de dados, enquanto a quantidade de regras geradas também varia conforme o filtro utilizado. O estudo evidencia, assim, que a escolha do método de seleção influencia tanto o desempenho preditivo quanto a estrutura do classificador associativo.
+
+%ref
+\citeonline{alhawari2021classification} investigam a seleção de atributos na classificação de avaliações textuais de aplicativos relacionadas à manutenção de software. Após o processamento dos textos, os autores aplicam os filtros \textit{Information Gain} (IG) e $\chi^2$ como pré-processamento de classificadores tradicionais e associativos (CBA, CBA2, CMAR e CPAR). O trabalho também propõe o ACRM (\textit{Associative Classification for Reviews Mining}), que utiliza FP-Growth para mineração de padrões e os critérios de confiança e \textit{conviction} para classificação. Os resultados indicam melhorias no desempenho após a seleção de atributos, com IG apresentando, em geral, melhores resultados que $\chi^2$, embora os ganhos sejam menores nos classificadores associativos.
+
+%ref
+\citeonline{ashi2021enhancing} investigam o efeito da seleção de atributos na predição de evasão de clientes (\textit{customer churn}) utilizando os classificadores associativos CBA, CBA2, CPAR e FARC-HD. Os autores empregam o método \textit{Sequential Backward Search using Inconsistent Examples Pairs} (SBS-IEP) como etapa de pré-processamento e comparam os classificadores com e sem seleção de atributos. Os resultados mostram uma redução na quantidade de regras geradas pelos quatro classificadores, embora em proporções distintas, evidenciando que a seleção de atributos também pode contribuir para a redução da complexidade dos modelos associativos.
+
+%ref
+\citeonline{piri2019exploring} investigam a seleção de atributos na classificação associativa de dados de cardiotocografia para determinação do estado fetal. Após a discretização dos atributos contínuos por um método baseado em entropia, os autores utilizam o \textit{ExtraTreesClassifier} para obter um \textit{ranking} de importância, selecionando os dez atributos mais relevantes para o classificador CBA. Os experimentos consideram as variantes CBA-M1 e CBA-M2, com e sem poda. Na configuração CBA-M1 com poda, a seleção eleva a acurácia de 83\% para 84\% e reduz a quantidade de regras de 48 para 2. Os resultados evidenciam que a seleção de atributos pode contribuir para reduzir significativamente a complexidade do modelo associativo, mesmo quando os ganhos preditivos são modestos.
+
+%ref
+\citeonline{cicek2021assessment} investigam a classificação associativa de dados de expressão gênica para distinguir indivíduos positivos e negativos para COVID-19. O conjunto de dados contém 15.979 genes e 234 amostras, caracterizando um problema de alta dimensionalidade. Os autores utilizam LASSO como etapa de pré-processamento, reduzindo o conjunto de 15.979 para 31 genes, posteriormente utilizados pelo classificador associativo CBA. As regras de associação de classe geradas permitem identificar combinações de genes associadas às classes, contribuindo para a interpretação dos resultados. Entretanto, o estudo não apresenta uma comparação experimental do classificador com e sem seleção de atributos.
+
+%ref
+\citeonline{alagukumar2025impacts} investigam a combinação de seleção de atributos e discretização na classificação associativa de dados de expressão gênica. Os autores avaliam três filtros baseados em informação mútua (JIM, JMI e JMI3), combinados com cinco métodos supervisionados de discretização (MDLP, CAIM, CACC, AMEVA e Chi-Merge). Os atributos selecionados são discretizados e utilizados pelos classificadores associativos CBA e CMAR. A avaliação considera tanto o desempenho preditivo quanto o número de intervalos e \textit{itemsets}, permitindo analisar os efeitos das diferentes combinações de pré-processamento sobre a representação dos dados e a classificação.
+
+%ref
+Além das abordagens que utilizam a seleção de atributos como pré-processamento de classificadores associativos convencionais, alguns estudos propõem arquiteturas híbridas ou incorporam mecanismos de seleção à própria construção dos modelos. \citeonline{abubacker2017integrated} propõem uma arquitetura híbrida para classificação de mamografias que combina seleção de atributos, mineração de regras de associação de classe (RACs) e classificadores neurais. A seleção utiliza \textit{Correlation-based Feature Selection} (CFS) associado a uma busca genética, enquanto a mineração emprega uma versão modificada do \textit{Genetic Association Rule Mining} (GARM). As RACs geradas são utilizadas como entrada dos classificadores ACNN e ACFNN, baseados, respectivamente, em redes neurais e redes neuro-fuzzy. Diferentemente dos classificadores associativos convencionais, a arquitetura utiliza as regras como entrada para modelos neurais, caracterizando uma abordagem híbrida.
+
+%ref
+Diferentemente das abordagens que realizam seleção de atributos como pré-processamento, \citeonline{nandhini2022performance} investigam critérios de seleção incorporados à geração de regras do classificador associativo CPAR. Os autores substituem o critério original \textit{FOIL's Information Gain} por \textit{Gain Ratio} (GR) e \textit{Mutual Information Gain} (IG), originando as variantes CPAR-GR e CPAR-IG. Também avaliam as medidas \textit{Laplace Accuracy} e \textit{Likelihood Ratio} para avaliação e seleção das regras. Os resultados em conjuntos de dados médicos indicam desempenho favorável do CPAR-GR em relação ao CPAR original, embora sem superioridade consistente em todas as configurações. O estudo demonstra, assim, que a escolha do critério de seleção durante a geração das regras pode influenciar o desempenho preditivo do classificador.
+
+%ref
+\citeonline{wu2024novel} propõem o MCWCAR (\textit{Mutual Information and Correlation Coefficient Weighted Class Association Rule Mining}) para predição de defeitos de software. Diferentemente das abordagens que selecionam previamente um subconjunto de atributos, o método incorpora critérios de relevância à própria mineração de \textit{itemsets}. A informação mútua é utilizada para ponderar atributos na mineração de \textit{itemsets} sem classe, enquanto coeficientes de correlação atribuem pesos aos itens associados às classes com e sem defeito. Essas ponderações influenciam a seleção dos \textit{itemsets} frequentes que dão origem às regras de associação de classe, caracterizando uma abordagem de seleção de atributos interna ao processo de classificação associativa, sem a geração prévia de um subconjunto global de atributos. Os resultados experimentais indicam desempenho superior ao dos classificadores CWCAR, CBA3 e ACAR nas métricas \textit{Balance}, MCC e G-Mean, com diferenças estatisticamente significativas nas comparações realizadas.
+
+%ref
+\citeonline{rad2024framework} propõem um \textit{framework} para detecção de moedas falsificadas baseado em classificação associativa fuzzy. A proposta introduz o PFA (\textit{Pruned Fuzzy Associative Classifier}) e o mecanismo Engine\_FAFS, que utiliza regras de associação fuzzy para selecionar atributos presentes nos antecedentes das regras consideradas relevantes. Diferentemente das abordagens que empregam filtros tradicionais, a seleção é realizada a partir das próprias regras de associação, sendo posteriormente integrada à construção do classificador associativo PFA, que utiliza regras com consequentes de classe. O \textit{framework} também incorpora poda de regras baseada em dependência estatística e otimização por \textit{Particle Swarm Optimization} (PSO), incluindo o ajuste do parâmetro $\delta$, responsável por controlar o tamanho do subconjunto selecionado.
+
+%ref
+Por fim, destaca-se uma proposta que, diferentemente das estratégias individuais de seleção ou dos mecanismos incorporados à geração de regras, combina múltiplos seletores de atributos antes da construção do classificador associativo. \citeonline{sowan2023hybrid} propõem duas estratégias de seleção de atributos para classificação associativa de câncer de mama. A primeira, denominada WARF (\textit{Weighted Average of Relative Frequency}), combina os filtros CFS, \textit{Information Gain}, \textit{Gain Ratio}, $\chi^2$ e ReliefF em um \textit{ensemble}, utilizando \textit{rankings} de importância e frequências relativas de seleção dos atributos para identificar um subconjunto relevante, posteriormente utilizado pelo classificador associativo PCBA. A segunda estratégia, Hybrid PSO-WARF, incorpora uma busca baseada em \textit{Particle Swarm Optimization} (PSO) e na avaliação de subconjuntos por classificadores, constituindo uma abordagem híbrida entre filtro e \textit{wrapper}. Os resultados experimentais indicam melhorias no desempenho preditivo em comparação com diferentes métodos individuais e classificadores associativos de referência. Entre os estudos analisados, este é o mais diretamente relacionado à presente dissertação, por combinar múltiplos seletores de atributos com classificação associativa. Entretanto, sua estratégia de agregação baseia-se em frequências relativas e médias ponderadas de importância, diferentemente dos métodos de agregação de \textit{rankings} investigados nesta dissertação.
+
+% ---------------------------------------------------------------------
+\subsection{Síntese Comparativa dos Trabalhos} \label{subsec:sintese-ca}
+% ---------------------------------------------------------------------
+
+A análise dos trabalhos apresentados na Seção~\ref{subsec:trabalhos-ca} evidencia diferentes formas de integração da seleção de atributos à classificação associativa, distinguindo abordagens de seleção externa e interna. A Tabela~\ref{tab:sintese-ca} sintetiza os 12 estudos quanto ao tipo de integração, aos métodos de seleção de atributos, às estratégias de utilização, aos classificadores associativos empregados e às avaliações e comparações realizadas. Os trabalhos são apresentados na mesma ordem da subseção anterior, facilitando a correspondência entre suas descrições e a análise comparativa. A partir dessa síntese, são discutidos os principais aspectos metodológicos que diferenciam os estudos, permitindo identificar tendências, limitações e oportunidades de investigação.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begingroup
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.25}
+
+\begin{longtable}{|
+p{2.15cm}|
+p{1.25cm}|
+p{2.65cm}|
+p{3.05cm}|
+p{1.95cm}|
+p{3.55cm}|}
+
+\caption{Síntese comparativa dos trabalhos que integram seleção de atributos e classificação associativa.}
+\label{tab:sintese-ca}\\
+
+\hline
+\textbf{Referência} &
+\textbf{Tipo} &
+\textbf{Método de FS} &
+\textbf{Estratégia de uso} &
+\textbf{CA} &
+\textbf{Avaliação/Comparação} \\
+\hline
+\endfirsthead
+
+\multicolumn{6}{c}{\tablename\ \thetable{} -- continuação}\\
+\hline
+\textbf{Referência} &
+\textbf{Tipo} &
+\textbf{Método de FS} &
+\textbf{Estratégia de uso} &
+\textbf{CA} &
+\textbf{Avaliação/Comparação} \\
+\hline
+\endhead
+
+\hline
+\multicolumn{6}{r}{\textit{continua na próxima página}}\\
+\endfoot
+
+\hline
+\endlastfoot
+
+\citeonline{alazaidah2021feature} &
+Externa &
+ABB-IEP, ABB-LIU, Focus, LVF, Relief, SBS-LIU, SBS-IEP, SFS-IEP e SFS-LIU &
+Comparação de nove métodos de FS, aplicados individualmente como pré-processamento &
+CBA, CBA2, CFAR, CMAR e CPAR &
+Compara os métodos de FS em diferentes conjuntos de dados e classificadores associativos \\
+\hline
+
+\citeonline{ghareb2018enhanced} &
+Externa &
+CRFM, MCDM, OR2 e doze métodos tradicionais &
+Proposição de três filtros e comparação individual com métodos de referência &
+CA baseada em Apriori &
+Compara o desempenho dos seletores e seus efeitos sobre a quantidade de regras \\
+\hline
+
+\citeonline{alhawari2021classification} &
+Externa &
+IG e $\chi^2$ &
+Comparação de dois filtros aplicados separadamente como pré-processamento &
+CBA, CBA2, CMAR, CPAR e ACRM &
+Compara classificadores tradicionais e associativos após a seleção de atributos \\
+\hline
+
+\citeonline{ashi2021enhancing} &
+Externa &
+SBS-IEP &
+Método individual de seleção sequencial aplicado antes da classificação &
+CBA, CBA2, CPAR e FARC-HD &
+Compara os classificadores com e sem FS, incluindo a quantidade de regras \\
+\hline
+
+\citeonline{piri2019exploring} &
+Externa &
+ExtraTreesClassifier &
+Método individual baseado em \textit{ranking} de importância, com seleção dos dez primeiros atributos &
+CBA &
+Compara CBA-M1 e CBA-M2, com e sem poda e seleção de atributos \\
+\hline
+
+\citeonline{cicek2021assessment} &
+Externa &
+LASSO &
+Método individual para redução de dimensionalidade antes da classificação &
+CBA &
+Avalia o classificador com atributos selecionados, sem comparação com o conjunto completo \\
+\hline
+
+\citeonline{alagukumar2025impacts} &
+Externa &
+JIM, JMI e JMI3 &
+Comparação de filtros individuais combinados experimentalmente com métodos de discretização &
+CBA e CMAR &
+Compara combinações de FS e discretização quanto ao desempenho, intervalos e \textit{itemsets} \\
+\hline
+
+\citeonline{abubacker2017integrated} &
+Externa &
+CFS com busca genética &
+Seleção prévia integrada a uma arquitetura híbrida que utiliza RACs como entrada de modelos neurais &
+GARM + ACNN/ACFNN &
+Avalia o desempenho da arquitetura híbrida em dados de mamografia \\
+\hline
+
+\citeonline{nandhini2022performance} &
+Interna &
+FOIL-IG, GR e IG &
+Critérios alternativos de seleção de condições durante a geração das regras &
+CPAR, CPAR-GR e CPAR-IG &
+Compara variantes do CPAR e medidas de avaliação e seleção de regras \\
+\hline
+
+\citeonline{wu2024novel} &
+Interna &
+Informação mútua e coeficientes de correlação &
+Ponderação de atributos e itens incorporada à mineração de \textit{itemsets}, sem seleção prévia de subconjunto global &
+MCWCAR &
+Compara o desempenho com CWCAR, CBA3 e ACAR \\
+\hline
+
+\citeonline{rad2024framework} &
+Externa &
+Engine\_FAFS &
+Seleção de atributos baseada em regras de associação fuzzy, integrada a um \textit{framework} com PSO e poda de regras &
+PFA &
+Avalia o \textit{framework} proposto para detecção de moedas falsificadas \\
+\hline
+
+\citeonline{sowan2023hybrid} &
+Externa &
+WARF: CFS, IG, GR, $\chi^2$ e ReliefF; Hybrid PSO-WARF &
+\textit{Ensemble} de filtros baseado em frequências relativas e médias ponderadas; variante híbrida com PSO &
+PCBA &
+Compara métodos individuais, estratégias propostas e classificadores associativos de referência \\
+\hline
+
+\end{longtable}
+\endgroup
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\noindent\textbf{Tipo de integração.} Em dez dos 12 estudos analisados, a seleção de atributos ocorre antes da construção do classificador associativo, caracterizando uma abordagem externa. Essa configuração favorece a modularidade, permitindo modificar o método de seleção sem necessariamente alterar o algoritmo de classificação, como observado em \citeonline{alazaidah2021feature} e \citeonline{sowan2023hybrid}.
+
+Em contrapartida, \citeonline{nandhini2022performance} e \citeonline{wu2024novel} incorporam critérios de relevância diretamente à construção do classificador associativo, seja durante a geração das regras, seja na mineração de \textit{itemsets}. Nessas abordagens, a seleção não resulta previamente em um subconjunto global de atributos.
+
+Uma particularidade é apresentada por \citeonline{rad2024framework}, cuja seleção é orientada por regras de associação fuzzy, embora anteceda a construção do classificador associativo final. Assim, o estudo é classificado como seleção externa, mas distingue-se das abordagens tradicionais de pré-processamento.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\noindent\textbf{Métodos de FS.} Os estudos analisados apresentam diversidade nos critérios empregados para avaliar a relevância dos atributos. Medidas baseadas em teoria da informação aparecem de forma recorrente. \citeonline{nandhini2022performance} exploram FOIL-IG, GR e IG no CPAR; \citeonline{alhawari2021classification} utilizam IG e $\chi^2$; \citeonline{alagukumar2025impacts} analisam JIM, JMI e JMI3; e \citeonline{wu2024novel} incorporam informação mútua à ponderação dos atributos. Essa recorrência evidencia a importância das medidas de dependência e relevância na seleção de atributos para classificação associativa.
+
+Entretanto, os resultados não apontam para um critério de seleção consistentemente superior. \citeonline{alazaidah2021feature} identificam comportamentos distintos conforme o tipo dos atributos; \citeonline{ghareb2018enhanced} observam variações entre métodos de seleção e conjuntos de dados; e \citeonline{nandhini2022performance} mostram que a substituição do critério utilizado pelo CPAR influencia o desempenho preditivo, embora sem superioridade consistente em todas as configurações. Em conjunto, esses estudos indicam que diferentes critérios de seleção podem produzir resultados distintos conforme as características dos dados e do classificador associativo.
+
+Também são empregados métodos baseados em modelos e mecanismos de busca. \citeonline{cicek2021assessment} utilizam LASSO em um cenário de elevada dimensionalidade; \citeonline{piri2019exploring} empregam a importância dos atributos calculada pelo \textit{ExtraTreesClassifier}; \citeonline{abubacker2017integrated} combinam CFS com busca genética; e \citeonline{ashi2021enhancing} utilizam busca sequencial para eliminação de atributos. Essas estratégias ampliam a diversidade metodológica observada na literatura.
+
+Entre os estudos analisados, \citeonline{sowan2023hybrid} distinguem-se pela combinação de diferentes critérios de relevância em um \textit{ensemble}, em vez da aplicação isolada dos métodos de seleção. Essa característica aproxima a proposta da presente pesquisa, embora os mecanismos de combinação adotados sejam distintos daqueles investigados no EFS4AC.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\noindent\textbf{Estratégias de uso.} Os estudos apresentam três formas principais de utilização dos métodos de FS: aplicação de um seletor individual, comparação de diferentes seletores utilizados separadamente e combinação de múltiplos métodos para produzir uma seleção consensual. As duas primeiras predominam nos trabalhos analisados, enquanto a terceira é representada por \citeonline{sowan2023hybrid}, que propõem o WARF. Essa distinção evidencia que, embora a comparação entre métodos de FS esteja presente na literatura de classificação associativa, a investigação de estratégias de combinação de seus resultados permanece menos explorada.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\noindent\textbf{Avaliações/Comparações.} Além do desempenho preditivo, alguns estudos consideram os efeitos da seleção de atributos sobre propriedades dos modelos associativos. \citeonline{ashi2021enhancing} e \citeonline{piri2019exploring} avaliam a quantidade de regras geradas, enquanto \citeonline{alagukumar2025impacts} investigam os efeitos conjuntos da seleção e da discretização sobre o número de intervalos e \textit{itemsets}. Essas avaliações evidenciam a importância de considerar aspectos estruturais dos modelos, além de sua capacidade preditiva.
+
+Os estudos também apresentam diferenças quanto aos procedimentos de avaliação experimental. \citeonline{nandhini2022performance} utilizam testes estatísticos para comparar variantes do CPAR; \citeonline{alhawari2021classification} complementam as comparações com testes de significância e medidas de tamanho de efeito; e \citeonline{wu2024novel} empregam Scott-Knott ESD e Wilcoxon \textit{signed-rank}. Por outro lado, alguns trabalhos concentram seus experimentos em aplicações específicas e em conjuntos de dados mais restritos, como \citeonline{abubacker2017integrated}, \citeonline{cicek2021assessment}, \citeonline{piri2019exploring} e \citeonline{rad2024framework}. Essas diferenças metodológicas dificultam a comparação direta dos resultados reportados.
+
+Em conjunto, os estudos evidenciam diferentes possibilidades de aplicação da seleção de atributos à classificação associativa, com resultados dependentes dos métodos e das características dos dados. A combinação de múltiplos seletores constitui uma alternativa ainda pouco explorada nesse contexto, motivando a análise das estratégias de \textit{Ensemble Feature Selection} apresentada na Seção~\ref{ensambleFS}.
+
+%=====================================================================
+% 3.2 -- ENSEMBLE FEATURE SELECTION
+%=====================================================================
+\input{ch-revisao/sec_ensemble-fs}
+
+
+%=====================================================================
+% 3.3 -- SÍNTESE
+%=====================================================================
+\section{Síntese das Evidências e Lacunas de Pesquisa}
+\label{sec:consideracoes-relacionados}
+
+A análise dos trabalhos relacionados permite identificar oportunidades de investigação na interseção entre duas vertentes da literatura: a aplicação de métodos de \textit{Feature Selection} (FS) à classificação associativa e o desenvolvimento de estratégias de \textit{Ensemble Feature Selection} (EFS). Embora ambas investiguem a seleção de atributos, apresentam enfoques distintos, cuja integração constitui o principal interesse desta pesquisa.
+
+Na literatura de FS aplicada à classificação associativa, os 12 estudos analisados na Seção~\ref{sec:fs-ca} demonstram que a seleção de atributos pode ser incorporada de diferentes maneiras ao processo de classificação. Predominam as abordagens de seleção externa, nas quais um subconjunto de atributos é definido antes da indução do classificador, enquanto outros trabalhos integram critérios de relevância à construção ou à avaliação das regras. Os resultados também indicam que a eficácia dos métodos de FS depende das características dos dados e das estratégias de classificação utilizadas, não permitindo identificar um único seletor consistentemente superior. Entre esses estudos, destaca-se \citeonline{sowan2023hybrid}, que combinam diferentes métodos de seleção por meio do WARF antes da indução do classificador associativo PCBA, além de investigarem uma extensão híbrida baseada em PSO. Esse trabalho constitui um precedente importante de EFS aplicado à classificação associativa, embora não tenha como objetivo comparar sistematicamente diferentes decisões metodológicas de construção de um \textit{ensemble}.
+
+Por sua vez, os 22 estudos de EFS analisados na Seção~\ref{ensambleFS} apresentam diferentes estratégias para composição dos seletores, tratamento da diversidade, agregação dos resultados e definição do subconjunto final de atributos. Essas contribuições demonstram a variedade de alternativas metodológicas disponíveis, mas também evidenciam que tais decisões são frequentemente investigadas em configurações e contextos específicos. Entre os trabalhos examinados, permanece pouco explorada sua avaliação sistemática e integrada no contexto da classificação associativa, particularmente quanto aos efeitos de diferentes configurações do \textit{ensemble} sobre o desempenho preditivo e a complexidade dos modelos induzidos.
+
+Essa lacuna é relevante porque, na classificação associativa, a seleção de atributos não se limita à redução dimensional da entrada. Ao determinar quais atributos estarão disponíveis para a construção dos itens, ela também modifica o espaço de busca da mineração e pode influenciar a quantidade e a estrutura das Regras de Associação Classificativas (RACs) geradas. Consequentemente, estratégias de seleção com desempenho preditivo semelhante podem produzir modelos associativos estruturalmente distintos. Torna-se, portanto, importante avaliar conjuntamente o desempenho classificatório, a redução de atributos e as propriedades estruturais dos modelos resultantes.
+
+Diante dessas evidências, a oportunidade de pesquisa identificada consiste em investigar, sob um protocolo experimental comum, como diferentes decisões de construção de um EFS baseado em agregação de \textit{rankings} influenciam os resultados da classificação associativa. Essa investigação envolve a composição de seletores heterogêneos, a análise da diversidade entre seus resultados, a escolha dos mecanismos de agregação e a definição do subconjunto final de atributos. Além de comparar essas configurações entre si, é necessário confrontá-las com métodos individuais de FS e com a classificação associativa sem seleção, buscando identificar em quais condições o uso de EFS proporciona um melhor equilíbrio entre desempenho preditivo, redução dimensional e complexidade dos modelos baseados em regras. Essa perspectiva fundamenta a proposta do EFS4AC, apresentada no capítulo seguinte.

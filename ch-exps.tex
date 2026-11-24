@@ -1,0 +1,256 @@
+%============================================================================
+% CAPÍTULO 5 — EXPERIMENTOS INICIAIS E RESULTADOS PRELIMINARES
+% Estrutura evolutiva: preencher apenas o que tiver sido efetivamente executado.
+% Não apresentar configurações planejadas como resultados obtidos.
+%============================================================================
+\chapter{Experimentos Iniciais e Resultados Preliminares}\label{cap:experimentos-iniciais}
+
+Este capítulo apresenta o planejamento experimental e os resultados preliminares
+obtidos com o método \textit{EFS4AC}, descrito no
+Capítulo~\ref{cap:Metodologia}. O objetivo desta etapa da pesquisa é verificar
+a viabilidade de sua integração com a classificação associativa e iniciar a
+investigação dos efeitos das decisões metodológicas propostas sobre o desempenho
+preditivo, a redução dimensional e a complexidade dos classificadores induzidos. Assim, o protocolo descrito
+neste capítulo contempla as configurações efetivamente avaliadas nos experimentos iniciais.
+
+%============================================================================
+\section{Protocolo Experimental}\label{sec:exp-protocolo}
+%============================================================================
+
+Esta seção descreve os conjuntos de dados, os procedimentos de preparação dos dados,
+o classificador associativo, as configurações do \textit{EFS4AC} e o procedimento
+de avaliação.
+
+%%%%%%%%%%%
+\subsection{Conjuntos de Dados}\label{subsec:exp-bases}
+
+A avaliação foi conduzida sobre conjuntos de dados de classificação com
+atributo de classe nominal...COMPLETAR...
+
+...VIDE TRABALHO MAICON...
+
+%%%%%%%%%%%
+\subsection{Pré-processamento}\label{subsec:exp-preprocessamento}
+
+...VIDE TRABALHO MAICON...
+
+%%%%%%%%%%%
+\subsection{Classificador Associativo}
+\label{subsec:exp-integracao}
+
+...Identificar o classificador associativo e sua implementação; informar suporte, confiança, critérios de poda/ordenação e demais parâmetros...
+
+%%%%%%%%%%%
+\subsection{Configurações do EFS4AC e Métodos de Referência}\label{subsec:exp-configuracoes}
+
+A arquitetura do \textit{EFS4AC} permite investigar quatro fatores principais:
+a composição dos métodos-base, o controle da redundância entre \textit{rankings},
+o operador de agregação e a regra de definição do subconjunto final. As
+configurações previstas e avaliadas até este momento são sintetizadas na Tabela~\ref{tab:exp-configuracoes}.
+
+%%%%%%%%%%%
+\begin{table}[htbp]
+    \centering
+    \small
+    \caption{Configurações metodológicas investigadas inicialmente.}
+    \label{tab:exp-configuracoes}
+    \renewcommand{\arraystretch}{1.15}
+    \begin{tabular}{p{3.2cm}p{5.3cm}p{4.2cm}}
+        \hline
+        \textbf{Fator} & \textbf{Configurações avaliadas} &
+        \textbf{Aspecto investigado} \\
+        \hline
+        Composição & $E_{U+M}$ & Efeito dos métodos-base \\
+        Redundância & $D_0$, $D_L$ & Efeito do controle de similaridade \\
+        Agregação & Borda Média, Mediana, Geométrica, L2; TOPSIS &
+        Efeito do operador de consenso \\
+        Corte & $K_{25}$, $K_{50}$, $K_{75}$, $K_{\Delta}$ &
+        Efeito da quantidade selecionada \\
+        Referências & Sem FS; métodos-base individuais &
+        Comparação com alternativas sem consenso \\
+        \hline
+    \end{tabular}
+\end{table}
+%%%%%%%%%%%
+
+As configurações de referência compreendem a indução do classificador com todos
+os atributos (sem seleção) e a seleção realizada individualmente pelos métodos-
+base. Essas comparações permitem investigar se os resultados do \textit{ensemble}
+diferem daqueles obtidos por seus componentes isolados.
+
+%%%%%%%%%%%
+\subsection{Procedimento de Validação Cruzada e Prevenção de Vazamento de Informação}\label{subsec:exp-validacao}
+
+Como os métodos-base utilizados pelo \textit{EFS4AC} empregam informações
+da classe para estimar a relevância dos atributos, todo o processo de
+seleção deve ser realizado exclusivamente com os dados de treinamento.
+Isso inclui o pré-processamento, quando seus parâmetros
+dependem dos dados, a construção dos \textit{rankings}, a análise da
+diversidade, a agregação e a determinação do ponto de corte. Esse
+procedimento busca evitar o vazamento de informações dos dados de teste
+para as etapas de seleção de atributos e indução do classificador.
+
+Em um procedimento de validação cruzada com $k$ partições
+(\textit{folds}), seja $D_{\mathrm{tr}}^{(q)}$ o conjunto de treinamento
+e $D_{\mathrm{te}}^{(q)}$ o conjunto de teste correspondente à
+partição $q$, com $q=1,\ldots,k$. Em cada partição, o
+\textit{EFS4AC} é executado novamente utilizando exclusivamente
+os dados de treinamento, conforme a Equação~\ref{eq:exp-efs-fold}, em que $\operatorname{EFS4AC}(\cdot)$ representa a aplicação do método
+proposto e $F_q^{*}$ corresponde ao subconjunto de atributos selecionado
+a partir dos dados de treinamento da partição $q$.
+
+%%%%%%%%%
+\begin{equation}\label{eq:exp-efs-fold}
+    F_q^{*} =
+    \operatorname{EFS4AC}(D_{\mathrm{tr}}^{(q)})
+\end{equation}
+%%%%%%%%%
+
+Após a seleção, os conjuntos de treinamento e teste são projetados
+sobre os atributos pertencentes a $F_q^{*}$, conforme a
+Equação~\ref{eq:exp-projecoes-fold}. Nessa equação, $\pi_{F_q^{*}}(\cdot)$ representa a operação de projeção
+que preserva somente os atributos pertencentes ao subconjunto
+$F_q^{*}$, além do atributo de classe.
+Os conjuntos $D_{\mathrm{tr}}^{*(q)}$ e $D_{\mathrm{te}}^{*(q)}$
+correspondem, respectivamente, aos dados de treinamento e teste
+após a redução de atributos.
+
+%%%%%%%%%
+\begin{equation}\label{eq:exp-projecoes-fold}
+    D_{\mathrm{tr}}^{*(q)}
+    =
+    \pi_{F_q^{*}}(D_{\mathrm{tr}}^{(q)}),
+    \qquad
+    D_{\mathrm{te}}^{*(q)}
+    =
+    \pi_{F_q^{*}}(D_{\mathrm{te}}^{(q)})
+\end{equation}
+%%%%%%%%%
+
+O classificador associativo é então induzido utilizando
+$D_{\mathrm{tr}}^{*(q)}$ e avaliado sobre
+$D_{\mathrm{te}}^{*(q)}$. Esse procedimento é repetido para
+todas as $k$ partições da validação cruzada. Neste trabalho, utilizou-se $k=10$.
+
+Cabe destacar que diferentes partições podem produzir subconjuntos
+$F_q^{*}$ distintos, uma vez que a seleção de atributos é realizada
+independentemente em cada conjunto de treinamento. Dessa forma,
+os dados de teste não participam da escolha dos atributos, permitindo
+avaliar o desempenho do classificador associativo sem introduzir
+vazamento de informações durante o processo de seleção.
+
+%============================================================================
+\section{Critérios de Avaliação}
+\label{sec:exp-criterios}
+%============================================================================
+
+A avaliação do \textit{EFS4AC} considera não apenas o desempenho preditivo,
+mas também o grau de redução dimensional, a estrutura do classificador
+associativo, a estabilidade da seleção e o custo computacional. Essas dimensões
+serão analisadas conjuntamente, sem pressupor que a melhora de uma medida
+implique necessariamente melhora nas demais.
+
+\textbf{Desempenho Preditivo.} A medida de desempenho será a F1-Macro, Equação~\ref{eq:exp-f1-macro}, em que $C$ representa o número de classes.
+%%%%%%%%%%%
+\begin{equation}\label{eq:exp-f1-macro}
+    F1_{\mathrm{Macro}}=\frac{1}{C}\sum_{c=1}^{C}F1_c,
+    \qquad
+    F1_c=2*\frac{\operatorname{Precisao}_c*\,\operatorname{Revocacao}_c}
+    {\operatorname{Precisao}_c+\operatorname{Revocacao}_c}
+\end{equation}
+%%%%%%%%%%%
+
+\textbf{Redução Dimensional.} Para cada subconjunto $F^{*}$, serão registrados o número de atributos selecionados e a proporção de redução em relação ao conjunto original, conforme Equação~\ref{eq:exp-reducao}. Uma redução maior não será interpretada isoladamente como superior,
+pois a exclusão de atributos informativos pode prejudicar o desempenho da classificação e a complexidade dp modelo.
+%%%%%%%%%%%
+\begin{equation}\label{eq:exp-reducao}
+    \operatorname{Red}(F^{*})=
+    \left(1-\frac{|F^{*}|}{|F|}\right)\times 100
+\end{equation}
+%%%%%%%%%%%
+
+\textbf{Complexidade do classificador associativo.} Para analisar a estrutura do modelo, serão registrados inicialmente o número de regras finais e o tamanho médio dos antecedentes. Seja $\mathcal{Q}$ o conjunto de regras e $\operatorname{ant}(q)$ o antecedente da
+regra $q$. Para $|\mathcal{Q}|>0$, define-se $\overline{L}_{\mathrm{ant}}$ de acordo com a Equação~\ref{eq:exp-tamanho-medio}.
+%%%%%%%%%%%
+\begin{equation}\label{eq:exp-tamanho-medio}
+    \overline{L}_{\mathrm{ant}}=
+    \frac{1}{|\mathcal{Q}|}\sum_{q\in\mathcal{Q}}|\operatorname{ant}(q)|
+\end{equation}
+%%%%%%%%%%%
+
+\textbf{Estabilidade da Seleção.} A estabilidade será considerada como a consistência dos subconjuntos obtidos
+em diferentes partições de treinamento. Para dois subconjuntos
+$F_a^{*}$ e $F_b^{*}$, o índice de Jaccard é obtido via Equação~\ref{eq:exp-jaccard}. Para $k$ subconjuntos, a estabilidade média (Est) entre pares pode ser expressa via Equação~\ref{eq:exp-estabilidade}. Essa medida será interpretada em conjunto com o tamanho dos subconjuntos,
+pois a sobreposição também é influenciada pela quantidade de atributos
+selecionados.
+
+%%%%%%%%%%%
+\begin{equation}\label{eq:exp-jaccard}
+    J(F_a^{*},F_b^{*})=
+    \frac{|F_a^{*}\cap F_b^{*}|}{|F_a^{*}\cup F_b^{*}|}
+\end{equation}
+%%%%%%%%%%%
+
+%%%%%%%%%%%
+\begin{equation}\label{eq:exp-estabilidade}
+    \operatorname{Est}=
+    \frac{2}{k(k-1)}\sum_{a=1}^{k-1}\sum_{b=a+1}^{k}
+    J(F_a^{*},F_b^{*})
+\end{equation}
+%%%%%%%%%%%
+
+\textbf{Custo Computacional [OPCIONAL].} Serão registrados separadamente o tempo de seleção de atributos
+$T_{\mathrm{EFS}}$ e o tempo de indução do classificador
+$T_{\mathrm{CA}}$. Quando pertinente, será considerado o tempo total, i.e., $T_{\mathrm{total}}=T_{\mathrm{EFS}}+T_{\mathrm{CA}}$. Essa distinção permite verificar se o custo adicional da seleção é compensado
+por eventual redução no custo de indução do classificador.
+
+%===========================================================================
+\section{Resultados e Discussão}
+\label{sec:exp-resultados}
+%============================================================================
+
+%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Desempenho Preditivo e Redução Dimensional}\label{subsec:exp-resultados-f1-reducao}
+
+Objetivo: verificar se a redução do conjunto de
+atributos preserva, melhora ou prejudica o desempenho de classificação em
+relação aos cenários de referência disponíveis.
+
+%%%%%%%%%%%
+\begin{table}[htbp]
+    \centering
+    \small
+    \caption{Desempenho preditivo e redução dimensional: estrutura para os resultados preliminares.}
+    \label{tab:exp-resultados-principais}
+    \begin{tabular}{p{2.5cm}p{3.0cm}p{2.7cm}p{2.1cm}p{2.1cm}}
+        \hline
+        \textbf{Base} & \textbf{Configuração} &
+        \textbf{F1-Macro} & \textbf{Atributos} & \textbf{Redução} \\
+        \hline
+        \multicolumn{5}{c}{\textit{Preencher com os resultados obtidos.}} \\
+        \hline
+    \end{tabular}
+\end{table}
+%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Efeitos sobre o Classificador Associativo}
+\label{subsec:exp-resultados-regras}
+
+Analisar: número de regras finais e o tamanho médio dos antecedentes. Reduções nessas medidas não serão interpretadas isoladamente como
+melhoria, devendo ser consideradas em conjunto com a F1-Macro.
+
+%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Estabilidade da Seleção}\label{subsec:exp-resultados-estabilidade}
+...
+
+%%%%%%%%%%%%%%%%%%%%%%
+%Posteriormente - estudo de ablação
+%\subsection{Componentes do EFS4AC}\label{subsec:exp-resultados-componentes}
+
+%As saídas intermediárias do \textit{EFS4AC} também poderão ser utilizadas para compreender o comportamento das configurações avaliadas. A matriz de correlação de Spearman permitirá identificar concordâncias e redundâncias entre os métodos-base. A comparação dos \textit{rankings} consensuais e dos subconjuntos selecionados permitirá verificar como diferentes agregadores e regras de corte influenciam a seleção final.
+
+%============================================================================%
+\section{Considerações Finais}\label{sec:exp-consideracoes}
+
+...FAZER...

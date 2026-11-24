@@ -1,0 +1,722 @@
+% ==================================================================================================================================
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Trabalhos Relacionados}
+\label{trabRelac}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Este capítulo apresenta os trabalhos relacionados às duas vertentes que fundamentam esta pesquisa. A primeira, apresentada na Seção~\ref{sec:fs-ca}, compreende estudos que investigam a utilização de métodos de seleção de atributos em classificadores associativos. A segunda, apresentada na Seção~\ref{ensambleFS}, aborda estratégias de \textit{Ensemble Feature Selection} (EFS), com ênfase na diversidade entre seletores, nos mecanismos de agregação, na estabilidade da seleção e na definição dos subconjuntos finais de atributos. Por fim, a Seção~\ref{sec:consideracoes-relacionados} sintetiza as evidências identificadas e as lacunas que motivam esta pesquisa.
+
+% =====================================================================
+% =====================================================================
+% =====================================================================
+% =====================================================================
+\section{Seleção de Atributos em Classificadores Associativos}
+\label{sec:fs-ca}
+% =====================================================================
+
+A seleção de atributos assume uma função
+particularmente relevante em classificação associativa, uma vez que a
+dimensionalidade do conjunto de dados influencia não apenas a etapa de
+classificação, mas também o espaço de busca utilizado para a descoberta de
+\textit{itemsets} e Regras de Associação de Classe (\textit{Class Association
+Rules} -- CARs). A presença de atributos irrelevantes ou redundantes pode
+aumentar o número de combinações candidatas, favorecer a geração de regras
+redundantes e elevar o custo computacional da mineração. Consequentemente,
+reduzir o espaço de atributos pode afetar simultaneamente a complexidade do
+processo de mineração, a quantidade de regras produzidas, a interpretabilidade
+do modelo e seu desempenho preditivo.
+
+A literatura apresenta diferentes estratégias para incorporar FS a
+classificadores associativos. Em algumas propostas, a seleção é realizada como
+uma etapa independente de pré-processamento, de forma que somente o subconjunto
+selecionado é submetido posteriormente à mineração de regras
+\citeonline{piri2019exploring,alhawari2021classification,sowan2023hybrid,
+alagukumar2025impacts}. Em outras, a relevância dos atributos participa
+diretamente da geração ou ponderação das CARs
+\citeonline{nandhini2022performance,wu2024novel}. Há ainda propostas nas quais
+a própria estrutura das regras é utilizada como fonte de informação para
+selecionar características, estabelecendo uma integração mais estreita entre
+FS e classificação associativa \citeonline{rad2024framework}.
+
+Diante dessa diversidade, esta seção analisa os trabalhos que relacionam
+explicitamente FS e classificação associativa, buscando identificar como a
+seleção é inserida no \textit{pipeline}, quais critérios são utilizados para
+avaliar atributos, quais classificadores associativos são empregados e quais
+efeitos são observados sobre desempenho, dimensionalidade e estrutura das
+regras.
+
+% ---------------------------------------------------------------------
+\subsection{Procedimento da revisão}
+\label{subsec:procedimento-rsl-ca}
+% ---------------------------------------------------------------------
+
+A identificação dos estudos foi conduzida por meio de uma revisão da literatura
+orientada especificamente à relação entre FS e classificação associativa. A
+estratégia de busca combinou termos associados à classificação baseada em regras,
+incluindo \textit{associative classification}, \textit{associative classifier},
+\textit{class association rules} e \textit{predictive association rules}, com
+termos relacionados à redução de atributos, como \textit{feature selection},
+\textit{attribute selection}, \textit{feature ranking} e \textit{item
+selection}. As consultas foram adaptadas às particularidades das bases
+bibliográficas utilizadas no levantamento.
+
+A análise originalmente foi orientada por cinco questões de pesquisa, voltadas
+a: (i) identificar o \textit{pipeline} adotado e as etapas modificadas ou
+preservadas; (ii) verificar se FS ocorre externamente ou é incorporada ao
+classificador; (iii) caracterizar os métodos de seleção utilizados; (iv)
+identificar estratégias adicionais de redução de complexidade ou melhoria do
+modelo; e (v) examinar a avaliação experimental apresentada pelos estudos.
+Nesta seção, essas questões são consolidadas em três eixos analíticos:
+\textit{forma de integração}, \textit{abordagens de seleção} e
+\textit{evidências experimentais}, evitando a repetição da descrição
+metodológica da revisão.
+
+Após a aplicação dos critérios de seleção e a atualização do levantamento, o conjunto de trabalhos analisado nesta seção compreende 12 estudos que apresentam relação
+explícita entre seleção ou avaliação de atributos e classificadores
+associativos. Os trabalhos são discutidos a seguir em ordem alfabética pelo
+sobrenome do primeiro autor.
+
+% ---------------------------------------------------------------------
+\subsection{Trabalhos analisados}
+\label{subsec:trabalhos-ca}
+% ---------------------------------------------------------------------
+
+\noindent\textbf{\citeonline{abubacker2017integrated}.}
+O trabalho propõe uma arquitetura híbrida para classificação de mamografias na
+qual a redução dimensional antecede a mineração associativa. Inicialmente,
+\citeonline{abubacker2017integrated} empregam um mecanismo de seleção
+multivariada baseado em \textit{Correlation-based Feature Selection} (CFS),
+associado a uma busca genética, para obter um subconjunto de características
+relevantes. Os atributos selecionados são então fornecidos a uma versão
+modificada do GARM (\textit{Genetic Association Rule Mining}), responsável pela
+geração das regras. Posteriormente, essas regras são utilizadas como entrada
+para classificadores neurais e neuro-fuzzy, denominados ACNN e ACFNN. A
+estrutura proposta evidencia uma integração em estágios, na qual FS restringe
+previamente o espaço submetido à mineração de regras. Experimentalmente, o ACFNN
+alcançou acurácia média superior à versão neural, indicando benefício da
+combinação entre seleção, mineração associativa e sistema neuro-fuzzy.
+
+\medskip
+
+\noindent\textbf{\citeonline{alagukumar2025impacts}.}
+A relação entre FS e discretização é investigada explicitamente por
+\citeonline{alagukumar2025impacts} em dados de expressão gênica. Os autores
+avaliam três filtros baseados em informação mútua --- JIM
+(\textit{Joint Impurity Filter}), JMI (\textit{Joint Mutual Information}) e JMI3
+(\textit{Third-order Joint Mutual Information}) --- combinados com cinco
+métodos supervisionados de discretização: MDLP, CAIM, CACC, AMEVA e
+Chi-Merge. O subconjunto resultante é discretizado, transformado para o formato
+transacional e posteriormente submetido aos classificadores CBA e CMAR. Dessa
+forma, o estudo não trata FS como uma decisão isolada, mas investiga seu efeito
+em conjunto com a granularidade criada pela discretização.
+
+Além do desempenho preditivo, os autores analisam o
+número de intervalos, \textit{itemsets} e o tempo de execução. Nos conjuntos de
+expressão gênica considerados, o CMAR atingiu 100\% de acurácia nas combinações
+avaliadas, enquanto o comportamento do CBA apresentou maior dependência da
+combinação entre filtro e discretizador. Esse resultado é relevante para
+classificação associativa porque evidencia que FS e discretização afetam
+diretamente a representação transacional sobre a qual as CARs são geradas.
+
+\medskip
+
+\noindent\textbf{\citeonline{alazaidah2021feature}.}
+Em um estudo comparativo especificamente direcionado à classificação
+associativa, \citeonline{alazaidah2021feature} avaliam nove métodos de seleção:
+ABB-IEP, ABB-LIU, Focus, LVF, Relief, SBS-LIU, SBS-IEP, SFS-IEP e SFS-LIU.
+Os subconjuntos produzidos são avaliados com cinco classificadores
+associativos: CBA, CBA2, CFAR, CMAR e CPAR. A comparação é realizada sobre
+conjuntos de dados com diferentes tipos de atributos, permitindo analisar não
+apenas qual seletor produz maior acurácia, mas também sua interação com a
+natureza dos dados e com o classificador utilizado.
+
+Os resultados de \citeonline{alazaidah2021feature} mostram que não há uma
+configuração única dominante em todos os cenários: ABB-IEP e ABB-LIU se
+destacam nos conjuntos compostos por atributos nominais, enquanto Relief
+apresenta melhor comportamento em conjuntos com atributos reais e inteiros.
+Esse resultado reforça a dependência entre o mecanismo de seleção e as
+características do problema, aspecto importante quando se considera a adoção de
+um único seletor como etapa fixa de um \textit{pipeline} associativo.
+
+\medskip
+
+\noindent\textbf{\citeonline{alhawari2021classification}.}
+Investigam classificação de avaliações
+de aplicativos em categorias relacionadas à manutenção de software. Após etapas
+de processamento de linguagem natural e transformação dos textos em uma
+representação estruturada, os autores aplicam \textit{Information Gain} (IG) e
+$\chi^2$ para selecionar os atributos textuais mais relevantes. Os subconjuntos
+obtidos são utilizados com classificadores tradicionais e associativos,
+incluindo CBA, CBA2, CMAR e CPAR.
+
+O trabalho também propõe o ACRM (\textit{Associative Classification for Reviews
+Mining}), que utiliza FP-Growth para obtenção de padrões e combina confiança e
+\textit{conviction} na seleção das regras. Na análise de FS,
+\citeonline{alhawari2021classification} verificam melhoria de desempenho após a
+remoção de atributos pouco informativos, com IG apresentando, em geral, melhores
+resultados que $\chi^2$. Os autores observam, entretanto, que os classificadores
+associativos são menos sensíveis à presença de atributos ineficientes do que
+alguns classificadores tradicionais, em razão da utilização das regras mais
+fortes no processo de predição.
+
+\medskip
+
+\noindent\textbf{\citeonline{ashi2021enhancing}.}
+No domínio de predição de \textit{customer churn},
+analisam o efeito da FS sobre CBA, CBA2, CPAR e
+FARC-HD. Após o pré-processamento dos dados, é utilizado o SBS-IEP
+(\textit{Sequential Backward Search using Inconsistent Examples Pairs}) para
+reduzir o conjunto de atributos antes da indução dos classificadores
+associativos. O estudo compara os modelos com e sem seleção por meio de
+acurácia, taxa de erro, curva ROC, quantidade de regras e tempo de execução.
+
+A contribuição do estudo de \citeonline{ashi2021enhancing} é particularmente
+relevante por avaliar não apenas desempenho preditivo, mas também efeitos
+estruturais da redução dimensional. Os resultados mostram que a aplicação de FS
+altera a quantidade de regras produzidas e o custo computacional dos
+classificadores, evidenciando que, em classificação associativa, a seleção de
+atributos pode repercutir diretamente sobre a complexidade do modelo final.
+
+\medskip
+
+\noindent\textbf{\citeonline{cicek2021assessment}.}
+Aplicam classificação associativa a dados de
+expressão gênica para distinguir indivíduos positivos e negativos para COVID-19.
+O conjunto original contém 15.979 genes de 234 indivíduos, caracterizando um
+problema no qual a dimensionalidade é substancialmente superior ao número de
+amostras. Para reduzir esse espaço, os autores utilizam LASSO como mecanismo de
+seleção dos preditores e, posteriormente, constroem o modelo de classificação
+associativa sobre o subconjunto selecionado.
+
+A avaliação reportada por \citeonline{cicek2021assessment} inclui acurácia,
+acurácia balanceada, sensibilidade, especificidade, valor preditivo positivo,
+valor preditivo negativo e F1-\textit{score}. O modelo associativo alcança
+92,7\% de acurácia e 90,5\% de F1-\textit{score}. Além da redução de um espaço
+inicial de milhares de genes, o trabalho utiliza as regras resultantes para
+relacionar combinações de genes às classes, preservando a finalidade
+interpretável do classificador associativo.
+
+\medskip
+
+\noindent\textbf{\citeonline{ghareb2018enhanced}.}
+No contexto de categorização de textos em língua árabe,
+os autores propõem três métodos de filtro, denominados
+CRFM, MCDM e OR2. Os métodos são comparados com doze estratégias tradicionais
+de seleção, totalizando uma avaliação ampla de diferentes critérios de FS. Os
+subconjuntos resultantes são avaliados tanto com Naive Bayes quanto com
+classificação associativa, sobre três conjuntos de documentos.
+
+Os resultados de \citeonline{ghareb2018enhanced} mostram que os filtros
+propostos podem produzir desempenho competitivo ou superior em diferentes
+configurações, porém sem identificar um único método dominante para todos os
+conjuntos de dados, tamanhos de subconjunto e classificadores. Esse resultado é
+importante para a presente discussão porque fornece evidência empírica de que
+diferentes critérios de FS capturam propriedades distintas dos dados, limitando
+a adoção de um seletor individual como solução universal.
+
+\medskip
+
+\noindent\textbf{\citeonline{nandhini2022performance}.}
+Diferentemente dos trabalhos que realizam FS como pré-processamento,
+\citeonline{nandhini2022performance} investigam a seleção de atributos dentro do
+próprio processo de geração de regras do CPAR. O algoritmo original utiliza
+FOIL's Information Gain para selecionar, a cada iteração, o atributo que será
+incorporado ao antecedente das CARs. Os autores substituem esse critério por
+\textit{Gain Ratio} (GR) e \textit{Mutual Information Gain} (IG), originando as
+variantes CPAR-GR e CPAR-IG.
+
+Além do critério de seleção, \citeonline{nandhini2022performance} avaliam
+\textit{Laplace Accuracy} e \textit{Likelihood Ratio} na avaliação e escolha das
+melhores regras. Os experimentos são conduzidos em diferentes conjuntos de
+dados médicos, considerando acurácia e AUC e complementados por testes
+estatísticos. Os resultados indicam comportamento particularmente favorável do
+CPAR-GR, mostrando que a escolha da medida utilizada durante a construção das
+regras altera diretamente o desempenho do classificador. Assim, o estudo
+constitui um exemplo de FS \textit{interna}, na qual seleção de atributos e
+geração de CARs não são etapas independentes.
+
+\medskip
+
+\noindent\textbf{\citeonline{piri2019exploring}.}
+Utilizam classificação associativa para determinar
+o estado fetal a partir de dados de cardiotocografia. Os atributos contínuos são
+inicialmente transformados por discretização baseada em entropia e, em seguida,
+o \textit{ExtraTreesClassifier} é empregado para calcular a importância das
+variáveis. A partir desse ranking são selecionados dez atributos, que compõem a
+versão reduzida do conjunto de dados utilizada pelo classificador CBA.
+
+O estudo compara o CBA antes e depois de FS e reporta aumento de acurácia de
+83\% para 84\%. Além disso, \citeonline{piri2019exploring} observam redução no
+número de regras e no tempo necessário para construção do classificador após a
+remoção dos atributos menos relevantes. Embora o ganho preditivo seja limitado,
+o resultado evidencia os efeitos simultâneos da seleção sobre desempenho e
+compacidade do modelo associativo.
+
+\medskip
+
+\noindent\textbf{\citeonline{rad2024framework}.}
+Propõem um \textit{framework} para detecção de
+moedas falsificadas baseado em classificação associativa fuzzy. A proposta
+introduz o PFA (\textit{Pruned Fuzzy Associative Classifier}) e o mecanismo
+Engine\_FAFS, no qual as próprias regras de associação fuzzy são utilizadas para
+identificar características relevantes. Nesse caso, FS não é simplesmente
+executada como um filtro independente antes da mineração; a evidência obtida das
+regras participa da determinação do subconjunto empregado pelo sistema.
+
+O \textit{framework} de \citeonline{rad2024framework} também combina seleção de
+características, poda de regras e otimização por \textit{Particle Swarm
+Optimization} (PSO). Entre os parâmetros otimizados encontra-se o limiar
+$\delta$, relacionado ao tamanho do subconjunto selecionado. A proposta,
+portanto, representa uma forma de integração baseada nas próprias regras,
+distinta tanto do pré-processamento externo quanto da seleção dinâmica durante a
+construção dos antecedentes.
+
+\medskip
+
+\noindent\textbf{\citeonline{sowan2023hybrid}.}
+Um dos trabalhos mais diretamente relacionados à combinação de múltiplos
+seletores é apresentado por \citeonline{sowan2023hybrid}, que propõem duas
+estratégias de FS para classificação associativa de câncer de mama. A primeira,
+denominada WARF (\textit{Weighted Average of Relative Frequency}), constitui um
+\textit{ensemble} de filtros que agrega CFS, \textit{Information Gain},
+\textit{Gain Ratio}, $\chi^2$ e ReliefF. A seleção combina os resultados desses
+métodos por meio da frequência relativa de escolha dos atributos, produzindo um
+subconjunto que é posteriormente utilizado pelo PCBA.
+
+A segunda estratégia de \citeonline{sowan2023hybrid}, denominada Hybrid
+PSO-WARF, acrescenta ao resultado do ensemble uma etapa de busca baseada em
+\textit{Particle Swarm Optimization}, formando uma abordagem híbrida entre
+filtro e \textit{wrapper}. Os autores avaliam WARF-PCBA e Hybrid
+PSO-WARF-PCBA em dois conjuntos de câncer de mama, comparando-os com CBA e com
+configurações individuais baseadas em ReliefF, CFS, IG, GR e $\chi^2$, além de
+outros classificadores. No conjunto de recorrência de câncer de mama, por
+exemplo, a utilização de WARF elevou a acurácia em relação ao conjunto completo
+de atributos, e a variante híbrida atingiu 75,9\%.
+
+Entre os estudos analisados nesta seção, \citeonline{sowan2023hybrid}
+constituem a evidência mais explícita de aplicação de
+\textit{Ensemble Feature Selection} diretamente associada a um classificador
+associativo. Por essa razão, o trabalho é especialmente relevante para a
+discussão desenvolvida na Seção~\ref{ensambleFS}, embora sua estratégia de
+agregação e sua etapa híbrida sejam distintas da abordagem investigada nesta
+dissertação.
+
+\medskip
+
+\noindent\textbf{\citeonline{wu2024novel}.}
+\citeonline{wu2024novel} propõem o MCWCAR (\textit{Mutual Information and
+Correlation Coefficient Weighted Class Association Rule Mining}) para predição
+de defeitos de software. A principal diferença em relação aos métodos de
+pré-processamento é que a relevância das características é incorporada à própria
+mineração dos \textit{itemsets}. A informação mútua é utilizada na ponderação
+das características, enquanto medidas de correlação contribuem para distinguir
+relações associadas às classes de defeito e não defeito.
+
+O MCWCAR integra, portanto, seleção/ponderação de atributos e mineração de CARs
+em um único mecanismo. \citeonline{wu2024novel} avaliam a proposta em 27
+conjuntos de dados do repositório PROMISE e utilizam métricas como
+\textit{Balance}, MCC, G-Mean e F-\textit{measure}. As comparações com CWCAR,
+CBA3 e ACAR são complementadas por Scott-Knott ESD e Wilcoxon
+\textit{signed-rank}, sendo observadas diferenças estatisticamente
+significativas em favor do MCWCAR para diferentes métricas. O estudo demonstra
+que incorporar critérios tradicionalmente relacionados a FS à própria mineração
+pode reduzir o espaço de busca e simultaneamente alterar a qualidade das regras
+geradas.
+
+% ---------------------------------------------------------------------
+\subsection{Síntese comparativa}
+\label{subsec:sintese-ca}
+% ---------------------------------------------------------------------
+
+A análise dos trabalhos mostra que FS é utilizada em diferentes níveis de
+acoplamento com a classificação associativa. A Tabela~\ref{tab:sintese-ca}
+sintetiza os 12 estudos segundo a forma de integração, o mecanismo de seleção
+utilizado, o classificador associativo empregado e a principal característica
+metodológica. As referências são apresentadas em ordem alfabética.
+
+\begingroup
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.15}
+
+\begin{longtable}{@{}p{2.65cm}p{1.65cm}p{3.65cm}p{2.6cm}p{4.95cm}@{}}
+
+\caption{Síntese dos trabalhos que integram seleção de atributos e classificação associativa.}
+\label{tab:sintese-ca}\\
+
+\toprule
+\textbf{Referência} &
+\textbf{Integração} &
+\textbf{Método de FS} &
+\textbf{CA} &
+\textbf{Característica principal} \\
+\midrule
+\endfirsthead
+
+\multicolumn{5}{c}{\tablename\ \thetable{} -- continuação}\\
+\toprule
+\textbf{Referência} &
+\textbf{Integração} &
+\textbf{Método de FS} &
+\textbf{CA} &
+\textbf{Característica principal} \\
+\midrule
+\endhead
+
+\midrule
+\multicolumn{5}{r}{\textit{continua na próxima página}}\\
+\endfoot
+
+\bottomrule
+\endlastfoot
+
+\citeonline{abubacker2017integrated} &
+Externa &
+CFS com busca genética &
+GARM + ACNN/ACFNN &
+Seleciona características de mamografia antes da mineração de regras; as regras
+geradas posteriormente alimentam classificadores neural e neuro-fuzzy. \\
+
+\citeonline{alagukumar2025impacts} &
+Externa &
+JIM, JMI e JMI3 &
+CBA e CMAR &
+Analisa conjuntamente FS baseada em informação mútua e cinco métodos de
+discretização, relacionando seleção ao número de intervalos,
+\textit{itemsets}, tempo e desempenho. \\
+
+\citeonline{alazaidah2021feature} &
+Externa &
+ABB-IEP, ABB-LIU, Focus, LVF, Relief, SBS e SFS &
+CBA, CBA2, CFAR, CMAR e CPAR &
+Compara nove seletores com cinco CAs e mostra dependência entre método de FS,
+tipo de atributo e classificador. \\
+
+\citeonline{alhawari2021classification} &
+Externa &
+IG e $\chi^2$ &
+CBA, CBA2, CMAR, CPAR e ACRM &
+Reduz a representação textual de avaliações de aplicativos e investiga o efeito
+da seleção sobre classificadores tradicionais e associativos. \\
+
+\citeonline{ashi2021enhancing} &
+Externa &
+SBS-IEP &
+CBA, CBA2, CPAR e FARC-HD &
+Avalia modelos com e sem FS considerando desempenho, número de regras e tempo
+de execução. \\
+
+\citeonline{cicek2021assessment} &
+Externa &
+LASSO &
+Classificação associativa/CBA &
+Reduz 15.979 genes antes da indução do modelo associativo para classificação de
+COVID-19 e interpretação das regras gênicas. \\
+
+\citeonline{ghareb2018enhanced} &
+Externa &
+CRFM, MCDM e OR2 &
+AC &
+Propõe três filtros e os compara com doze métodos tradicionais em categorização
+de textos árabes, sem identificar um seletor universalmente dominante. \\
+
+\citeonline{nandhini2022performance} &
+Interna &
+FOIL-IG, GR e IG &
+CPAR e variantes &
+Seleciona dinamicamente atributos durante a formação dos antecedentes das CARs,
+originando CPAR-GR e CPAR-IG. \\
+
+\citeonline{piri2019exploring} &
+Externa &
+ExtraTreesClassifier &
+CBA &
+Seleciona dez atributos após discretização por entropia; compara CBA com e sem
+FS e observa redução de regras e tempo. \\
+
+\citeonline{rad2024framework} &
+Integrada às regras &
+Engine\_FAFS + PSO &
+PFA &
+Utiliza as próprias regras fuzzy para identificar características relevantes e
+combina FS com otimização e poda de regras. \\
+
+\citeonline{sowan2023hybrid} &
+Externa/híbrida &
+WARF: CFS + IG + GR + $\chi^2$ + ReliefF; PSO-WARF &
+PCBA &
+Emprega explicitamente ensemble heterogêneo de filtros e uma variante híbrida
+com PSO antes da classificação associativa. \\
+
+\citeonline{wu2024novel} &
+Interna &
+Informação mútua e coeficiente de correlação &
+MCWCAR &
+Incorpora relevância dos atributos à mineração por meio de pesos utilizados na
+descoberta e avaliação dos \textit{itemsets}. \\
+
+\end{longtable}
+\endgroup
+
+% ---------------------------------------------------------------------
+\subsection{Análise dos estudos}
+\label{subsec:analise-ca}
+% ---------------------------------------------------------------------
+
+\subsubsection{Forma de integração entre FS e classificação associativa}
+
+A primeira distinção identificada refere-se ao momento em que a seleção de
+atributos interfere no processo associativo. Em nove dos 12 estudos, a FS é
+realizada antes da indução do classificador, caracterizando uma integração
+externa. Essa configuração é observada em
+\citeonline{abubacker2017integrated},
+\citeonline{alagukumar2025impacts},
+\citeonline{alazaidah2021feature},
+\citeonline{alhawari2021classification},
+\citeonline{ashi2021enhancing},
+\citeonline{cicek2021assessment},
+\citeonline{ghareb2018enhanced},
+\citeonline{piri2019exploring} e
+\citeonline{sowan2023hybrid}. Apesar das diferenças entre os seletores, esses
+trabalhos compartilham uma mesma separação conceitual: primeiro é determinado um
+subconjunto de atributos e, posteriormente, o classificador associativo é
+construído sobre o espaço reduzido.
+
+Essa separação apresenta como vantagem a modularidade, pois permite modificar o
+seletor sem necessariamente alterar o algoritmo responsável pela mineração das
+CARs. Tal característica é particularmente evidente nos experimentos de
+\citeonline{alazaidah2021feature}, nos quais diferentes seletores são combinados
+com diferentes CAs, e em \citeonline{sowan2023hybrid}, que compara seletores
+individuais, o ensemble WARF e sua variante híbrida mantendo a etapa associativa
+subsequente.
+
+Em contraste, \citeonline{nandhini2022performance} e
+\citeonline{wu2024novel} integram a informação de relevância diretamente ao
+processo de indução. No primeiro caso, o atributo incorporado ao antecedente é
+escolhido dinamicamente durante a geração de cada regra; no segundo, pesos
+baseados em informação mútua e correlação modificam a mineração dos
+\textit{itemsets}. Assim, a FS deixa de ser uma transformação independente do
+conjunto de entrada e passa a interferir diretamente no espaço de regras
+explorado pelo algoritmo.
+
+A proposta de \citeonline{rad2024framework} ocupa uma posição distinta. O
+Engine\_FAFS utiliza informação proveniente das próprias regras fuzzy para
+decidir quais características devem permanecer no modelo. Portanto, o trabalho
+não se enquadra adequadamente em uma divisão estritamente binária entre seleção
+``antes'' ou ``durante'' a mineração. Trata-se de uma integração orientada pelas
+regras, combinada posteriormente com poda e otimização por PSO.
+
+\subsubsection{Abordagens de seleção e relação com a geração de regras}
+
+Os 12 estudos mostram elevada diversidade nos critérios empregados para
+representar relevância. Medidas baseadas em teoria da informação aparecem de
+forma recorrente. \citeonline{nandhini2022performance} exploram FOIL-IG, GR e
+IG dentro do CPAR; \citeonline{alhawari2021classification} utilizam IG em
+conjunto com $\chi^2$; \citeonline{alagukumar2025impacts} analisam JIM, JMI e
+JMI3; e \citeonline{wu2024novel} incorporam informação mútua à ponderação dos
+atributos. Essa recorrência indica que relações entre atributo e classe
+constituem uma das principais fontes de evidência utilizadas na literatura para
+controlar o espaço de busca associativo.
+
+Entretanto, os trabalhos também mostram que essa evidência não é suficiente para
+definir um único critério preferencial. \citeonline{alazaidah2021feature}
+identificam comportamentos distintos conforme o tipo dos atributos,
+\citeonline{ghareb2018enhanced} observam variação entre seletores, conjuntos de
+dados e classificadores, e \citeonline{nandhini2022performance} mostram que a
+substituição da medida utilizada pelo CPAR altera significativamente o
+desempenho das regras geradas. Em conjunto, esses resultados indicam que
+diferentes métodos de FS capturam propriedades distintas da relação entre os
+atributos e a variável-alvo.
+
+Também são encontrados métodos dependentes de modelos ou mecanismos de busca.
+\citeonline{cicek2021assessment} utilizam LASSO em um cenário de elevada
+dimensionalidade; \citeonline{piri2019exploring} empregam a importância
+calculada pelo ExtraTreesClassifier; \citeonline{abubacker2017integrated}
+combinam CFS com busca genética; e \citeonline{ashi2021enhancing} utilizam
+busca sequencial para eliminação de atributos. Essas estratégias reforçam a
+heterogeneidade metodológica existente na literatura.
+
+O caso de \citeonline{sowan2023hybrid} diferencia-se dos demais porque a
+heterogeneidade dos critérios é explorada deliberadamente. O WARF não escolhe
+entre CFS, IG, GR, $\chi^2$ e ReliefF; em vez disso, agrega a evidência dos
+cinco seletores para determinar os atributos mais recorrentes. A variante
+Hybrid PSO-WARF acrescenta ainda uma busca orientada pelo desempenho. Dessa
+forma, o trabalho transforma a discordância entre seletores em parte explícita
+do mecanismo de seleção, característica central de uma abordagem de
+\textit{Ensemble Feature Selection}.
+
+\subsubsection{Efeitos da FS e avaliação experimental}
+
+A avaliação dos estudos indica que os efeitos de FS não devem ser interpretados
+somente em termos de acurácia. Em problemas associativos, a redução do espaço de
+atributos pode modificar o número de \textit{itemsets} candidatos, a quantidade
+de CARs, o tempo de mineração e a complexidade do classificador resultante.
+Essa preocupação é explicitamente observada por
+\citeonline{ashi2021enhancing},
+\citeonline{piri2019exploring},
+\citeonline{alagukumar2025impacts} e
+\citeonline{sowan2023hybrid}, que analisam aspectos adicionais à capacidade
+preditiva.
+
+\citeonline{alagukumar2025impacts}, por exemplo, mostram que a escolha do
+seletor deve ser analisada juntamente com a discretização, uma vez que os
+intervalos produzidos alteram a representação transacional e o número de
+\textit{itemsets}. De maneira complementar,
+\citeonline{piri2019exploring} associam a remoção de atributos à redução da
+quantidade de regras e do tempo de construção, enquanto
+\citeonline{ashi2021enhancing} reportam alterações tanto no número de regras
+quanto no custo de execução após FS.
+
+Em termos de rigor experimental, os estudos também apresentam diferenças.
+\citeonline{nandhini2022performance} utilizam testes estatísticos para comparar
+as variantes do CPAR, \citeonline{alhawari2021classification} complementam suas
+comparações com testes de significância e tamanho de efeito, e
+\citeonline{wu2024novel} utilizam Scott-Knott ESD e Wilcoxon
+\textit{signed-rank} na avaliação sobre 27 conjuntos de dados. Por outro lado,
+parte dos estudos concentra a avaliação em um domínio específico e em um número
+mais restrito de bases, como ocorre em
+\citeonline{abubacker2017integrated},
+\citeonline{cicek2021assessment},
+\citeonline{piri2019exploring} e
+\citeonline{rad2024framework}. Essas diferenças limitam comparações diretas
+entre os valores absolutos reportados pelos trabalhos.
+
+De forma geral, os resultados disponíveis sustentam a utilização de FS como
+mecanismo de controle da dimensionalidade em classificação associativa, mas não
+permitem estabelecer um seletor individual como superior de maneira
+independente do conjunto de dados e do classificador. Essa conclusão é
+particularmente apoiada pelas comparações de
+\citeonline{alazaidah2021feature} e
+\citeonline{ghareb2018enhanced}, nas quais o melhor comportamento varia entre
+configurações, bem como pelos resultados de
+\citeonline{nandhini2022performance}, que demonstram a influência do critério
+utilizado dentro de um mesmo classificador.
+
+Nesse contexto, a abordagem de \citeonline{sowan2023hybrid} constitui um ponto
+de ligação importante com a literatura de \textit{Ensemble Feature Selection},
+pois substitui a dependência de um único critério pela agregação de diferentes
+seletores antes da classificação associativa. Entretanto, entre os estudos
+analisados, estratégias desse tipo permanecem pouco exploradas quando comparadas
+ao uso de seletores individuais. Essa constatação motiva a análise específica
+de métodos de \textit{Ensemble Feature Selection} apresentada na
+Seção~\ref{ensambleFS}, com o objetivo de investigar como diferentes evidências de
+relevância podem ser combinadas de maneira sistemática antes de sua integração
+com classificadores associativos.
+
+% =====================================================================
+% 3.2 -- ENSEMBLE FEATURE SELECTION
+% =====================================================================
+\input{ch-revisao/sec_ensemble-fs}
+
+% =====================================================================
+% =====================================================================
+\section{Síntese das evidências e lacuna de pesquisa}
+\label{sec:consideracoes-relacionados}
+% =====================================================================
+
+A análise desenvolvida neste capítulo permite relacionar duas vertentes da
+literatura que, embora compartilhem o problema da seleção de atributos, apresentam
+níveis distintos de desenvolvimento. A primeira compreende os estudos que aplicam
+\textit{Feature Selection} (FS) diretamente à classificação associativa; a segunda
+abrange as abordagens de \textit{Ensemble Feature Selection} (EFS), nas quais
+múltiplas fontes de evidência são combinadas para reduzir a dependência de um
+único método de seleção. A interseção entre essas duas vertentes delimita a lacuna
+de pesquisa de interesse neste trabalho.
+
+Na literatura de FS aplicada à classificação associativa, a seleção de atributos já
+se encontra estabelecida como mecanismo para reduzir a dimensionalidade antes ou
+durante a indução das regras. Conforme discutido na Seção~\ref{sec:fs-ca}, nove
+dos 12 estudos analisados realizam a seleção de forma externa, isto é, produzem
+primeiramente um subconjunto de atributos e somente depois executam o
+classificador associativo. Os demais trabalhos apresentam formas de integração mais
+estreitas, nas quais critérios de relevância participam da construção dos
+antecedentes, da ponderação dos atributos ou da própria avaliação das regras.
+Portanto, a lacuna identificada não corresponde à ausência de FS em classificação
+associativa.
+
+Os estudos analisados também não fornecem evidências para a adoção de um único
+seletor como solução geral. Diferentes critérios informacionais, estatísticos,
+baseados em modelos, em relevância e redundância ou em estratégias de busca
+apresentam comportamentos distintos conforme o conjunto de dados e o
+classificador considerado. Essa variabilidade é particularmente importante em
+classificação associativa, pois a alteração do subconjunto de atributos modifica
+não apenas a entrada do classificador, mas também o conjunto de itens disponível
+para mineração e, consequentemente, o espaço no qual as Regras de Associação
+Classificativas (RACs) podem ser geradas.
+
+Nesse cenário, o trabalho de Sowan et al. (2023) constitui uma exceção relevante
+dentro do conjunto analisado. Os autores utilizam o WARF, que combina CFS,
+\textit{Information Gain}, \textit{Gain Ratio}, $\chi^2$ e ReliefF antes da
+indução do PCBA, e propõem ainda uma extensão híbrida baseada em PSO. O estudo
+demonstra, portanto, a viabilidade de associar um \textit{ensemble} de métodos de
+FS a um classificador associativo. Entretanto, a proposta investiga uma
+configuração específica de composição e agregação, orientada ao domínio de câncer
+de mama, não tendo como objetivo comparar sistematicamente diferentes decisões de
+projeto de um EFS, tais como mecanismo de consenso, ponderação dos seletores,
+estabilidade da seleção e definição do ponto de corte.
+
+Essa limitação torna-se mais evidente quando os resultados da Seção~\ref{ensambleFS}
+são considerados. Os 22 estudos primários de EFS analisados apresentam diferentes
+soluções para as principais etapas do processo. \citeonline{drotar2019ensemble},
+por exemplo, investigam métodos eleitorais e diversidade entre ranqueadores;
+\citeonline{zhang2019ensemble} incorporam estabilidade à ponderação dos
+seletores; \citeonline{fu2023reranking} estruturam a agregação em múltiplos
+estágios; \citeonline{loggenberg2026cross} associam \textit{Weighted Borda
+Count}, ponderação e corte adaptativo; \citeonline{chinglensana2026ef} combinam
+consenso, refinamento iterativo e controle de redundância; e
+\citeonline{geng2026stability} relacionam otimização de pesos e
+reprodutibilidade entre partições. Esses trabalhos demonstram que composição,
+agregação, ponderação, estabilidade e corte são componentes independentes e
+relevantes no projeto de um EFS.
+
+Apesar desse avanço metodológico, nenhum dos seis estudos de maior proximidade
+analisados na Seção~\ref{subsec:efs-sintese} investiga essas decisões no contexto
+da classificação associativa. Suas avaliações são realizadas com classificadores
+tradicionais e em domínios como bioinformática, categorização textual,
+viticultura espectral e detecção de intrusões. Consequentemente, permanece em
+aberto como estratégias desenvolvidas na literatura geral de EFS se comportam
+quando o subconjunto selecionado é utilizado não apenas para treinar um
+classificador convencional, mas para restringir um processo de mineração de
+regras.
+
+A lacuna identificada neste trabalho encontra-se, portanto, na interseção entre
+essas duas vertentes. Entre os estudos analisados, permanece pouco explorada uma
+investigação sistemática de EFS heterogêneo aplicado à classificação associativa
+que permita analisar, sob um protocolo experimental comum, como diferentes
+critérios de seleção e diferentes mecanismos de combinação afetam o subconjunto
+de atributos utilizado na mineração. Particularmente, ainda requer investigação
+o efeito conjunto de três decisões: a diversidade dos métodos de FS que compõem
+o \textit{ensemble}, a estratégia utilizada para produzir o consenso e a regra
+empregada para transformar esse consenso no subconjunto final de atributos.
+
+Além disso, a avaliação dessa integração demanda critérios específicos da
+classificação associativa. Em classificadores convencionais, um método de FS pode
+ser avaliado principalmente pela redução dimensional e pelo desempenho
+preditivo. Em classificação associativa, entretanto, a seleção repercute sobre
+todo o processo de indução: reduz ou amplia o número de itens disponíveis,
+modifica o espaço de busca de \textit{itemsets}, interfere na quantidade e na
+estrutura das regras geradas e pode alterar o custo computacional e a
+interpretabilidade do modelo. Dessa forma, uma avaliação adequada deve considerar,
+além de medidas preditivas, propriedades como redução de atributos, estabilidade
+dos subconjuntos, tempo de processamento, número de regras e complexidade das
+RACs resultantes.
+
+A estabilidade merece atenção particular nesse contexto. Uma estratégia de FS
+pode preservar o desempenho médio do classificador e, ainda assim, selecionar
+conjuntos substancialmente diferentes quando pequenas alterações são realizadas
+nos dados de treinamento. Em classificação associativa, essa instabilidade pode
+ser propagada para a etapa de mineração, produzindo conjuntos distintos de itens,
+\textit{itemsets} e regras. Assim, avaliar a estabilidade do EFS não representa
+apenas uma análise adicional da etapa de pré-processamento, mas também uma forma
+de investigar a reprodutibilidade estrutural do classificador associativo obtido.
+
+Dessa forma, a contribuição pretendida não parte da hipótese de que o EFS seja
+inédito em classificação associativa, uma vez que existe precedente explícito na
+literatura. O problema de pesquisa decorre da ausência, entre os trabalhos
+analisados, de uma investigação abrangente das decisões que estruturam um EFS
+nesse contexto e de seus efeitos sobre o processo associativo. Essa lacuna
+fundamenta a continuidade desta pesquisa, voltada à análise de estratégias capazes
+de combinar evidências produzidas por diferentes métodos de seleção antes da
+indução do classificador associativo e avaliar seus efeitos tanto sobre a seleção
+de atributos quanto sobre o desempenho e a estrutura do modelo baseado em regras.
